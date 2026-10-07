@@ -85,8 +85,7 @@
                                                 <input value="paypal" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/paypal.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span class="d-block fw-600 fs-15">{{ translate('Paypal') }}</span>
                                                     </span>
@@ -101,8 +100,7 @@
                                                 <input value="stripe" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/stripe.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span class="d-block fw-600 fs-15">{{ translate('Stripe') }}</span>
                                                     </span>
@@ -117,8 +115,7 @@
                                                 <input value="mercadopago" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/mercadopago.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('Mercadopago') }}</span>
@@ -134,8 +131,7 @@
                                                 <input value="sslcommerz" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/sslcommerz.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('sslcommerz') }}</span>
@@ -151,8 +147,7 @@
                                                 <input value="instamojo" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/instamojo.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('Instamojo') }}</span>
@@ -168,8 +163,7 @@
                                                 <input value="razorpay" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/rozarpay.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('Razorpay') }}</span>
@@ -185,8 +179,7 @@
                                                 <input value="paystack" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/paystack.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('Paystack') }}</span>
@@ -202,8 +195,7 @@
                                                 <input value="voguepay" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/vogue.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('VoguePay') }}</span>
@@ -219,8 +211,7 @@
                                                 <input value="payhere" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/payhere.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('payhere') }}</span>
@@ -236,8 +227,7 @@
                                                 <input value="ngenius" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/ngenius.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('ngenius') }}</span>
@@ -253,8 +243,7 @@
                                                 <input value="iyzico" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/iyzico.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('Iyzico') }}</span>
@@ -270,8 +259,7 @@
                                                 <input value="nagad" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/nagad.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span class="d-block fw-600 fs-15">{{ translate('Nagad') }}</span>
                                                     </span>
@@ -286,8 +274,7 @@
                                                 <input value="bkash" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/bkash.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span class="d-block fw-600 fs-15">{{ translate('Bkash') }}</span>
                                                     </span>
@@ -302,8 +289,7 @@
                                                 <input value="aamarpay" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/aamarpay.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('Aamarpay') }}</span>
@@ -319,8 +305,7 @@
                                                  <input value="piprapay" class="online_payment" type="radio"
                                                      name="payment_option" checked>
                                                  <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                     <img src="{{ static_asset('assets/img/cards/piprapay.png') }}"
-                                                         class="img-fit mb-2" onerror="this.onerror=null;this.src='{{ static_asset('assets/img/cards/cod.png') }}';">
+                                                     <i class="las la-wallet la-2x mb-2 text-primary d-block"></i>
                                                      <span class="d-block text-center">
                                                          <span
                                                              class="d-block fw-600 fs-15">{{ translate('PipraPay') }}</span>
@@ -336,8 +321,7 @@
                                                 <input value="authorizenet" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/authorizenet.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('Authorize Net') }}</span>
@@ -353,8 +337,7 @@
                                                 <input value="payku" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/payku.png') }}"
-                                                        class="img-fit mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span class="d-block fw-600 fs-15">{{ translate('Payku') }}</span>
                                                     </span>
@@ -371,8 +354,7 @@
                                                     <input value="flutterwave" class="online_payment" type="radio"
                                                         name="payment_option" checked>
                                                     <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                        <img src="{{ static_asset('assets/img/cards/flutterwave.png') }}"
-                                                            class="img-fit mb-2">
+                                                        <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                         <span class="d-block text-center">
                                                             <span
                                                                 class="d-block fw-600 fs-15">{{ translate('flutterwave') }}</span>
@@ -388,8 +370,7 @@
                                                     <input value="payfast" class="online_payment" type="radio"
                                                         name="payment_option" checked>
                                                     <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                        <img src="{{ static_asset('assets/img/cards/payfast.png') }}"
-                                                            class="img-fit mb-2">
+                                                        <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                         <span class="d-block text-center">
                                                             <span
                                                                 class="d-block fw-600 fs-15">{{ translate('payfast') }}</span>
@@ -408,8 +389,7 @@
                                                     <input value="paytm" class="online_payment" type="radio"
                                                         name="payment_option" checked>
                                                     <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                        <img src="{{ static_asset('assets/img/cards/paytm.png') }}"
-                                                            class="img-fit mb-2">
+                                                        <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                         <span class="d-block text-center">
                                                             <span
                                                                 class="d-block fw-600 fs-15">{{ translate('Paytm') }}</span>
@@ -425,8 +405,7 @@
                                                     <input value="toyyibpay" class="online_payment" type="radio"
                                                         name="payment_option" checked>
                                                     <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                        <img src="{{ static_asset('assets/img/cards/toyyibpay.png') }}"
-                                                            class="img-fit mb-2">
+                                                        <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                         <span class="d-block text-center">
                                                             <span
                                                                 class="d-block fw-600 fs-15">{{ translate('ToyyibPay') }}</span>
@@ -442,8 +421,7 @@
                                                     <input value="myfatoorah" class="online_payment" type="radio"
                                                         name="payment_option" checked>
                                                     <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                        <img src="{{ static_asset('assets/img/cards/myfatoorah.png') }}"
-                                                            class="img-fit mb-2">
+                                                        <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                         <span class="d-block text-center">
                                                             <span
                                                                 class="d-block fw-600 fs-15">{{ translate('MyFatoorah') }}</span>
@@ -459,8 +437,7 @@
                                                     <input value="Khalti" class="online_payment" type="radio"
                                                         name="payment_option" checked>
                                                     <span class="d-block aiz-megabox-elem p-3">
-                                                        <img src="{{ static_asset('assets/img/cards/khalti.png') }}"
-                                                            class="img-fluid mb-2">
+                                                        <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                         <span class="d-block text-center">
                                                             <span
                                                                 class="d-block fw-600 fs-15">{{ translate('Khalti') }}</span>
@@ -476,8 +453,7 @@
                                                     <input value="phonepe" class="online_payment" type="radio"
                                                         name="payment_option" checked>
                                                     <span class="d-block aiz-megabox-elem p-3">
-                                                        <img src="{{ static_asset('assets/img/cards/phonepe.png') }}"
-                                                            class="img-fluid mb-2">
+                                                        <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                         <span class="d-block text-center">
                                                             <span
                                                                 class="d-block fw-600 fs-15">{{ translate('Phonepe') }}</span>
@@ -495,8 +471,7 @@
                                                 <input value="paymob" class="online_payment" type="radio"
                                                     name="payment_option" checked>
                                                 <span class="d-block aiz-megabox-elem p-3">
-                                                    <img src="{{ static_asset('assets/img/cards/paymob.png') }}"
-                                                        class="img-fluid mb-2">
+                                                    <i class="las la-credit-card la-2x mb-2 text-primary d-block"></i>
                                                     <span class="d-block text-center">
                                                         <span
                                                             class="d-block fw-600 fs-15">{{ translate('Paymob') }}</span>
@@ -526,8 +501,7 @@
                                                     <input value="cash_on_delivery" class="online_payment" type="radio"
                                                         name="payment_option" checked>
                                                     <span class="d-block aiz-megabox-elem rounded-0 p-3">
-                                                        <img src="{{ static_asset('assets/img/cards/cod.png') }}"
-                                                            class="img-fit mb-2">
+                                                        <i class="las la-money-bill-wave la-2x mb-2 text-success d-block"></i>
                                                         <span class="d-block text-center">
                                                             <span
                                                                 class="d-block fw-600 fs-15">{{ translate('Cash on Delivery') }}</span>

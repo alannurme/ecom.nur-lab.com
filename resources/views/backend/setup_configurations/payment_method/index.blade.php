@@ -7,7 +7,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="d-flex align-items-center">
-                            <img class="mr-3" src="{{ static_asset('assets/img/cards/'.$payment_method->name.'.png') }}" height="30" onerror="this.onerror=null;this.src='https://pay.nur-lab.com/logo.png';">
+                            <i class="las la-credit-card fs-24 mr-2 text-primary"></i>
                             <h5 class="mb-0 h6">{{ ucfirst(translate($payment_method->name)) }}</h5>
                         </div>
                         <label class="aiz-switch aiz-switch-success mb-0 float-right">
@@ -26,7 +26,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="d-flex align-items-center">
-                            <img class="mr-3" src="{{ static_asset('assets/img/cards/cod.png') }}" height="30">
+                            <i class="las la-money-bill-wave fs-24 mr-2 text-success"></i>
                             <h5 class="mb-0 h6">{{ translate('Cash Payment') }}</h5>
                         </div>
                         <label class="aiz-switch aiz-switch-success mb-0 float-right">
