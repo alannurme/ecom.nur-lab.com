@@ -130,6 +130,30 @@ class AppServiceProvider extends ServiceProvider
           PRIMARY KEY (`id`)
         )");
       }
+
+      // Auto-insert piprapay into payment_methods & business_settings tables if missing
+      if (Schema::hasTable('payment_methods')) {
+        $piprapay = \DB::table('payment_methods')->where('name', 'piprapay')->first();
+        if (!$piprapay) {
+          \DB::table('payment_methods')->insert([
+            'name'             => 'piprapay',
+            'active'           => 1,
+            'addon_identifier' => null,
+          ]);
+        } elseif ($piprapay->addon_identifier !== null) {
+          \DB::table('payment_methods')->where('name', 'piprapay')->update(['addon_identifier' => null]);
+        }
+      }
+
+      if (Schema::hasTable('business_settings')) {
+        $setting = \DB::table('business_settings')->where('type', 'piprapay')->first();
+        if (!$setting) {
+          \DB::table('business_settings')->insert([
+            'type'  => 'piprapay',
+            'value' => '1',
+          ]);
+        }
+      }
     } catch (\Exception $e) {
       // Ignore database connection error during setup
     }
