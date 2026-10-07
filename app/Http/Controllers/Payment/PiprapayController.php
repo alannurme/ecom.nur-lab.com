@@ -24,6 +24,8 @@ class PiprapayController extends Controller
         $secret_key = env('PIPRAPAY_SECRET_KEY');
 
         $post_data = [
+            'api_key'        => $secret_key,
+            'secret_key'     => $secret_key,
             'amount'         => 10,
             'currency'       => 'BDT',
             'customer_name'  => Auth::check() ? Auth::user()->name : 'Test User',
@@ -38,10 +40,12 @@ class PiprapayController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Accept: application/json',
             'Authorization: Bearer ' . $secret_key,
+            'api-key: ' . $secret_key,
             'x-api-key: ' . $secret_key
         ]);
 
@@ -102,6 +106,8 @@ class PiprapayController extends Controller
         $secret_key = env('PIPRAPAY_SECRET_KEY');
 
         $post_data = [
+            'api_key'        => $secret_key,
+            'secret_key'     => $secret_key,
             'amount'         => (float) $amount,
             'currency'       => 'BDT',
             'customer_name'  => $name,
@@ -116,7 +122,10 @@ class PiprapayController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Authorization: Bearer ' . $secret_key,
-            'Content-Type: application/json'
+            'api-key: ' . $secret_key,
+            'x-api-key: ' . $secret_key,
+            'Content-Type: application/json',
+            'Accept: application/json'
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
