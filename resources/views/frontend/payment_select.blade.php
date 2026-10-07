@@ -312,7 +312,24 @@
                                             </label>
                                         </div>
                                     @endif
-                                    <!-- authorizenet -->
+                                    <!-- piprapay -->
+                                     @if (get_setting('piprapay') == 1)
+                                         <div class="col-6 col-xl-3 col-md-4">
+                                             <label class="aiz-megabox d-block mb-3">
+                                                 <input value="piprapay" class="online_payment" type="radio"
+                                                     name="payment_option" checked>
+                                                 <span class="d-block aiz-megabox-elem rounded-0 p-3">
+                                                     <img src="{{ static_asset('assets/img/cards/piprapay.png') }}"
+                                                         class="img-fit mb-2" onerror="this.onerror=null;this.src='{{ static_asset('assets/img/cards/cod.png') }}';">
+                                                     <span class="d-block text-center">
+                                                         <span
+                                                             class="d-block fw-600 fs-15">{{ translate('PipraPay') }}</span>
+                                                     </span>
+                                                 </span>
+                                             </label>
+                                         </div>
+                                     @endif
+                                     <!-- authorizenet -->
                                     @if (get_setting('authorizenet') == 1)
                                         <div class="col-6 col-xl-3 col-md-4">
                                             <label class="aiz-megabox d-block mb-3">

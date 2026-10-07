@@ -41,6 +41,7 @@ use App\Http\Controllers\Payment\RazorpayController;
 use App\Http\Controllers\Payment\SslcommerzController;
 use App\Http\Controllers\Payment\StripeController;
 use App\Http\Controllers\Payment\TapController;
+use App\Http\Controllers\Payment\PiprapayController;
 use App\Http\Controllers\Payment\VoguepayController;
 use App\Http\Controllers\ProductQueryController;
 use App\Http\Controllers\PurchaseHistoryController;
@@ -510,6 +511,12 @@ Route::any('/paymob/callback', [PaymobController::class, 'callback']);
 
 // tap
 Route::any('/tap/callback', [TapController::class, 'callback'])->name('tap.callback');
+
+// PipraPay
+Route::controller(PiprapayController::class)->group(function () {
+    Route::any('/piprapay/pay', 'pay')->name('piprapay.pay');
+    Route::any('/piprapay/callback', 'callback')->name('piprapay.callback');
+});
 
 //Blog Section
 Route::controller(BlogController::class)->group(function () {

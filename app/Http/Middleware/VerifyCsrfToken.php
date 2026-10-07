@@ -31,6 +31,7 @@ class VerifyCsrfToken extends Middleware
         '/bkash*',
         'api/v2/bkash*',
         '/aamarpay*',
+        '/piprapay*',
         '/mock_payments',
         '/apple-callback',
         '/lnmo*',
