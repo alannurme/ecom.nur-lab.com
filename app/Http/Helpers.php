@@ -167,16 +167,21 @@ if (!function_exists('filter_products')) {
 if (!function_exists('get_cached_products')) {
     function get_cached_products($category_id = null)
     {
-        return Cache::remember('products-category-' . $category_id, 86400, function () use ($category_id) {
+        $products = Cache::remember('products-category-' . $category_id, 3600, function () use ($category_id) {
             return filter_products(Product::where('category_id', $category_id))->latest()->take(5)->get();
         });
+        if (count($products) == 0) {
+            Cache::forget('products-category-' . $category_id);
+            $products = filter_products(Product::where('category_id', $category_id))->latest()->take(5)->get();
+        }
+        return $products;
     }
 }
 
 if (!function_exists('verified_sellers_id')) {
     function verified_sellers_id()
     {
-        return Cache::rememberForever('verified_sellers_id', function () {
+        return Cache::remember('verified_sellers_id', 3600, function () {
             return Shop::where('verification_status', 1)->pluck('user_id')->toArray();
         });
     }
@@ -1950,10 +1955,16 @@ if (!function_exists('get_product_max_unit_price')) {
 if (!function_exists('get_featured_products')) {
     function get_featured_products()
     {
-        return Cache::remember('featured_products', 3600, function () {
+        $products = Cache::remember('featured_products', 3600, function () {
             $product_query = Product::query();
             return filter_products($product_query->where('featured', '1'))->latest()->limit(12)->get();
         });
+        if (count($products) == 0) {
+            Cache::forget('featured_products');
+            $product_query = Product::query();
+            $products = filter_products($product_query->where('featured', '1'))->latest()->limit(12)->get();
+        }
+        return $products;
     }
 }
 
