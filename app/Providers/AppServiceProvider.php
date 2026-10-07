@@ -20,142 +20,145 @@ class AppServiceProvider extends ServiceProvider
     Schema::defaultStringLength(191);
     Paginator::useBootstrap();
 
-    // Auto-create missing database tables if they do not exist
-    try {
-      if (!Schema::hasTable('seller_admin_requests')) {
-        \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_conversations` (
-          `id` int(20) NOT NULL AUTO_INCREMENT,
-          `sender_id` INT(11) NOT NULL,
-          `receiver_id` INT(11) NOT NULL,
-          `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-          `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-          PRIMARY KEY (`id`)
-        )");
-
-        \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_messages` (
-          `id` int(20) NOT NULL AUTO_INCREMENT,
-          `seller_admin_conversation_id` INT(11) NOT NULL,
-          `user_id` INT(11) NOT NULL,
-          `message` LONGTEXT NOT NULL,
-          `seen` INT(2) NOT NULL DEFAULT 0,
-          `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-          `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-          PRIMARY KEY (`id`)
-        )");
-
-        \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_promotions` (
-          `id` int(20) NOT NULL AUTO_INCREMENT,
-          `todays_deal` INT(2) NOT NULL DEFAULT 0,
-          `featured_products` INT(2) NOT NULL DEFAULT 0,
-          `flash_sale_id` INT(11) NULL,
-          `message` LONGTEXT NULL,
-          `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-          `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-          PRIMARY KEY (`id`)
-        )");
-
-        \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_promotion_sellers` (
-          `id` int(20) NOT NULL AUTO_INCREMENT,
-          `seller_admin_promotion_id` INT(11) NOT NULL,
-          `seller_id` INT(11) NOT NULL,
-          `seen` INT(2) NOT NULL DEFAULT 0,
-          `responded` INT(2) NOT NULL DEFAULT 0,
-          `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-          `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-          PRIMARY KEY (`id`)
-        )");
-
-        \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_notices` (
-          `id` int(20) NOT NULL AUTO_INCREMENT,
-          `notice_type` VARCHAR(255) NOT NULL DEFAULT 'permanent',
-          `notice_datetime` VARCHAR(255) NULL,
-          `message` LONGTEXT NULL,
-          `bg_color` VARCHAR(255) NULL,
-          `save_as_preset` INT(2) NOT NULL DEFAULT 0,
-          `status` INT(2) NOT NULL DEFAULT 0,
-          `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-          `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-          PRIMARY KEY (`id`)
-        )");
-
-        \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_notice_sellers` (
-          `id` int(20) NOT NULL AUTO_INCREMENT,
-          `seller_admin_notice_id` INT(11) NOT NULL,
-          `seller_id` INT(11) NOT NULL,
-          `seen` INT(2) NOT NULL DEFAULT 0,
-          `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-          `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-          PRIMARY KEY (`id`)
-        )");
-
-        \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_requests` (
-          `id` int(20) NOT NULL AUTO_INCREMENT,
-          `seller_id` INT(11) NOT NULL,
-          `name` VARCHAR(255) NOT NULL,
-          `category_name` VARCHAR(255) NULL,
-          `brand_name` VARCHAR(255) NULL,
-          `color_name` VARCHAR(255) NULL,
-          `attribute_name` VARCHAR(255) NULL,
-          `unit_name` VARCHAR(255) NULL,
-          `measurement_point_name` VARCHAR(255) NULL,
-          `warranty_name` VARCHAR(255) NULL,
-          `seen` INT(2) NOT NULL DEFAULT 0,
-          `message` LONGTEXT NULL,
-          `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-          `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-          PRIMARY KEY (`id`)
-        )");
-
-        \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_promotion_participates` (
-          `id` int(20) NOT NULL AUTO_INCREMENT,
-          `seller_admin_promotion_id` INT(11) NOT NULL,
-          `seller_id` INT(11) NOT NULL,
-          `seen` INT(2) NOT NULL DEFAULT 0,
-          `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-          `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-          PRIMARY KEY (`id`)
-        )");
-
-        \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_promotion_participate_products` (
-          `id` int(20) NOT NULL AUTO_INCREMENT,
-          `seller_admin_promotion_participate_id` INT(11) NOT NULL,
-          `product_id` INT(11) NOT NULL,
-          `todays_deal` INT(2) NOT NULL DEFAULT 0,
-          `featured` INT(2) NOT NULL DEFAULT 0,
-          `flash_sale` INT(2) NOT NULL DEFAULT 0,
-          `flash_sale_id` INT(11) NULL,
-          `discount` double(20,2) NULL,
-          `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-          `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-          PRIMARY KEY (`id`)
-        )");
-      }
-
-      // Auto-insert piprapay into payment_methods & business_settings tables if missing
-      if (Schema::hasTable('payment_methods')) {
-        $piprapay = \DB::table('payment_methods')->where('name', 'piprapay')->first();
-        if (!$piprapay) {
-          \DB::table('payment_methods')->insert([
-            'name'             => 'piprapay',
-            'active'           => 1,
-            'addon_identifier' => null,
-          ]);
-        } elseif ($piprapay->addon_identifier !== null) {
-          \DB::table('payment_methods')->where('name', 'piprapay')->update(['addon_identifier' => null]);
+    // Auto-create missing database tables & piprapay seed if not done yet
+    if (!\Cache::has('auto_setup_done')) {
+      try {
+        if (Schema::hasTable('payment_methods')) {
+          $piprapay = \DB::table('payment_methods')->where('name', 'piprapay')->first();
+          if (!$piprapay) {
+            \DB::table('payment_methods')->insert([
+              'name'             => 'piprapay',
+              'active'           => 1,
+              'addon_identifier' => null,
+            ]);
+          } elseif ($piprapay->addon_identifier !== null) {
+            \DB::table('payment_methods')->where('name', 'piprapay')->update(['addon_identifier' => null]);
+          }
         }
-      }
 
-      if (Schema::hasTable('business_settings')) {
-        $setting = \DB::table('business_settings')->where('type', 'piprapay')->first();
-        if (!$setting) {
-          \DB::table('business_settings')->insert([
-            'type'  => 'piprapay',
-            'value' => '1',
-          ]);
+        if (Schema::hasTable('business_settings')) {
+          $setting = \DB::table('business_settings')->where('type', 'piprapay')->first();
+          if (!$setting) {
+            \DB::table('business_settings')->insert([
+              'type'  => 'piprapay',
+              'value' => '1',
+            ]);
+          }
         }
+
+        if (!Schema::hasTable('seller_admin_requests')) {
+          \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_conversations` (
+            `id` int(20) NOT NULL AUTO_INCREMENT,
+            `sender_id` INT(11) NOT NULL,
+            `receiver_id` INT(11) NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`)
+          )");
+
+          \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_messages` (
+            `id` int(20) NOT NULL AUTO_INCREMENT,
+            `seller_admin_conversation_id` INT(11) NOT NULL,
+            `user_id` INT(11) NOT NULL,
+            `message` LONGTEXT NOT NULL,
+            `seen` INT(2) NOT NULL DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`)
+          )");
+
+          \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_promotions` (
+            `id` int(20) NOT NULL AUTO_INCREMENT,
+            `todays_deal` INT(2) NOT NULL DEFAULT 0,
+            `featured_products` INT(2) NOT NULL DEFAULT 0,
+            `flash_sale_id` INT(11) NULL,
+            `message` LONGTEXT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`)
+          )");
+
+          \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_promotion_sellers` (
+            `id` int(20) NOT NULL AUTO_INCREMENT,
+            `seller_admin_promotion_id` INT(11) NOT NULL,
+            `seller_id` INT(11) NOT NULL,
+            `seen` INT(2) NOT NULL DEFAULT 0,
+            `responded` INT(2) NOT NULL DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`)
+          )");
+
+          \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_notices` (
+            `id` int(20) NOT NULL AUTO_INCREMENT,
+            `notice_type` VARCHAR(255) NOT NULL DEFAULT 'permanent',
+            `notice_datetime` VARCHAR(255) NULL,
+            `message` LONGTEXT NULL,
+            `bg_color` VARCHAR(255) NULL,
+            `save_as_preset` INT(2) NOT NULL DEFAULT 0,
+            `status` INT(2) NOT NULL DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`)
+          )");
+
+          \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_notice_sellers` (
+            `id` int(20) NOT NULL AUTO_INCREMENT,
+            `seller_admin_notice_id` INT(11) NOT NULL,
+            `seller_id` INT(11) NOT NULL,
+            `seen` INT(2) NOT NULL DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`)
+          )");
+
+          \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_requests` (
+            `id` int(20) NOT NULL AUTO_INCREMENT,
+            `seller_id` INT(11) NOT NULL,
+            `name` VARCHAR(255) NOT NULL,
+            `category_name` VARCHAR(255) NULL,
+            `brand_name` VARCHAR(255) NULL,
+            `color_name` VARCHAR(255) NULL,
+            `attribute_name` VARCHAR(255) NULL,
+            `unit_name` VARCHAR(255) NULL,
+            `measurement_point_name` VARCHAR(255) NULL,
+            `warranty_name` VARCHAR(255) NULL,
+            `seen` INT(2) NOT NULL DEFAULT 0,
+            `message` LONGTEXT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`)
+          )");
+
+          \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_promotion_participates` (
+            `id` int(20) NOT NULL AUTO_INCREMENT,
+            `seller_admin_promotion_id` INT(11) NOT NULL,
+            `seller_id` INT(11) NOT NULL,
+            `seen` INT(2) NOT NULL DEFAULT 0,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`)
+          )");
+
+          \DB::statement("CREATE TABLE IF NOT EXISTS `seller_admin_promotion_participate_products` (
+            `id` int(20) NOT NULL AUTO_INCREMENT,
+            `seller_admin_promotion_participate_id` INT(11) NOT NULL,
+            `product_id` INT(11) NOT NULL,
+            `todays_deal` INT(2) NOT NULL DEFAULT 0,
+            `featured` INT(2) NOT NULL DEFAULT 0,
+            `flash_sale` INT(2) NOT NULL DEFAULT 0,
+            `flash_sale_id` INT(11) NULL,
+            `discount` double(20,2) NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`)
+          )");
+        }
+
+        \Cache::put('auto_setup_done', true, 86400 * 30);
+      } catch (\Exception $e) {
+        // Ignore database connection error during setup
       }
-    } catch (\Exception $e) {
-      // Ignore database connection error during setup
     }
 
     View::composer('seller.inc.seller_nav', function ($view) {

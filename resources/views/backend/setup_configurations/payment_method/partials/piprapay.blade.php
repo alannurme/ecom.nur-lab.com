@@ -2,6 +2,17 @@
     @csrf
     <input type="hidden" name="payment_method" value="piprapay">
     <div class="form-group row">
+        <input type="hidden" name="types[]" value="PIPRAPAY_BASE_URL">
+        <div class="col-md-4">
+            <label class="col-from-label">{{ translate('PipraPay Base API URL') }}</label>
+        </div>
+        <div class="col-md-8">
+            <input type="text" class="form-control" name="PIPRAPAY_BASE_URL"
+                value="{{ env('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api') }}"
+                placeholder="https://pay.nur-lab.com/api" required>
+        </div>
+    </div>
+    <div class="form-group row">
         <input type="hidden" name="types[]" value="PIPRAPAY_SECRET_KEY">
         <div class="col-md-4">
             <label class="col-from-label">{{ translate('PipraPay Secret Key') }}</label>

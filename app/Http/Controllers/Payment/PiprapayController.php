@@ -44,7 +44,8 @@ class PiprapayController extends Controller
         $name = $user ? $user->name : 'Customer';
         $email = ($user && $user->email) ? $user->email : 'customer@nur-lab.com';
 
-        $api_url = "https://pay.nur-lab.com/api/checkout/redirect";
+        $base_url = rtrim(env('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api'), '/');
+        $api_url = $base_url . '/checkout/redirect';
         $secret_key = env('PIPRAPAY_SECRET_KEY');
 
         $post_data = [
@@ -99,8 +100,9 @@ class PiprapayController extends Controller
             return redirect()->route('cart');
         }
 
+        $base_url = rtrim(env('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api'), '/');
         $secret_key = env('PIPRAPAY_SECRET_KEY');
-        $verify_url = "https://pay.nur-lab.com/api/verify-payment";
+        $verify_url = $base_url . "/verify-payment";
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $verify_url);
