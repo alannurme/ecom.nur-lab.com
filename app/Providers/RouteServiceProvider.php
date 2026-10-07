@@ -40,63 +40,43 @@ class RouteServiceProvider extends ServiceProvider
    */
   public function map()
   {
-    $this->mapApiRoutes();
+     $this->mapApiRoutes();
 
-    $this->mapApiSellerRoutes();
+     $this->mapApiSellerRoutes();
+    
+     $this->mapAdminRoutes();
 
-    $this->mapAdminRoutes();
+     $this->mapSellerRoutes();
+    
+     $this->mapAffiliateRoutes();
+    
+     $this->mapRefundRoutes();
+    
+     $this->mapClubPointsRoutes();
+    
+     $this->mapOtpRoutes();
+    
+     $this->mapOfflinePaymentRoutes();
+    
+     $this->mapAfricanPaymentGatewayRoutes();
+    
+     $this->mapPaytmRoutes();
+    
+     $this->mapPosRoutes();
+    
+     $this->mapSellerPackageRoutes();
+    
+     $this->mapDeliveryBoyRoutes();
+    
+     $this->mapAuctionRoutes();
 
-    $this->mapSellerRoutes();
-
-    $this->mapAffiliateRoutes();
-
-    $this->mapRefundRoutes();
-
-    $this->mapClubPointsRoutes();
-
-    $this->mapOtpRoutes();
-
-    $this->mapOfflinePaymentRoutes();
-
-    $this->mapAfricanPaymentGatewayRoutes();
-
-    $this->mapPaytmRoutes();
-
-    if (addon_is_activated('pos_system')) {
-        $this->mapPosRoutes();
-    }
-
-    $this->mapSellerPackageRoutes();
-
-    $this->mapDeliveryBoyRoutes();
-
-    $this->mapAuctionRoutes();
-
-    $this->mapWholesaleRoutes();
-
-    $this->mapPreorderRoutes();
-
-    $this->mapCybersourceRoutes();
-
-    $this->mapGstRoutes();
-
-    $this->mapShiprocketRoutes();
-
-    $this->mapSteadfastRoutes();
-
-    $this->mapPathaoRoutes();
-
-    $this->mapKnetRoutes();
-
-    $this->mapUddoktapayRoutes();
-
-    $this->mapRedxRoutes();
-
-    $this->mapWebRoutes();
+     $this->mapWholesaleRoutes();
+    
+     $this->mapWebRoutes();
 
     // $this->mapInstallRoutes();
 
-    // $this->mapUpdateRoutes();
+    //$this->mapUpdateRoutes();
   }
 
   /**
@@ -112,6 +92,27 @@ class RouteServiceProvider extends ServiceProvider
        ->namespace($this->namespace)
        ->group(base_path('routes/wholesale.php'));
   }
+  
+  
+  
+
+    //me add for route backup_restore_route
+  /**
+   * Define the "backup and restore" routes for the application.
+   *
+   * These routes all receive session state, CSRF protection, etc.
+   *
+   * @return void
+   */
+  protected function mapBackupResrtoreRoutes()
+  {
+    Route::middleware('web')
+       ->namespace($this->namespace)
+       ->group(base_path('routes/backup_restore.php'));
+  }
+  //me end
+
+
 
   /**
    * Define the "delivery boy" routes for the application.
@@ -185,7 +186,7 @@ class RouteServiceProvider extends ServiceProvider
 
 
   /**
-   * Define the "Asian payment" routes for the application.
+   * Define the "offline payment" routes for the application.
    *
    * These routes all receive session state, CSRF protection, etc.
    *
@@ -199,7 +200,7 @@ class RouteServiceProvider extends ServiceProvider
   }
 
   /**
-   * Define the "African payment" routes for the application.
+   * Define the "offline payment" routes for the application.
    *
    * These routes all receive session state, CSRF protection, etc.
    *
@@ -338,20 +339,6 @@ class RouteServiceProvider extends ServiceProvider
        ->group(base_path('routes/seller.php'));
   }
 
-	 /**
-     * Define the "Pre Order" routes for the application.
-     *
-     * These routes all receive session state, CSRF protection, etc.
-     *
-     * @return void
-     */
-    protected function mapPreorderRoutes()
-    {
-        Route::middleware('web')
-            ->namespace($this->namespace)
-            ->group(base_path('routes/preorder.php'));
-    }
-
   /**
    * Define the "api" routes for the application.
    *
@@ -383,20 +370,6 @@ class RouteServiceProvider extends ServiceProvider
   }
 
   /**
-   * Define the "b2b" routes for the application.
-   *
-   * These routes all receive session state, CSRF protection, etc.
-   *
-   * @return void
-   */
-  protected function mapCybersourceRoutes()
-  {
-    Route::middleware('web')
-       ->namespace($this->namespace)
-       ->group(base_path('routes/cybersource.php'));
-  }
-
-  /**
      * Configure the rate limiters for the application.
      *
      * @return void
@@ -408,101 +381,4 @@ class RouteServiceProvider extends ServiceProvider
         });
     }
 
-     /**
-     * Define the "GST System" routes for the application.
-     *
-     * These routes all receive session state, CSRF protection, etc.
-     *
-     * @return void
-     */
-    protected function mapGstRoutes()
-    {
-      Route::middleware('web')
-        ->namespace($this->namespace)
-        ->group(base_path('routes/gst.php'));
-    }
-
-    /**
-     * Define the "Shiprocket System" routes for the application.
-     *
-     * These routes all receive session state, CSRF protection, etc.
-     *
-     * @return void
-     */
-    protected function mapShiprocketRoutes()
-    {
-      Route::middleware('web')
-        ->namespace($this->namespace)
-        ->group(base_path('routes/shiprocket.php'));
-    }
-
-    /**
-   * Define the "Steadfast System" routes for the application.
-   *
-   * These routes all receive session state, CSRF protection, etc.
-   *
-   * @return void
-   */
-  protected function mapSteadfastRoutes()
-  {
-    Route::middleware('web')
-       ->namespace($this->namespace)
-       ->group(base_path('routes/steadfast.php'));
-  }
-
-  /**
-   * Define the "Pathao System" routes for the application.
-   *
-   * These routes all receive session state, CSRF protection, etc.
-   *
-   * @return void
-   */
-  protected function mapPathaoRoutes()
-  {
-    Route::middleware('web')
-       ->namespace($this->namespace)
-       ->group(base_path('routes/pathao.php'));
-  }
-
-    /**
-   * Define the "Knet Payment Gateway" routes for the application.
-   *
-   * These routes all receive session state, CSRF protection, etc.
-   *
-   * @return void
-   */
-  protected function mapKnetRoutes()
-  {
-    Route::middleware('web')
-       ->namespace($this->namespace)
-       ->group(base_path('routes/knet.php'));
-  }
-
-    /**
-   * Define the "Uddoktapay" routes for the application.
-   *
-   * These routes all receive session state, CSRF protection, etc.
-   *
-   * @return void
-   */
-  protected function mapUddoktapayRoutes()
-  {
-    Route::middleware('web')
-       ->namespace($this->namespace)
-       ->group(base_path('routes/uddoktapay.php'));
-  }
-
-    /**
-   * Define the "Redx System" routes for the application.
-   *
-   * These routes all receive session state, CSRF protection, etc.
-   *
-   * @return void
-   */
-  protected function mapRedxRoutes()
-  {
-    Route::middleware('web')
-       ->namespace($this->namespace)
-       ->group(base_path('routes/redx.php'));
-  }
 }
