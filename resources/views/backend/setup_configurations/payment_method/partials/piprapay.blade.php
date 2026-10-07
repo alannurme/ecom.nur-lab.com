@@ -52,6 +52,9 @@ function testPiprapayConnection(btn) {
         $(btn).prop('disabled', false).html(originalText);
         if (data.status) {
             AIZ.plugins.notify('success', data.message);
+            if (data.redirect_url) {
+                window.open(data.redirect_url, '_blank');
+            }
         } else {
             AIZ.plugins.notify('danger', data.message);
         }

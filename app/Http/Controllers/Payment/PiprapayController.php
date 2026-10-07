@@ -166,7 +166,7 @@ class PiprapayController extends Controller
         }
 
         $postData = [
-            'amount' => 100.00,
+            'amount' => 10.00,
             'currency' => 'BDT',
             'full_name' => 'Test User',
             'customer_name' => 'Test User',
@@ -206,9 +206,11 @@ class PiprapayController extends Controller
         $response = json_decode($responseJson, true);
 
         if (($httpCode == 200 || $httpCode == 201) && (isset($response['status']) && $response['status'] == 'success' || isset($response['pp_url']))) {
+            $paymentUrl = $response['pp_url'] ?? $response['redirect_url'] ?? $response['url'] ?? null;
             return response()->json([
                 'status' => true,
-                'message' => translate('Connection Successful! PipraPay API is working correctly.')
+                'redirect_url' => $paymentUrl,
+                'message' => translate('Connection Successful! Opening 10 BDT test payment page...')
             ]);
         }
 
