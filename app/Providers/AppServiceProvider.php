@@ -155,6 +155,13 @@ class AppServiceProvider extends ServiceProvider
           )");
         }
 
+        if (Schema::hasTable('cities')) {
+          $inactive_cities = \DB::table('cities')->where('status', 0)->exists();
+          if ($inactive_cities) {
+            \DB::table('cities')->where('status', 0)->update(['status' => 1]);
+          }
+        }
+
         \Cache::put('auto_setup_done', true, 86400 * 30);
       } catch (\Exception $e) {
         // Ignore database connection error during setup
