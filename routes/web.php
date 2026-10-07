@@ -33,6 +33,7 @@ use App\Http\Controllers\Payment\MercadopagoController;
 use App\Http\Controllers\Payment\NagadController;
 use App\Http\Controllers\Payment\NgeniusController;
 use App\Http\Controllers\Payment\PayhereController;
+use App\Http\Controllers\Payment\PiprapayController;
 use App\Http\Controllers\Payment\PaykuController;
 use App\Http\Controllers\Payment\PaymobController;
 use App\Http\Controllers\Payment\PaypalController;
@@ -510,6 +511,9 @@ Route::any('/paymob/callback', [PaymobController::class, 'callback']);
 
 // tap
 Route::any('/tap/callback', [TapController::class, 'callback'])->name('tap.callback');
+
+// PipraPay
+Route::any('/piprapay/callback', [PiprapayController::class, 'callback'])->name('piprapay.callback');
 
 //Blog Section
 Route::controller(BlogController::class)->group(function () {
