@@ -17,9 +17,14 @@ use Session;
 
 class PiprapayController extends Controller
 {
-    private function getBaseUrl()
+    private function getBaseUrl($customUrl = null)
     {
-        return rtrim(env('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com'), '/');
+        $url = $customUrl ?: env('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com');
+        $url = rtrim(trim($url), '/');
+        if (str_ends_with($url, '/api')) {
+            $url = substr($url, 0, -4);
+        }
+        return rtrim($url, '/');
     }
 
     public function pay(Request $request)
@@ -84,7 +89,7 @@ class PiprapayController extends Controller
             return redirect($response['data']['payment_url']);
         }
 
-        $errorMsg = $response['message'] ?? translate('Could not generate PipraPay payment URL');
+        $errorMsg = $response['error']['message'] ?? $response['message'] ?? translate('Could not generate PipraPay payment URL');
         flash($errorMsg)->error();
         return redirect()->route('home');
     }
@@ -139,7 +144,7 @@ class PiprapayController extends Controller
 
     public function testConnection(Request $request)
     {
-        $baseUrl = rtrim($request->input('base_url', 'https://pay.nur-lab.com'), '/');
+        $baseUrl = $this->getBaseUrl($request->input('base_url'));
         $apiKey = $request->input('api_key');
 
         if (!$baseUrl || !$apiKey) {
@@ -150,7 +155,7 @@ class PiprapayController extends Controller
         }
 
         $postData = [
-            'amount' => 1.00,
+            'amount' => 100.00,
             'currency' => 'BDT',
             'customer_name' => 'Test User',
             'customer_email' => 'test@nur-lab.com',
@@ -182,23 +187,17 @@ class PiprapayController extends Controller
 
         $response = json_decode($responseJson, true);
 
-        if ($httpCode == 200 && isset($response['status']) && $response['status'] == 'success') {
+        if (($httpCode == 200 || $httpCode == 201) && isset($response['status']) && $response['status'] == 'success') {
             return response()->json([
                 'status' => true,
                 'message' => translate('Connection Successful! PipraPay API is working correctly.')
             ]);
         }
 
-        if (isset($response['message'])) {
-            return response()->json([
-                'status' => false,
-                'message' => translate('API Response Error: ') . $response['message']
-            ]);
-        }
-
+        $msg = $response['error']['message'] ?? $response['message'] ?? translate('Connection Failed (HTTP Code: ') . $httpCode . ')';
         return response()->json([
             'status' => false,
-            'message' => translate('Connection Failed (HTTP Code: ') . $httpCode . ')'
+            'message' => $msg
         ]);
     }
 }
