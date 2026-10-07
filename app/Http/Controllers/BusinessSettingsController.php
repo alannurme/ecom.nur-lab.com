@@ -106,6 +106,34 @@ class BusinessSettingsController extends Controller
         return view('backend.setup_configurations.whatsapp_chat');
     }
 
+    public function facebook_chat(Request $request)
+    {
+        CoreComponentRepository::instantiateShopRepository();
+        CoreComponentRepository::initializeCache();
+        return view('backend.setup_configurations.facebook_chat');
+    }
+
+    public function facebook_chat_update(Request $request)
+    {
+        if ($request->has('types')) {
+            foreach ($request->types as $key => $type) {
+                $this->overWriteEnvFile($type, $request[$type]);
+            }
+        }
+        $business_settings = BusinessSetting::where('type', 'facebook_chat')->first();
+        if ($business_settings == null) {
+            $business_settings = new BusinessSetting;
+            $business_settings->type = 'facebook_chat';
+        }
+        $business_settings->value = $request->has('facebook_chat') ? 1 : 0;
+        $business_settings->save();
+
+        Artisan::call('cache:clear');
+
+        flash(translate("Facebook chat settings updated successfully"))->success();
+        return back();
+    }
+
     public function facebook_comment(Request $request)
     {
         CoreComponentRepository::instantiateShopRepository();
