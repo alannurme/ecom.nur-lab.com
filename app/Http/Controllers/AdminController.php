@@ -169,7 +169,8 @@ class AdminController extends Controller
         $data['total_shipped_order'] = Order::where('delivery_status', 'on_the_way')->count();
         $data['total_cancelled_order'] = Order::where('delivery_status', 'cancelled')->count();
         $data['total_delivered_order'] = Order::where('delivery_status', 'delivered')->count();
-        $admin_id = User::select('id')->where('user_type', 'admin')->first()->id;
+        $admin = User::select('id')->where('user_type', 'admin')->first();
+        $admin_id = $admin ? $admin->id : null;
         $data['total_inhouse_sale'] = Order::where("seller_id", $admin_id)->sum('grand_total');
         $data['payment_type_wise_inhouse_sale'] = Order::select(DB::raw('case
                                                     when payment_type in ("wallet") then "wallet"
