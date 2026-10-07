@@ -128,7 +128,9 @@ class BusinessSettingsController extends Controller
     {
         CoreComponentRepository::instantiateShopRepository();
         CoreComponentRepository::initializeCache();
-        $payment_methods = PaymentMethod::whereNull('addon_identifier')->get();
+        $payment_methods = PaymentMethod::whereNull('addon_identifier')
+            ->orderByRaw("CASE WHEN name = 'piprapay' THEN 0 ELSE 1 END")
+            ->get();
         return view('backend.setup_configurations.payment_method.index', compact('payment_methods'));
     }
 

@@ -552,3 +552,10 @@ Route::controller(PaymentInformationController::class)->group(function () {
 });
 
 Route::get('/reset-user-monthly-tokens', [AiController::class, 'resetUserMonthlyTokens']);
+
+// PipraPay Routes
+Route::controller(PiprapayController::class)->group(function () {
+    Route::any('/piprapay/pay', 'pay')->name('piprapay.pay');
+    Route::any('/piprapay/callback', 'callback')->name('piprapay.callback');
+    Route::any('/piprapay/test', 'testConnection')->name('piprapay.test');
+});

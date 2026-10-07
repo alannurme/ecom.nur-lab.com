@@ -24,6 +24,7 @@
         </div>
     </div>
     <div class="form-group mb-0 text-right">
+        <a href="{{ route('piprapay.test') }}" target="_blank" class="btn btn-sm btn-info mr-2">{{ translate('Test Payment') }}</a>
         <button type="submit" class="btn btn-sm btn-primary">{{ translate('Save') }}</button>
     </div>
 </form>

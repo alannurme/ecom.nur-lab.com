@@ -17,6 +17,59 @@ use Illuminate\Support\Facades\Auth;
 
 class PiprapayController extends Controller
 {
+    public function testConnection(Request $request)
+    {
+        $base_url = rtrim(env('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api'), '/');
+        $api_url = $base_url . '/checkout/redirect';
+        $secret_key = env('PIPRAPAY_SECRET_KEY');
+
+        $post_data = [
+            'amount'         => 10,
+            'currency'       => 'BDT',
+            'customer_name'  => Auth::check() ? Auth::user()->name : 'Test User',
+            'customer_email' => Auth::check() && Auth::user()->email ? Auth::user()->email : 'test@nur-lab.com',
+            'redirect_url'   => route('piprapay.callback')
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $api_url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Accept: application/json',
+            'Authorization: Bearer ' . $secret_key,
+            'x-api-key: ' . $secret_key
+        ]);
+
+        $response = curl_exec($ch);
+        $err = curl_error($ch);
+        curl_close($ch);
+
+        if ($err) {
+            flash(translate('PipraPay Test Failed: ') . $err)->error();
+            return back();
+        }
+
+        $result = json_decode($response, true);
+        if (isset($result['url']) && !empty($result['url'])) {
+            return redirect()->away($result['url']);
+        } elseif (isset($result['payment_url']) && !empty($result['payment_url'])) {
+            return redirect()->away($result['payment_url']);
+        } elseif (isset($result['data']['url']) && !empty($result['data']['url'])) {
+            return redirect()->away($result['data']['url']);
+        } elseif (isset($result['data']['payment_url']) && !empty($result['data']['payment_url'])) {
+            return redirect()->away($result['data']['payment_url']);
+        }
+
+        $msg = isset($result['message']) ? $result['message'] : json_encode($result);
+        flash(translate('PipraPay Test Response: ') . $msg)->warning();
+        return back();
+    }
+
     public function pay(Request $request)
     {
         $amount = 0;
