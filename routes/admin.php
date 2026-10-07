@@ -439,6 +439,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
 
         Route::get('/business-settings/general-info', 'general_info')->name('general.info');
         Route::get('/business-settings/order-config', 'order_config')->name('order.config');
+        Route::get('/business-settings/order-configuration', 'order_config')->name('order_configuration.index');
         Route::get('/business-settings/invoice-config', 'invoice_config')->name('invoice.config');
         Route::get('/business-settings/order-tracking-config', 'order_tracking_config')->name('order_tracking.config');
         Route::get('/business-settings/shipping-label-config', 'shipping_label_config')->name('shipping_label.config');
