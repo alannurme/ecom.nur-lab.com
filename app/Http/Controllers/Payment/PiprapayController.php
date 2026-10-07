@@ -19,9 +19,9 @@ class PiprapayController extends Controller
 {
     public function testConnection(Request $request)
     {
-        $base_url = rtrim(env('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api'), '/');
+        $base_url = rtrim(env('PIPRAPAY_BASE_URL') ?: get_setting('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api'), '/');
         $api_url = $base_url . '/checkout/redirect';
-        $secret_key = env('PIPRAPAY_SECRET_KEY');
+        $secret_key = env('PIPRAPAY_SECRET_KEY') ?: get_setting('PIPRAPAY_SECRET_KEY');
 
         $post_data = [
             'api_key'        => $secret_key,
@@ -44,8 +44,6 @@ class PiprapayController extends Controller
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Accept: application/json',
-            'Authorization: Bearer ' . $secret_key,
-            'api-key: ' . $secret_key,
             'x-api-key: ' . $secret_key
         ]);
 
@@ -101,9 +99,9 @@ class PiprapayController extends Controller
         $name = $user ? $user->name : 'Customer';
         $email = ($user && $user->email) ? $user->email : 'customer@nur-lab.com';
 
-        $base_url = rtrim(env('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api'), '/');
+        $base_url = rtrim(env('PIPRAPAY_BASE_URL') ?: get_setting('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api'), '/');
         $api_url = $base_url . '/checkout/redirect';
-        $secret_key = env('PIPRAPAY_SECRET_KEY');
+        $secret_key = env('PIPRAPAY_SECRET_KEY') ?: get_setting('PIPRAPAY_SECRET_KEY');
 
         $post_data = [
             'api_key'        => $secret_key,
@@ -121,11 +119,9 @@ class PiprapayController extends Controller
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bearer ' . $secret_key,
-            'api-key: ' . $secret_key,
-            'x-api-key: ' . $secret_key,
             'Content-Type: application/json',
-            'Accept: application/json'
+            'Accept: application/json',
+            'x-api-key: ' . $secret_key
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -162,8 +158,8 @@ class PiprapayController extends Controller
             return redirect()->route('cart');
         }
 
-        $base_url = rtrim(env('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api'), '/');
-        $secret_key = env('PIPRAPAY_SECRET_KEY');
+        $base_url = rtrim(env('PIPRAPAY_BASE_URL') ?: get_setting('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api'), '/');
+        $secret_key = env('PIPRAPAY_SECRET_KEY') ?: get_setting('PIPRAPAY_SECRET_KEY');
         $verify_url = $base_url . "/verify-payment";
 
         $ch = curl_init();
@@ -172,8 +168,9 @@ class PiprapayController extends Controller
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['trx_id' => $trx_id]));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bearer ' . $secret_key,
-            'Content-Type: application/json'
+            'Content-Type: application/json',
+            'Accept: application/json',
+            'x-api-key: ' . $secret_key
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
