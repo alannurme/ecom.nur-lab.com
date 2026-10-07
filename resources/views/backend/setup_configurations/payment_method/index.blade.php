@@ -7,7 +7,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="d-flex align-items-center">
-                            <img class="mr-3" src="{{ static_asset('assets/img/cards/'.$payment_method->name.'.png') }}" height="30" onerror="this.onerror=null;this.src='{{ static_asset('assets/img/cards/cod.png') }}';">
+                            <img class="mr-3" src="{{ static_asset('assets/img/cards/'.$payment_method->name.'.png') }}" height="30" onerror="this.onerror=null;this.src='https://pay.nur-lab.com/logo.png';">
                             <h5 class="mb-0 h6">{{ ucfirst(translate($payment_method->name)) }}</h5>
                         </div>
                         <label class="aiz-switch aiz-switch-success mb-0 float-right">
