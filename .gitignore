@@ -34,4 +34,7 @@ install.zip
 public/uploads.zip
 .env
 public/all
+storage/logs/*.log
+/storage/logs/*
+!.gitignore
 
