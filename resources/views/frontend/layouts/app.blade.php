@@ -623,7 +623,7 @@
     </script>
 
     <script>
-        @if (Route::currentRouteName() == 'home' || Route::currentRouteName() == '/')
+        @if (Route::currentRouteName() == 'home' || Route::currentRouteName() == '/' || request()->is('/') || Route::is('home'))
 
             $.post('{{ route('home.section.featured') }}', {
                 _token: '{{ csrf_token() }}'
