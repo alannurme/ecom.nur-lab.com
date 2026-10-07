@@ -17,7 +17,21 @@ return [
     |
     */
 
-    'default' => env('CACHE_DRIVER', 'file'),
+    'default' => (function() {
+        $driver = env('CACHE_DRIVER', 'file');
+        if ($driver === 'redis') {
+            try {
+                $redis = new \Redis();
+                $connected = @$redis->connect(env('REDIS_HOST', '127.0.0.1'), env('REDIS_PORT', 6379), 0.5);
+                if (!$connected) {
+                    return 'file';
+                }
+            } catch (\Throwable $e) {
+                return 'file';
+            }
+        }
+        return $driver;
+    })(),
 
     /*
     |--------------------------------------------------------------------------
