@@ -62,7 +62,9 @@ class RouteServiceProvider extends ServiceProvider
 
     $this->mapPaytmRoutes();
 
-    $this->mapPosRoutes();
+    if (addon_is_activated('pos_system')) {
+        $this->mapPosRoutes();
+    }
 
     $this->mapSellerPackageRoutes();
 
