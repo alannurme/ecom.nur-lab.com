@@ -1080,9 +1080,13 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
     Route::controller(\App\Http\Controllers\BackupController::class)->group(function () {
         Route::get('/backups', 'index')->name('backups');
         Route::get('/backup-restore-settings', 'index')->name('backup_restore_settings.index');
-        Route::get('/backups/create', 'create')->name('backups.create');
-        Route::get('/backups/download/{file_name}', 'download')->name('backups.download');
-        Route::get('/backups/destroy/{file_name}', 'destroy')->name('backups.destroy');
+        Route::post('/backups', 'store')->name('backups.store');
+        Route::post('/backups/storeaddons', 'storeaddons')->name('backups.storeaddons');
+        Route::get('/backups/download/database/{key}', 'downloadDatabase')->name('backups.download.database');
+        Route::get('/backups/download/storage/{key}/{backuptype}', 'downloadStorage')->name('backups.download.storage');
+        Route::post('/backups/restore', 'restore')->name('backups.restore');
+        Route::delete('/backups/destroy', 'destroy')->name('backups.destroy');
+        Route::post('/backups/send', 'send')->name('backups.send');
     });
     
 });
