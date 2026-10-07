@@ -30,13 +30,19 @@
                             $home_slider_links = get_setting('home_slider_links', null, $lang);
                         @endphp
                         @foreach ($sliders as $key => $slider)
+                            @if ($key == 0 && $slider)
+                                @push('head')
+                                    <link rel="preload" as="image" href="{{ my_asset($slider->file_name) }}" fetchpriority="high">
+                                @endpush
+                            @endif
                             <div class="carousel-box">
                                 <a href="{{ isset(json_decode($home_slider_links, true)[$key]) ? json_decode($home_slider_links, true)[$key] : '' }}">
                                     <!-- Image -->
                                     <div class="d-block mw-100 img-fit overflow-hidden h-180px h-md-320px h-lg-460px h-xl-553px overflow-hidden">
-                                        <img class="img-fit h-100 m-auto has-transition ls-is-cached lazyloaded"
+                                        <img class="img-fit h-100 m-auto has-transition @if($key == 0) eagerloaded @else lazyload @endif"
                                         src="{{ $slider ? my_asset($slider->file_name) : static_asset('assets/img/placeholder.jpg') }}"
                                         alt="{{ env('APP_NAME') }} promo"
+                                        @if($key == 0) fetchpriority="high" loading="eager" @else loading="lazy" @endif
                                         onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder-rect.jpg') }}';">
                                     </div>
                                 </a>
@@ -298,7 +304,7 @@
     @if (get_setting('enable_featured_products') == 1)
         <!-- Featured Products -->
         <div id="section_featured" class="pt-2 pt-md-3" style="background: #f5f5fa;">
-
+            @include('frontend.'.get_setting('homepage_select').'.partials.featured_products_section')
         </div>
     @endif
 
@@ -380,14 +386,14 @@
     @if (get_setting('enable_best_selling_products') == 1)
         <!-- Best Selling  -->
         <div id="section_best_selling">
-
+            @include('frontend.'.get_setting('homepage_select').'.partials.best_selling_section')
         </div>
     @endif
 
     @if (get_setting('enable_new_products') == 1)
         <!-- New Products -->
         <div id="section_newest">
-
+            @include('frontend.'.get_setting('homepage_select').'.partials.newest_products_section', ['newest_products' => filter_products(\App\Models\Product::latest())->take(12)->get()->shuffle()])
         </div>
     @endif
 
@@ -514,7 +520,7 @@
     @if (get_setting('enable_category_wise_products_section') == 1)
         <!-- Category wise Products -->
         <div id="section_home_categories" style="background: #f5f5fa;">
-
+            @include('frontend.'.get_setting('homepage_select').'.partials.home_categories_section')
         </div>
     @endif
 

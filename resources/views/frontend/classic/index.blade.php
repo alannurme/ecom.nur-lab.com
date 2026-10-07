@@ -278,7 +278,7 @@
 @if (get_setting('enable_featured_products') == 1)
     <!-- Featured Products -->
     <div id="section_featured">
-
+        @include('frontend.'.get_setting('homepage_select').'.partials.featured_products_section')
     </div>
 @endif
 
@@ -361,14 +361,14 @@
 @if (get_setting('enable_best_selling_products') == 1)
     <!-- Best Selling  -->
     <div id="section_best_selling">
-
+        @include('frontend.'.get_setting('homepage_select').'.partials.best_selling_section')
     </div>
 @endif
 
 @if (get_setting('enable_new_products') == 1)
     <!-- New Products -->
     <div id="section_newest">
-
+        @include('frontend.'.get_setting('homepage_select').'.partials.newest_products_section', ['newest_products' => filter_products(\App\Models\Product::latest())->take(12)->get()->shuffle()])
     </div>
 @endif
 
@@ -499,7 +499,7 @@
 @if (get_setting('enable_category_wise_products_section') == 1)
 <!-- Category wise Products/home-category -->
 <div id="section_home_categories" class="mb-2 mb-md-3 mt-2 mt-md-3">
-
+    @include('frontend.'.get_setting('homepage_select').'.partials.home_categories_section')
 </div>
 @endif
 

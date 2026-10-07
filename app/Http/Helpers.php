@@ -145,7 +145,7 @@ if (!function_exists('filter_products')) {
     function filter_products($products)
     {
 
-        $products = $products->isApprovedPublished()->where('auction_product', 0);
+        $products = $products->isApprovedPublished()->where('auction_product', 0)->with(['stocks', 'taxes']);
 
         if (!addon_is_activated('wholesale')) {
             $products = $products->where('wholesale_product', 0);
@@ -1316,7 +1316,13 @@ if (!function_exists('app_timezone')) {
 if (!function_exists('uploaded_asset')) {
     function uploaded_asset($id)
     {
-        if (($asset = Upload::find($id)) != null) {
+        if (!$id) {
+            return static_asset('assets/img/placeholder.jpg');
+        }
+        $asset = Cache::remember('upload_' . $id, 86400, function () use ($id) {
+            return Upload::find($id);
+        });
+        if ($asset != null) {
             return $asset->external_link == null ? my_asset($asset->file_name) : $asset->external_link;
         }
         return static_asset('assets/img/placeholder.jpg');
@@ -1366,8 +1372,10 @@ if (!function_exists('static_asset')) {
 if (!function_exists('getBaseURL')) {
     function getBaseURL()
     {
-        $root = '//' . $_SERVER['HTTP_HOST'];
-        $root .= str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
+        $host = $_SERVER['HTTP_HOST'] ?? parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+        $root = '//' . $host;
+        $root .= str_replace(basename($scriptName), '', $scriptName);
 
         return $root;
     }
