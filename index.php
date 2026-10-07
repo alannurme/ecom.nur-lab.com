@@ -1,6 +1,7 @@
 <?php
 
 ini_set('serialize_precision', -1);
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 
 /**
  * Laravel - A PHP Framework For Web Artisans
