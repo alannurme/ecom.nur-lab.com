@@ -136,13 +136,13 @@ Route::controller(HomeController::class)->group(function () {
     //Home Page
     Route::get('/', 'index')->name('home')->middleware(['portfolio-view', 'facebook_page_view']);
 
-    Route::post('/home/section/featured', 'load_featured_section')->name('home.section.featured');
-    Route::post('/home/section/todays-deal', 'load_todays_deal_section')->name('home.section.todays_deal');
-    Route::post('/home/section/best-selling', 'load_best_selling_section')->name('home.section.best_selling');
-    Route::post('/home/section/newest-products', 'load_newest_product_section')->name('home.section.newest_products');
-    Route::post('/home/section/home-categories', 'load_home_categories_section')->name('home.section.home_categories');
-    Route::post('/home/section/best-sellers', 'load_best_sellers_section')->name('home.section.best_sellers');
-    Route::post('/home/section/preorder-products', 'load_preorder_featured_products_section')->name('home.section.preorder_products');
+    Route::match(['get', 'post'], '/home/section/featured', 'load_featured_section')->name('home.section.featured');
+    Route::match(['get', 'post'], '/home/section/todays-deal', 'load_todays_deal_section')->name('home.section.todays_deal');
+    Route::match(['get', 'post'], '/home/section/best-selling', 'load_best_selling_section')->name('home.section.best_selling');
+    Route::match(['get', 'post'], '/home/section/newest-products', 'load_newest_product_section')->name('home.section.newest_products');
+    Route::match(['get', 'post'], '/home/section/home-categories', 'load_home_categories_section')->name('home.section.home_categories');
+    Route::match(['get', 'post'], '/home/section/best-sellers', 'load_best_sellers_section')->name('home.section.best_sellers');
+    Route::match(['get', 'post'], '/home/section/preorder-products', 'load_preorder_featured_products_section')->name('home.section.preorder_products');
 
     //category dropdown menu ajax call
     Route::post('/category/nav-element-list', 'get_category_items')->name('category.elements');
