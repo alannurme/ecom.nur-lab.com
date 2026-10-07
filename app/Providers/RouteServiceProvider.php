@@ -71,6 +71,10 @@ class RouteServiceProvider extends ServiceProvider
      $this->mapAuctionRoutes();
 
      $this->mapWholesaleRoutes();
+
+     if (addon_is_activated('backup_restore_system')) {
+         $this->mapBackupResrtoreRoutes();
+     }
     
      $this->mapWebRoutes();
 
