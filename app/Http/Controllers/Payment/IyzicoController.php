@@ -174,7 +174,7 @@ class IyzicoController extends Controller
         curl_setopt($stream, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
         $rn = curl_exec($stream);
-        curl_close($stream);
+        @curl_close($stream);
 
         if ($rn == "bad" && env('DEMO_MODE') != 'On') {
             echo 'Product not Activated.';

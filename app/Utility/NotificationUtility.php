@@ -144,7 +144,7 @@ class NotificationUtility
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
 
         $result = curl_exec($ch);
-        curl_close($ch);
+        @curl_close($ch);
 
         $firebase_notification = new FirebaseNotification;
         $firebase_notification->title = $req->title;

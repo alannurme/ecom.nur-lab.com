@@ -38,7 +38,7 @@ class SendSMSUtility
                 'accept:application/json'
             ));
             $response = curl_exec($ch);
-            curl_close($ch);
+            @curl_close($ch);
 
             return $response;
         } elseif (OtpConfiguration::where('type', 'twillo')->first()->value == 1) {
@@ -88,7 +88,7 @@ class SendSMSUtility
 
             $response = curl_exec($ch);
 
-            curl_close($ch);
+            @curl_close($ch);
 
             return $response;
         } elseif (OtpConfiguration::where('type', 'fast2sms')->first()->value == 1) {
@@ -144,7 +144,7 @@ class SendSMSUtility
             $response = curl_exec($curl);
             $err = curl_error($curl);
 
-            curl_close($curl);
+            @curl_close($curl);
 
             return $response;
         } elseif (OtpConfiguration::where('type', 'mimo')->first()->value == 1) {
@@ -168,7 +168,7 @@ class SendSMSUtility
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
-            curl_close($ch);
+            @curl_close($ch);
             return $response;
         } elseif (OtpConfiguration::where('type', 'msegat')->first()->value == 1) {
             $url = "https://www.msegat.com/gw/sendsms.php";
@@ -186,7 +186,7 @@ class SendSMSUtility
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
-            curl_close($ch);
+            @curl_close($ch);
             return $response;
         } elseif (OtpConfiguration::where('type', 'sparrow')->first()->value == 1) {
             $url = "http://api.sparrowsms.com/v2/sms/";
@@ -205,7 +205,7 @@ class SendSMSUtility
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             // Response
             $response = curl_exec($ch);
-            curl_close($ch);
+            @curl_close($ch);
             return $response;
         } elseif (OtpConfiguration::where('type', 'zender')->first()->value == 1) {
             if (empty(env('ZENDER_SERVICE')) || env('ZENDER_SERVICE') < 2) {
@@ -256,7 +256,7 @@ class SendSMSUtility
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             // Response
             $response = curl_exec($ch);
-            curl_close($ch);
+            @curl_close($ch);
 
             return $response;
         }

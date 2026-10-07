@@ -22,7 +22,7 @@ class Msegat implements SendSms {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $response = curl_exec($ch);
-        curl_close($ch);
+        @curl_close($ch);
         return $response;
     }
 }

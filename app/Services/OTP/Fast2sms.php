@@ -59,7 +59,7 @@ class Fast2sms implements SendSms {
         $response = curl_exec($curl);
         $err = curl_error($curl);
 
-        curl_close($curl);
+        @curl_close($curl);
 
         return $response;
     }

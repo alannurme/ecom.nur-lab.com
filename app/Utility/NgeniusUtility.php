@@ -168,7 +168,7 @@ class NgeniusUtility
         $server_output = curl_exec($ch);
         // print_r($server_output);
         // exit();
-        curl_close($ch);
+        @curl_close($ch);
 
         return $server_output;
 
@@ -194,7 +194,7 @@ class NgeniusUtility
         curl_setopt($stream, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
         $rn = curl_exec($stream);
-        curl_close($stream);
+        @curl_close($stream);
         
         if($rn == "bad" && env('DEMO_MODE') != 'On') {
             return redirect()->route('home');

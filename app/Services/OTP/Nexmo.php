@@ -33,7 +33,7 @@ class Nexmo implements SendSms {
             'accept:application/json'
         ));
         $response = curl_exec($ch);
-        curl_close($ch);
+        @curl_close($ch);
 
         return $response;
     }

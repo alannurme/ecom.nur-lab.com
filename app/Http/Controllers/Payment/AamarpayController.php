@@ -101,7 +101,7 @@ class AamarpayController extends Controller
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $url_forward = str_replace('"', '', stripslashes(curl_exec($ch)));
-        curl_close($ch);
+        @curl_close($ch);
 
         $this->redirect_to_merchant($url_forward);
     }

@@ -16,7 +16,7 @@ class GoogleRevoke implements ProviderRevoke
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         $resultdata = curl_exec($ch);
         $response = curl_getinfo($ch);
-        curl_close($ch);
+        @curl_close($ch);
         return $response['http_code'];
     }
 }

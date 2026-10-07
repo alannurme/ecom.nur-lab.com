@@ -83,7 +83,7 @@ class PayhereUtility
                 curl_setopt($stream, CURLOPT_HEADER, 0);
                 curl_setopt($stream, CURLOPT_RETURNTRANSFER, 1);
                 $rn = curl_exec($stream);
-                curl_close($stream);
+                @curl_close($stream);
     
                 if($rn == 'no') {
                     return false;

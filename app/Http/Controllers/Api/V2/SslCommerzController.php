@@ -251,7 +251,7 @@ class SslCommerzController extends Controller
         $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
 
         if ($code == 200 && !(curl_errno($handle))) {
-            curl_close($handle);
+            @curl_close($handle);
             $sslcommerzResponse = $content;
 
             # PARSE THE JSON RESPONSE
@@ -259,7 +259,7 @@ class SslCommerzController extends Controller
 
             return $this;
         } else {
-            curl_close($handle);
+            @curl_close($handle);
             $msg = "FAILED TO CONNECT WITH SSLCOMMERZ API";
             $this->error = $msg;
             return false;

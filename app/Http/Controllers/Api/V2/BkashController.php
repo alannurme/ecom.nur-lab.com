@@ -75,7 +75,7 @@ class BkashController extends Controller
             curl_setopt($url, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
             $resultdata = curl_exec($url);
             
-            curl_close($url);
+            @curl_close($url);
     
             return redirect(json_decode($resultdata)->bkashURL);
 
@@ -156,7 +156,7 @@ class BkashController extends Controller
         curl_setopt($url, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
         $resultdata = curl_exec($url);
-        curl_close($url);
+        @curl_close($url);
 
         $token = json_decode($resultdata)->id_token;
         return $token;
@@ -187,7 +187,7 @@ class BkashController extends Controller
         curl_setopt($url, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($url, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         $resultdata = curl_exec($url);
-        curl_close($url);
+        @curl_close($url);
 
         return $resultdata;
     }
@@ -217,7 +217,7 @@ class BkashController extends Controller
         curl_setopt($url, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($url, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         $resultdata = curl_exec($url);
-        curl_close($url);
+        @curl_close($url);
 
         return $resultdata;
     }

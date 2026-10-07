@@ -450,7 +450,7 @@ class AdminController extends Controller
         curl_setopt($stream, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($stream, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         $rn = curl_exec($stream);
-        curl_close($stream);
+        @curl_close($stream);
         return $rn;
     }
 

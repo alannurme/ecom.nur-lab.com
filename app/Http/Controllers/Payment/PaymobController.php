@@ -147,7 +147,7 @@ class PaymobController extends Controller
         $output = curl_exec($ch);
 
         // Close curl resource to free up system resources
-        curl_close($ch);
+        @curl_close($ch);
         return json_decode($output);
     }
 

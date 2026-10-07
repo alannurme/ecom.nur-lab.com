@@ -59,7 +59,7 @@ class KhaltiController extends Controller
 
         // Response
         $response = json_decode(curl_exec($ch), true);
-        curl_close($ch);
+        @curl_close($ch);
 
         // return response()->json([
         //     "result" => true,
@@ -91,7 +91,7 @@ class KhaltiController extends Controller
 
         // Response
         $response = json_decode(curl_exec($ch));
-        curl_close($ch);
+        @curl_close($ch);
 
         if ($response->status == 'Completed') {
 

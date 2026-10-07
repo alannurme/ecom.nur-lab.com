@@ -98,7 +98,7 @@ class NagadUtility {
         $resultdata = curl_exec($url);
 
         $ResultArray = json_decode($resultdata, true);
-        curl_close($url);
+        @curl_close($url);
         return $ResultArray;
 
     }
@@ -116,7 +116,7 @@ class NagadUtility {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $file_contents = curl_exec($ch);
         echo curl_error($ch);
-        curl_close($ch);
+        @curl_close($ch);
         return $file_contents;
     }
 
@@ -135,7 +135,7 @@ class NagadUtility {
                 curl_setopt($stream, CURLOPT_HEADER, 0);
                 curl_setopt($stream, CURLOPT_RETURNTRANSFER, 1);
                 $rn = curl_exec($stream);
-                curl_close($stream);
+                @curl_close($stream);
     
                 if($rn == 'no') {
                     return false;

@@ -377,7 +377,7 @@ class AddonController extends Controller
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         
         $response = curl_exec($ch);
-        curl_close($ch);
+        @curl_close($ch);
         return $response;
     }
 
@@ -399,7 +399,7 @@ class AddonController extends Controller
         curl_setopt($stream, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
         $rn = curl_exec($stream);
-        curl_close($stream);
+        @curl_close($stream);
         return $rn;
     }
 
@@ -416,7 +416,7 @@ class AddonController extends Controller
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         
         $response = curl_exec($ch);
-        curl_close($ch);
+        @curl_close($ch);
         return json_decode($response, true);
     }
 

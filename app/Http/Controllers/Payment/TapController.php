@@ -87,7 +87,7 @@ class TapController extends Controller
         curl_setopt($url, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
         $response = json_decode(curl_exec($url));
-        curl_close($url);
+        @curl_close($url);
 
         if (isset($response->errors)) {
             flash($response->errors[0]->description)->warning();
@@ -118,7 +118,7 @@ class TapController extends Controller
         curl_setopt($url, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
         $response = json_decode(curl_exec($url));
-        curl_close($url);
+        @curl_close($url);
 
         if (isset($response->errors)) {
             flash($response->errors[0]->description)->warning();
