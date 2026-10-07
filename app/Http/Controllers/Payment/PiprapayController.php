@@ -62,13 +62,19 @@ class PiprapayController extends Controller
         $postData = [
             'amount' => (float) $amount,
             'currency' => $currencyCode,
+            'full_name' => $user ? $user->name : 'Customer',
             'customer_name' => $user ? $user->name : 'Customer',
+            'email_address' => $user ? $user->email : 'customer@nur-lab.com',
             'customer_email' => $user ? $user->email : 'customer@nur-lab.com',
+            'mobile_number' => ($user && $user->phone) ? $user->phone : '01700000000',
+            'customer_phone' => ($user && $user->phone) ? $user->phone : '01700000000',
+            'return_url' => route('piprapay.callback'),
             'redirect_url' => route('piprapay.callback')
         ];
 
         $ch = curl_init($baseUrl . '/api/checkout/redirect');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'MHS-PIPRAPAY-API-KEY: ' . $apiKey,
             'Authorization: Bearer ' . $apiKey,
             'Accept: application/json',
             'Content-Type: application/json'
@@ -82,12 +88,14 @@ class PiprapayController extends Controller
         curl_close($ch);
 
         $response = json_decode($responseJson, true);
+        $paymentUrl = $response['data']['payment_url'] ?? $response['pp_url'] ?? null;
+        $trxId = $response['data']['trx_id'] ?? $response['pp_id'] ?? null;
 
-        if (isset($response['status']) && $response['status'] == 'success' && isset($response['data']['payment_url'])) {
-            if (isset($response['data']['trx_id'])) {
-                Session::put('piprapay_trx_id', $response['data']['trx_id']);
+        if ($paymentUrl) {
+            if ($trxId) {
+                Session::put('piprapay_trx_id', $trxId);
             }
-            return redirect($response['data']['payment_url']);
+            return redirect($paymentUrl);
         }
 
         $errorMsg = $response['error']['message'] ?? $response['message'] ?? translate('Could not generate PipraPay payment URL');
@@ -97,7 +105,7 @@ class PiprapayController extends Controller
 
     public function callback(Request $request)
     {
-        $trx_id = $request->input('trx_id') ?: Session::get('piprapay_trx_id');
+        $trx_id = $request->input('trx_id') ?: $request->input('pp_id') ?: Session::get('piprapay_trx_id');
 
         if (!$trx_id) {
             flash(translate('Transaction ID missing for PipraPay verification'))->error();
@@ -109,6 +117,7 @@ class PiprapayController extends Controller
 
         $ch = curl_init($baseUrl . '/api/verify-payment');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'MHS-PIPRAPAY-API-KEY: ' . $apiKey,
             'Authorization: Bearer ' . $apiKey,
             'Accept: application/json',
             'Content-Type: application/json'
@@ -159,13 +168,19 @@ class PiprapayController extends Controller
         $postData = [
             'amount' => 100.00,
             'currency' => 'BDT',
+            'full_name' => 'Test User',
             'customer_name' => 'Test User',
+            'email_address' => 'test@nur-lab.com',
             'customer_email' => 'test@nur-lab.com',
+            'mobile_number' => '01700000000',
+            'customer_phone' => '01700000000',
+            'return_url' => route('piprapay.callback'),
             'redirect_url' => route('piprapay.callback')
         ];
 
         $ch = curl_init($baseUrl . '/api/checkout/redirect');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'MHS-PIPRAPAY-API-KEY: ' . $apiKey,
             'Authorization: Bearer ' . $apiKey,
             'Accept: application/json',
             'Content-Type: application/json'
@@ -190,7 +205,7 @@ class PiprapayController extends Controller
 
         $response = json_decode($responseJson, true);
 
-        if (($httpCode == 200 || $httpCode == 201) && isset($response['status']) && $response['status'] == 'success') {
+        if (($httpCode == 200 || $httpCode == 201) && (isset($response['status']) && $response['status'] == 'success' || isset($response['pp_url']))) {
             return response()->json([
                 'status' => true,
                 'message' => translate('Connection Successful! PipraPay API is working correctly.')
