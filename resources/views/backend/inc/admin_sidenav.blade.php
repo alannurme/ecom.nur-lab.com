@@ -2723,22 +2723,6 @@
                                     </a>
                                 </li>
                             @endcan
-                            @can('payment_methods_configurations')
-                                <li class="aiz-side-nav-item">
-                                    <a href="{{ route('payment_method.index') }}" class="aiz-side-nav-link">
-                                        <span class="aiz-side-nav-text"
-                                            style="color: {{ get_setting('navbar_text_color') }}">{{translate('Payment Methods')}}</span>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('order_configuration')
-                                <li class="aiz-side-nav-item">
-                                    <a href="{{ Route::has('order_configuration.index') ? route('order_configuration.index') : route('order.config') }}" class="aiz-side-nav-link">
-                                        <span class="aiz-side-nav-text"
-                                            style="color: {{ get_setting('navbar_text_color') }}">{{translate('Order Configuration')}}</span>
-                                    </a>
-                                </li>
-                            @endcan
                             @can('file_system_&_cache_configuration')
                                 <li class="aiz-side-nav-item">
                                     <a href="{{ route('file_system.index') }}" class="aiz-side-nav-link">
