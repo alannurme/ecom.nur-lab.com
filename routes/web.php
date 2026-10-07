@@ -82,7 +82,7 @@ Route::get('/refresh-csrf', function () {
 });
 
 // AIZ Uploader
-Route::controller(AizUploadController::class)->group(function () {
+Route::controller(AizUploadController::class)->middleware('auth')->group(function () {
     Route::post('/aiz-uploader', 'show_uploader');
     Route::post('/aiz-uploader/upload', 'upload');
     Route::get('/aiz-uploader/get-uploaded-files', 'get_uploaded_files');
@@ -129,13 +129,11 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/users/login', 'login')->name('user.login')->middleware('handle-demo-login');
     Route::get('/seller/login', 'login')->name('seller.login')->middleware('handle-demo-login');
     Route::get('/deliveryboy/login', 'login')->name('deliveryboy.login')->middleware('handle-demo-login');
-    Route::get('/users/registration', 'registration')->name('user.registration')->middleware('handle-demo-login')->middleware('portfolio-view');
+    Route::get('/users/registration', 'registration')->name('user.registration')->middleware('handle-demo-login')->middleware(['portfolio-view', 'facebook_page_view']);
     Route::post('/users/login/cart', 'cart_login')->name('cart.login.submit')->middleware('handle-demo-login');
 
-    Route::post('/import-data', 'import_data');
-
     //Home Page
-    Route::get('/', 'index')->name('home');
+    Route::get('/', 'index')->name('home')->middleware(['portfolio-view', 'facebook_page_view']);
 
     Route::post('/home/section/featured', 'load_featured_section')->name('home.section.featured');
     Route::post('/home/section/todays-deal', 'load_todays_deal_section')->name('home.section.todays_deal');
@@ -149,42 +147,42 @@ Route::controller(HomeController::class)->group(function () {
     Route::post('/category/nav-element-list', 'get_category_items')->name('category.elements');
 
     //Flash Deal Details Page
-    Route::get('/flash-deals', 'all_flash_deals')->name('flash-deals')->middleware('portfolio-view');
-    Route::get('/flash-deal/{slug}', 'flash_deal_details')->name('flash-deal-details');
+    Route::get('/flash-deals', 'all_flash_deals')->name('flash-deals')->middleware(['portfolio-view', 'facebook_page_view']);
+    Route::get('/flash-deal/{slug}', 'flash_deal_details')->name('flash-deal-details')->middleware(['portfolio-view', 'facebook_page_view']);
 
     //Todays Deal Details Page
-    Route::get('/todays-deal', 'todays_deal')->name('todays-deal')->middleware('portfolio-view');
+    Route::get('/todays-deal', 'todays_deal')->name('todays-deal')->middleware(['portfolio-view', 'facebook_page_view']);
 
     //Best Selling Page
-    Route::get('/best-selling', 'best_selling')->name('best-selling')->middleware('portfolio-view');
-    Route::get('/same-seller-products/{slug}','same_sellers_products')->name('same_seller_products')->middleware('portfolio-view');
+    Route::get('/best-selling', 'best_selling')->name('best-selling')->middleware(['portfolio-view', 'facebook_page_view']);
+    Route::get('/same-seller-products/{slug}','same_sellers_products')->name('same_seller_products')->middleware(['portfolio-view', 'facebook_page_view']);
 
     //Featured Products Page
-    Route::get('/featured-products', 'featured_products')->name('featured-products');
+    Route::get('/featured-products', 'featured_products')->name('featured-products')->middleware(['portfolio-view', 'facebook_page_view']);
 
-    Route::get('/product/{slug}', 'product')->name('product')->middleware('portfolio-view');
+    Route::get('/product/{slug}', 'product')->name('product')->middleware(['portfolio-view', 'facebook_page_view']);
     Route::post('/product/variant-price', 'variant_price')->name('products.variant_price');
-    Route::get('/shop/{slug}', 'shop')->name('shop.visit')->middleware('portfolio-view');
+    Route::get('/shop/{slug}', 'shop')->name('shop.visit')->middleware(['portfolio-view', 'facebook_page_view']);
     Route::get('/shop/{slug}/{type}', 'filter_shop')->name('shop.visit.type');
     Route::get('/product-reviews', 'product_reviews')->name('products.reviews');
 
     Route::get('/customer-packages', 'premium_package_index')->name('customer_packages_list_show');
 
-    Route::get('/brands', 'all_brands')->name('brands.all');
-    Route::get('/categories', 'all_categories')->name('categories.all')->middleware('portfolio-view');
-    Route::get('/sellers', 'all_seller')->name('sellers');
-    Route::get('/coupons', 'all_coupons')->name('coupons.all');
-    Route::get('/inhouse', 'inhouse_products')->name('inhouse.all');
+    Route::get('/brands', 'all_brands')->name('brands.all')->middleware(['portfolio-view', 'facebook_page_view']);
+    Route::get('/categories', 'all_categories')->name('categories.all')->middleware(['portfolio-view', 'facebook_page_view']);
+    Route::get('/sellers', 'all_seller')->name('sellers')->middleware(['portfolio-view', 'facebook_page_view']);
+    Route::get('/coupons', 'all_coupons')->name('coupons.all')->middleware(['portfolio-view', 'facebook_page_view']);
+    Route::get('/inhouse', 'inhouse_products')->name('inhouse.all')->middleware(['portfolio-view', 'facebook_page_view']);
 
 
     // Policies
-    Route::get('/seller-policy', 'sellerpolicy')->name('sellerpolicy');
-    Route::get('/return-policy', 'returnpolicy')->name('returnpolicy');
-    Route::get('/support-policy', 'supportpolicy')->name('supportpolicy');
-    Route::get('/terms', 'terms')->name('terms');
-    Route::get('/privacy-policy', 'privacypolicy')->name('privacypolicy');
+    Route::get('/seller-policy', 'sellerpolicy')->name('sellerpolicy')->middleware(['portfolio-view', 'facebook_page_view']);
+    Route::get('/return-policy', 'returnpolicy')->name('returnpolicy')->middleware(['portfolio-view', 'facebook_page_view']);
+    Route::get('/support-policy', 'supportpolicy')->name('supportpolicy')->middleware(['portfolio-view', 'facebook_page_view']);
+    Route::get('/terms', 'terms')->name('terms')->middleware(['portfolio-view', 'facebook_page_view']);
+    Route::get('/privacy-policy', 'privacypolicy')->name('privacypolicy')->middleware(['portfolio-view', 'facebook_page_view']);
 
-    Route::get('/track-your-order', 'trackOrder')->name('orders.track');
+    Route::get('/track-your-order', 'trackOrder')->name('orders.track')->middleware(['portfolio-view', 'facebook_page_view']);
 
     Route::get('/reset-seller-monthly-tokens', 'resetSellerMonthlyTokens');
 

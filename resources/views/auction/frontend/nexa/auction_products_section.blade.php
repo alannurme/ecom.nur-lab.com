@@ -45,7 +45,7 @@
                </div>
             </div>
             @php
-                $products = get_auction_products();
+                $products = get_auction_products()->shuffle();
             @endphp
             <div class="col mt-3 mt-md-0">
                 <!-- Slider -->

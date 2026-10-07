@@ -273,7 +273,7 @@ class AiService
                 'language'=>$language,
                 'is_regenerated'=>!empty($existingData),
                 'tokens'=>$tokenUsage
-            ]);
+            ], 200, [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         }
         catch(\Exception $e){

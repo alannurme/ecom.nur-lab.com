@@ -61,7 +61,18 @@ class ProductController extends Controller
         $category_id = null;
         $back_to=null;
         $selected_type= null;
-        $product_types = ['All Products', 'Physical Products', 'Digital Products', 'Not Approved', 'Drafts'];
+        if ($request->has('brand_id') && $request->brand_id != null) {
+            $brand_id = $request->brand_id;
+            $back_to='brands';
+            $product_types = ["Products of '{$request->brand_name}' Brand"];
+        }
+        else if($request->has('category_id') && $request->category_id != null) {
+            $product_types = ["Products of '{$request->category_name}' Category"];
+            $back_to='categories';
+            $category_id = $request->category_id;
+        }else{
+            $product_types = ['All Products', 'Physical Products', 'Digital Products', 'Not Approved', 'Drafts'];
+        }
         if ($request->has('selected_type')) {
             $selected_type = $request->selected_type;
         }

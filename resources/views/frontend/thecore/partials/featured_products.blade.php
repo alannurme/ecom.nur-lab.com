@@ -1,8 +1,9 @@
  <!-- Featured Products -->
 
 @if (count(get_featured_products()) > 0)
-<section class="mb-2 mb-md-2 mt-2 mt-xl-4 pr-0 pr-lg-2">
-    <div class="container p-3 rounded-75" style="background: {{  get_setting('featured_section_bg_color') != null ?  get_setting('featured_section_bg_color') : '#ffffff' }}">
+<section class="mb-2 mb-md-2 @if(get_setting('enable_hot_categories') == 1 || get_setting('enable_flash_deal') == 1) mt-3 mt-xl-4 @endif pr-0 pr-lg-2">
+    <div class="container p-3 rounded-75 @if(get_setting('enable_hot_categories') != 1 && get_setting('enable_flash_deal') != 1) h-400px h-xl-500px h-xxl-516px @endif " style="background: {{  get_setting('featured_section_bg_color') != null ?  get_setting('featured_section_bg_color') : '#ffffff' }}">
+        
         <!-- Top Section -->
         <div class="d-flex mb-1 align-items-baseline justify-content-between">
             <!-- Title -->
@@ -20,7 +21,7 @@
             data-rows="1" data-items="3" data-xxl-items="3" data-xl-items="3" data-lg-items="3"
             data-md-items="3" data-sm-items="2" data-xs-items="2" data-arrows="false" data-dots="false" data-autoplay="false" data-infinite="true">
         
-            @foreach (get_featured_products() as $key => $product)
+            @foreach (get_featured_products()->shuffle()->values() as $key => $product)
                 <div class="carousel-box mt-1 mb-1">
                     <div class="d-flex align-items-center rounded-2">
                         <!-- Image -->

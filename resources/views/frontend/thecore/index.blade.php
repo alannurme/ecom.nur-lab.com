@@ -14,7 +14,7 @@
     <div class="container">
         <div class="row">
             <!-- Sliders -->
-            <div class="col-lg-5 col-md-7 col-12">
+            <div class="@if (get_setting('enable_featured_products') == 1 || get_setting('enable_flash_deal') == 1 || get_setting('enable_hot_categories') == 1) col-lg-5 @else col-lg-12 @endif col-md-7 col-12">
                 @if (get_setting('home_slider_images', null, $lang) != null)
                 <div class="aiz-carousel dots-inside-bottom thecore-hero-slider" data-autoplay="true" data-infinite="true">
                     @php
@@ -47,8 +47,8 @@
                     @php
                     $flash_deal = get_featured_flash_deal();
                     @endphp
-                    @if ($flash_deal != null)
-                    <div class="col-lg-5 col-12 pl-2 pl-md-3 pl-xl-4">
+                    @if (get_setting('enable_flash_deal') == 1 && $flash_deal != null)
+                    <div class=" @if (get_setting('enable_hot_categories') == 1 && count($hot_categories) > 0) col-lg-5 @else col-lg-12 @endif col-12 pl-2 pl-md-3 pl-xl-4">
                         <section class="mb-2" id="flash_deal">
                             <!-- Mobile view Countdown -->
                             <div class="mobile-countdown-simple d-md-none w-100 mb-2 mt-1"
@@ -86,9 +86,9 @@
                     </div>
                     @endif
 
-                    @if (count($hot_categories) > 0)
+                    @if (get_setting('enable_hot_categories') == 1 && count($hot_categories) > 0)
                     <!-- HOT Category -->
-                    <div class="col-lg-{{ $flash_deal != null ? '7' : '12' }} col-12 pl-0 pl-lg-4 hot-categories">
+                    <div class="col-lg-{{ (get_setting('enable_flash_deal') == 1 && $flash_deal != null) ? '7' : '12' }} col-12 pl-0 pl-lg-4 hot-categories">
                         <div class="mb-2 mb-sm-0 pl-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="24" viewBox="0 0 188 255" class="mb-2">
                                 <path d="M187.899,164.809C185.803,214.868,144.574,254.812,94,254.812,42.085,254.812,0,211.312,0,160.812,0,154.062-.121,140.572,10,117.812c6.057-13.621,9.856-22.178,12-30,1.178-4.299,3.469-11.129,10,0,3.851,6.562,4,16,4,16s14.328-10.995,24-32c14.179-30.793,2.866-49.2-1-62-1.338-4.428-2.178-12.386,7,0,9.352,3.451,34.076,20.758,47,39,18.445,26.035,25,51,25,51s5.906-7.33,8-15c2.365-8.661,2.4-17.239,10-8.999,7.227,8.787,17.96,25.3,24,41C190.969,137.321,187.899,164.809,187.899,164.809Z" fill="#ff4c0d"/>
@@ -99,10 +99,10 @@
                         </div>
                         
                         <div class="aiz-carousel  arrow-inactive-transparent arrow-x-0 carousel-arrow"
-                            data-rows="2" data-items="{{ $flash_deal != null ? '4' : '6' }}" data-xxl-items="{{ $flash_deal != null ? '4' : '6' }}" data-xl-items="{{ $flash_deal != null ? '4' : '6' }}" data-lg-items="{{ $flash_deal != null ? '4' : '6' }}"
-                            data-md-items="{{ $flash_deal != null ? '4' : '6' }}" data-sm-items="5" data-xs-items="4" data-arrows="false" data-dots="false" data-autoplay="true" data-infinite="true">
+                            data-rows="2" data-items="{{ (get_setting('enable_flash_deal') == 1 && $flash_deal != null) ? '4' : '6' }}" data-xxl-items="{{ (get_setting('enable_flash_deal') == 1 && $flash_deal != null) ? '4' : '6' }}" data-xl-items="{{ (get_setting('enable_flash_deal') == 1 && $flash_deal != null) ? '4' : '6' }}" data-lg-items="{{ (get_setting('enable_flash_deal') == 1 && $flash_deal != null) ? '4' : '6' }}"
+                            data-md-items="{{ (get_setting('enable_flash_deal') == 1 && $flash_deal != null) ? '4' : '6' }}" data-sm-items="5" data-xs-items="4" data-arrows="false" data-dots="false" data-autoplay="true" data-infinite="true">
                         
-                            @foreach ($hot_categories as $key => $category)
+                            @foreach ($hot_categories->shuffle()->values() as $key => $category)
                             @php
                                 $category_name = $category->getTranslation('name');
                             @endphp
@@ -124,22 +124,26 @@
                             @endforeach
                         </div>
                     </div>
+                    @endif
+                    @if (get_setting('enable_featured_products') == 1)
                     <div class="col-12 d-none d-lg-block pl-md-0 pl-4 ml-0 ml-xl-2 featured-product">
                         @include('frontend.thecore.partials.featured_products')
                     </div>
                     @endif
                 </div>
             </div>
+            @if (get_setting('enable_featured_products') == 1)
             <div class="col-12 d-block d-lg-none mt-3">
                 @include('frontend.thecore.partials.featured_products')
             </div>
+            @endif
         </div>
     </div>
 </div>
 
 <input type="hidden" id="selected_homepage" value="{{get_setting('homepage_select')}}">
 
-@if (count($featured_categories) > 0)
+@if (get_setting('enable_featured_categories') == 1 && count($featured_categories) > 0)
 <!-- Featured Category -->
 <div class="pt-32px" style="background: #ffffffff;">
     <div class="container">
@@ -160,7 +164,7 @@
                         data-rows="1" data-items="6" data-xxl-items="6" data-xl-items="5" data-lg-items="4"
                         data-md-items="3" data-sm-items="1" data-xs-items="4" data-arrows="true" data-dots="false" data-autoplay="true" data-infinite="true">
                     
-                        @foreach ($featured_categories as $key => $category)
+                        @foreach ($featured_categories->shuffle()->values() as $key => $category)
                         @php
                             $category_name = $category->getTranslation('name');
                         @endphp
@@ -195,9 +199,9 @@
         <div class="d-sm-flex">
             <!-- Best Selling -->
             @php
-             $best_selling_products = get_best_selling_products(20);
+             $best_selling_products = get_best_selling_products(20)->shuffle()->values();
             @endphp
-            @if (count($best_selling_products) > 0)
+            @if (get_setting('enable_best_selling_products') == 1 && count($best_selling_products) > 0)
             <div class="px-0 px-sm-4 w-100 overflow-hidden rounded-75 best-salling-section pt-32px pb-26px mb-4 mb-sm-0" style="background-color: {{ get_setting('best_selling_section_bg_color', '#E7EFEC') }}">
                 <!-- Top Section -->
                 <div class="d-flex mb-2 mb-md-3 align-items-baseline justify-content-between px-3 px-md-2">
@@ -251,10 +255,10 @@
             <!-- Todays Deal -->
             @endif
             @php
-             $todays_deal_products = get_todays_deal_products(20);
+             $todays_deal_products = get_todays_deal_products(20)->shuffle()->values();
             @endphp
-            @if (count($todays_deal_products) > 0)
-            <div class="px-0 mt-sm-0 ml-sm-4 w-100  w-md-50 w-lg-35 overflow-hidden border border-2 border-dark rounded-75 todays-deal pt-32px pb-26px" style="background-color: {{ get_setting('todays_deal_bg_color', '#ffffff') }}">
+            @if (get_setting('enable_todays_deal') == 1 && count($todays_deal_products) > 0)
+            <div class="px-0  mt-sm-0 @if (get_setting('enable_best_selling_products') == 1 && count($best_selling_products) > 0) ml-sm-4 w-md-50 w-lg-35  @else ml-sm-0 w-md-100 w-lg-100 @endif w-100  overflow-hidden border border-2 border-dark rounded-75 todays-deal pt-32px pb-26px" style="background-color: {{ get_setting('todays_deal_bg_color', '#ffffff') }}">
                 <div class="d-flex mx-3 mb-3 align-items-baseline justify-content-between">
                     <!-- Title -->
                     <h3 class="fs-16 fw-600 mb-2 mb-sm-0">
@@ -313,7 +317,7 @@
 
 <!-- Banner section 1 -->
 @php $homeBanner1Images = get_setting('home_banner1_images', null, $lang); @endphp
-@if ($homeBanner1Images != null)
+@if (get_setting('enable_banner_1') == 1 && $homeBanner1Images != null)
 <div class="pt-3 pt-lg-4 pb-2 pb-lg-3 mb-1">
     <div class="container">
         @php
@@ -347,7 +351,7 @@
 
 
 <!-- Auction Product -->
-@if (addon_is_activated('auction'))
+@if (addon_is_activated('auction') && get_setting('enable_auction_products') == 1)
 <div id="auction_products">
 
 </div>
@@ -356,9 +360,9 @@
 
 
 <!-- Classified Product -->
-@if (get_setting('classified_product') == 1)
+@if (get_setting('classified_product') == 1 && get_setting('enable_classified_products_sections') == 1)
     @php
-        $classified_products = get_home_page_classified_products();
+        $classified_products = get_home_page_classified_products()->shuffle()->values();
     @endphp
     @if (count($classified_products) > 0)
         <section class="pt-32px pb-26px my-4" style="background: {{ get_setting('classified_bg_color', '#f5f5f5') }}">
@@ -427,7 +431,7 @@
     @endif
 @endif
 
-@if (addon_is_activated('preorder'))
+@if (addon_is_activated('preorder') && get_setting('enable_newest_preorder_products') == 1)
 <!-- Newest Preorder Products -->
 @include('preorder.frontend.home_page.thecore.newest_preorder')
 @endif
@@ -437,7 +441,7 @@
 @php $homeBanner2Images = get_setting('home_banner2_images', null, $lang); 
 $homeBanner2SmallImages = get_setting('home_banner2_sm_images', null, $lang); 
 @endphp
-@if ($homeBanner2Images != null)
+@if (get_setting('enable_banner_2') == 1 && $homeBanner2Images != null)
 <div class="py-32px mt-2 mb-32px">
     <div class="container">
         @php

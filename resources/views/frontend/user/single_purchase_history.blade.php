@@ -160,24 +160,30 @@
                         <div class="col-md-3 text-right d-md-block align-self-start">
                             <div class="font-weight-bold">
                                 @if ($orderDetail->delivery_status == 'delivered')
-                                    @php
-                                        $hasReview = \App\Models\Review::where('product_id', $orderDetail->product_id)
-                                            ->where('user_id', auth()->id())
-                                            ->exists();
-                                    @endphp
+                                    @if(get_setting('enable_ratings_and_review_section') == 1)
+                                        @php
+                                            $hasReview = \App\Models\Review::where('product_id', $orderDetail->product_id)
+                                                ->where('user_id', auth()->id())
+                                                ->exists();
+                                        @endphp
 
-                                    @if ($hasReview)
-                                        <a href="javascript:void(0);"
-                                            onclick="openReviewOffcanvas('{{ $orderDetail->product_id }}', '{{ $order->id }}')"
-                                            class="btn btn-on-the-way btn-sm w-120px rounded-pill">
-                                            {{ translate('Reviewed') }}
-                                        </a>
+                                        @if ($hasReview)
+                                            <a href="javascript:void(0);"
+                                                onclick="openReviewOffcanvas('{{ $orderDetail->product_id }}', '{{ $order->id }}')"
+                                                class="btn btn-on-the-way btn-sm w-120px rounded-pill">
+                                                {{ translate('Reviewed') }}
+                                            </a>
+                                        @else
+                                            <a href="javascript:void(0);"
+                                                onclick="openReviewOffcanvas('{{ $orderDetail->product_id }}', '{{ $order->id }}')"
+                                                class="btn btn-orange btn-sm w-120px rounded-pill py-1 text-white">
+                                                {{ translate('Review') }}
+                                            </a>
+                                        @endif
                                     @else
-                                        <a href="javascript:void(0);"
-                                            onclick="openReviewOffcanvas('{{ $orderDetail->product_id }}', '{{ $order->id }}')"
-                                            class="btn btn-orange btn-sm w-120px rounded-pill py-1 text-white">
-                                            {{ translate('Review') }}
-                                        </a>
+                                        <span class="btn btn-success btn-sm w-120px rounded-pill py-1 text-white">
+                                            {{ translate('Delivered') }}
+                                        </span>
                                     @endif
                                 @else
                                     <span class="text-danger">{{ translate('Not Delivered') }}</span>

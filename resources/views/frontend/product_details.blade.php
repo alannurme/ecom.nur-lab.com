@@ -100,24 +100,32 @@
                 <div class="container mb-32px">
                     <div class="tab-scroll-wrapper">
                         <ul id="tabLinks" class="m-0 p-0 d-flex position-relative" type="none">
-                            <li class="mr-2rem"><a href="#description"
-                                    class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Description')}}</a>
-                            </li>
-                            @if($detailedProduct->auction_product != 1)
-                            <li class="mr-2rem"><a href="#relatedProduct"
-                                    class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Related Products')}}</a></li>
+                            @if(get_setting('enable_product_description_section') == 1)
+                                <li class="mr-2rem"><a href="#description"
+                                        class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Description')}}</a>
+                                </li>
                             @endif
-                            <li class="mr-2rem"><a href="#reviewsRatings"
-                                    class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Reviews & Ratings')}}</a></li>
-                            @if(get_setting('product_query_activation') == 1)
-                            <li class="mr-2rem"><a href="#product_query"
-                                    class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Product Queries')}} ({{ count($detailedProduct->product_queries) }})</a></li>
+                            @if($detailedProduct->auction_product != 1 && get_setting('enable_product_related_section') == 1)
+                                <li class="mr-2rem"><a href="#relatedProduct"
+                                        class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Related Products')}}</a></li>
+                            @endif
+                            @if(get_setting('enable_ratings_and_review_section') == 1)
+                                <li class="mr-2rem"><a href="#reviewsRatings"
+                                        class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Reviews & Ratings')}}</a></li>
+                            @endif
+                            @if(get_setting('product_query_activation') == 1 && get_setting('enable_product_queries_section') == 1)
+                                <li class="mr-2rem"><a href="#product_query"
+                                        class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Product Queries')}} ({{ count($detailedProduct->product_queries) }})</a></li>
                             @endif
                             @if($detailedProduct->auction_product != 1)
-                            <li class="mr-2rem"><a href="#frequentlyBought"
-                                    class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Frequently Bought')}}</a></li>
-                            <li class="mr-2rem"><a href="#fromThisSeller"
-                                    class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('More from this Seller')}}</a></li>
+                                @if(get_setting('enable_frequently_bought_section') == 1)
+                                    <li class="mr-2rem"><a href="#frequentlyBought"
+                                            class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('Frequently Bought')}}</a></li>
+                                @endif
+                                @if(get_setting('enable_more_from_this_seller_section') == 1)
+                                    <li class="mr-2rem"><a href="#fromThisSeller"
+                                            class="nav-link d-inline-block px-0 pt-20px pb-20px fs-16 fw-700 text-gray hov-text-dark has-transition">{{translate('More from this Seller')}}</a></li>
+                                @endif
                             @endif
                             <span class="tab-underline"></span>
                         </ul>
@@ -127,49 +135,56 @@
 
 
             <div class="container d-flex flex-column">
-                <!--DESCRIPTION SECTION START-->
-                <section id="description">
-                    <div class="py-30px px-30px border  bg-white border-light-gray rounded-2">
-                        <div class="mw-100 overflow-hidden text-left aiz-editor-data">
-                            <?php echo $detailedProduct->getTranslation('description'); ?>
+                @if(get_setting('enable_product_description_section') == 1)
+                    <!--DESCRIPTION SECTION START-->
+                    <section id="description">
+                        <div class="py-30px px-30px border  bg-white border-light-gray rounded-2">
+                            <div class="mw-100 overflow-hidden text-left aiz-editor-data">
+                                <?php echo $detailedProduct->getTranslation('description'); ?>
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                @endif
                 <!--DESCRIPTION SECTION END-->
 
-                @if($detailedProduct->auction_product != 1)
-                <!--RELATED PRODUCTS SECTION START-->
-                <section id="relatedProduct">
-                    @include('frontend.product_details.related_products')
-                </section>
-                <!--RELATED PRODUCTS SECTION END-->
+                @if($detailedProduct->auction_product != 1 && get_setting('enable_product_related_section') == 1)
+                    <!--RELATED PRODUCTS SECTION START-->
+                    <section id="relatedProduct">
+                        @include('frontend.product_details.related_products')
+                    </section>
+                    <!--RELATED PRODUCTS SECTION END-->
                 @endif
 
-                <!--REVIEWS & RATINGS SECTION START-->
-                @include('frontend.product_details.review_section')
-               <!--REVIEWS & RATINGS SECTION END-->
+                @if(get_setting('enable_ratings_and_review_section') == 1)
+                    <!--REVIEWS & RATINGS SECTION START-->
+                    @include('frontend.product_details.review_section')
+                    <!--REVIEWS & RATINGS SECTION END-->
+                @endif
 
-                @if(get_setting('product_query_activation') == 1)
-                <!--PRODUCT QUERIES START-->
-                <section id="product_query">
-                   @include('frontend.product_details.product_queries')
-                </section>
-                <!--PRODUCT QUERIES END-->
+                @if(get_setting('product_query_activation') == 1 && get_setting('enable_product_queries_section') == 1)
+                    <!--PRODUCT QUERIES START-->
+                    <section id="product_query">
+                    @include('frontend.product_details.product_queries')
+                    </section>
+                    <!--PRODUCT QUERIES END-->
                 @endif
 
 
                 @if($detailedProduct->auction_product != 1)
-                <!--FREQUENT BOUGTH TOGETHER START-->
-                <section id="frequentlyBought">
-                    @include('frontend.product_details.frequently_bought_together')
-                </section>
-                <!--FREQUENT BOUGTH TOGETHER END-->
-
-                <!--FROM THIS SELLER START-->
-                <section id="fromThisSeller">
-                    @include('frontend.product_details.from_this_seller_products')
-                </section>
-                <!--FROM THIS SELLER END-->
+                    @if(get_setting('enable_frequently_bought_section') == 1)
+                        <!--FREQUENT BOUGTH TOGETHER START-->
+                        <section id="frequentlyBought">
+                            @include('frontend.product_details.frequently_bought_together')
+                        </section>
+                        <!--FREQUENT BOUGTH TOGETHER END-->
+                    @endif
+                    @if(get_setting('enable_more_from_this_seller_section') == 1)
+                        <!--FROM THIS SELLER START-->
+                        <section id="fromThisSeller">
+                            @include('frontend.product_details.from_this_seller_products')
+                        </section>
+                        <!--FROM THIS SELLER END-->
+                    @endif
                 @endif
             </div>
         </div>

@@ -8,6 +8,7 @@ use App\Models\FlashDeal;
 use App\Models\FlashDealTranslation;
 use App\Models\FlashDealProduct;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Support\Str;
 
 class FlashDealController extends Controller
@@ -47,7 +48,9 @@ class FlashDealController extends Controller
             ->with('childrenCategories')
             ->get();
 
-        return view('backend.marketing.flash_deals.create', compact('products', 'categories'));
+        $sellers = User::where('user_type', 'seller')->get();
+
+        return view('backend.marketing.flash_deals.create', compact('products', 'categories', 'sellers'));
     }
 
     public function store(Request $request)
@@ -113,8 +116,10 @@ class FlashDealController extends Controller
         $categories = Category::where('parent_id', 0)
             ->with('childrenCategories')
             ->get();
+        
+        $sellers = User::where('user_type', 'seller')->get();
 
-        return view('backend.marketing.flash_deals.edit', compact('flash_deal', 'lang', 'products', 'categories'));
+        return view('backend.marketing.flash_deals.edit', compact('flash_deal', 'lang', 'products', 'categories', 'sellers'));
     }
 
     public function update(Request $request, $id)
@@ -289,7 +294,7 @@ class FlashDealController extends Controller
 
     public function flash_deal_product_search(Request $request)
     {
-        if (!$request->category && !$request->search_key) {
+        if (!$request->category && !$request->seller && !$request->search_key) {
             return view('backend.marketing.flash_deals.flash_deal_product_list', ['products' => collect()]);
         }
 
@@ -319,6 +324,13 @@ class FlashDealController extends Controller
                     $q2->where('category_id', $request->category);
                 });
             })
+
+            // Seller filter
+            ->when($request->seller, function ($q) use ($request) {
+                $q->where('added_by', 'seller')
+                ->where('user_id', $request->seller);
+            })
+
             ->when($request->search_key, function ($q) use ($request) {
                 $q->where(function ($q2) use ($request) {
                     $q2->where('name', 'like', '%' . $request->search_key . '%')

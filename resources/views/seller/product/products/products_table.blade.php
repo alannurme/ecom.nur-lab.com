@@ -61,7 +61,7 @@
                         <div class="col">
                             <span class="text-truncate-2 fs-12 fs-md-14 fw-400 mr-2">{{ $product->getTranslation('name') }}</span>
                             @if(isset($product->brand->name))
-                                <a href="{{ route('products.all', ['brand_id' => $product->brand->id, 'brand_name' => $product->brand->name]) }}" class="fs-12 fs-md-14 fw-700 d-inline-block mt-1">
+                                <a href="{{ route('seller.products', ['brand_id' => $product->brand->id, 'brand_name' => $product->brand->name]) }}" class="fs-12 fs-md-14 fw-700 d-inline-block mt-1">
                                     {{ translate($product->brand->name) }}
                                 </a>
                             @else
@@ -73,7 +73,7 @@
                 </td>
                 <td class="hide-xs" data-label="Owner Category">
                      @php $shop = optional(optional($product->user)->shop); @endphp
-                    <a href="{{ $shop->id ? route('sellers.profile', encrypt($shop->id)) : '#' }}" class="fs-12 fs-md-14 fw-700 d-block">
+                    <a class="fs-12 fs-md-14 fw-700 d-block">
                          {{ $shop->name ?? translate('Inhouse') }}
                     </a>
                     <span class="fs-12 fw-200 text-secondary d-block pt-1">{{ translate('Main Category') }}</span>

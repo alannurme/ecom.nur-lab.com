@@ -75,6 +75,18 @@ class WebsiteController extends Controller
         $system_language = Language::where('code', app()->getLocale())->first();
         return view('backend.website_settings.select_header', compact('element', 'element_types', 'user', 'system_language'));
     }
+    public function select_all_category_layout(Request $request)
+    {
+        $element = Element::find(4);
+        $element_types = ElementType::where('element_id', $element->id)->get();
+        $system_language = Language::where('code', app()->getLocale())->first();
+        return view('backend.website_settings.select_all_category_layout', compact('element', 'element_types', 'system_language'));
+    }
+
+    public function product_details_section(Request $request)
+    {
+        return view('backend.website_settings.product_details_section');
+    }
 
     public function select_footer(Request $request)
     {

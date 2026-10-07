@@ -33,6 +33,8 @@ Route::group(['prefix' => 'v2/seller', 'middleware' => ['app_language']], functi
             Route::post('shop-update', 'update');
             Route::get('shop-verify-form', 'getVerifyForm');
             Route::post('shop-verify-info-store', 'store_verify_info');
+            Route::get('fulfilment_rate', 'fulfilment_rate');
+            Route::get('get-system-color', 'getColor');
         });
 
         //Refund Section
@@ -65,7 +67,18 @@ Route::group(['prefix' => 'v2/seller', 'middleware' => ['app_language']], functi
             Route::get('products/remaining-uploads', 'remainingUploads');
 
             Route::get('products/reviews', 'product_reviews');
+            Route::get('products/review-details/{id}', 'product_review_details');
             Route::post('product/search', 'productSearch');
+            Route::get('get-units', 'getUnit');
+            Route::get('refund-notes',  'getRefundNotes');
+            Route::get('warranty-notes', 'getWarrantyNotes');
+            Route::get('delivery-notes', 'getDeliveryNotes');
+            Route::get('shipping-notes', 'getShippingNotes');
+            Route::get('size-charts', 'getSizeCharts');
+            Route::get('view-chart/{id}', 'viewSizeCharts');
+            Route::post('assign-size-chart', 'assignSizeChart');
+            Route::get('view-assigned-size-chart/{id}', 'viewAssignSizeChart');
+            Route::post('product-search-for-size-chart', 'product_search_for_size_chart');
 
         });
 
@@ -141,6 +154,12 @@ Route::group(['prefix' => 'v2/seller', 'middleware' => ['app_language']], functi
             Route::get('file/delete/{id}', 'destroy');
         });
 
+        //Category wise discount
+        Route::controller(CategoryController::class)->group(function () {
+            Route::get('category-discounts', 'index');
+            Route::post('category-discount/update', 'update');
+        });
+
         // ...
 
         // POS
@@ -158,6 +177,23 @@ Route::group(['prefix' => 'v2/seller', 'middleware' => ['app_language']], functi
             Route::get('pos/configuration', 'posConfiguration');
             Route::post('pos/configuration/update', 'posConfigurationUpdate');
             
+        });
+
+        Route::controller(SellerHubController::class)->group(function () {
+            Route::get('all', 'all');
+            Route::get('notices', 'notices');
+            Route::get('requests-all', 'all_requests');
+            Route::post('requests-create', 'storeRequest');
+            Route::get('promotions', 'promotions');
+            Route::get('messages', 'messages');
+            Route::post('messages', 'sendMessage');
+            Route::get('promotional-product-list', 'promotional_product_list');
+            Route::post('add-promotional-product', 'update_promotional_product');
+            Route::post('remove-promotional-product', 'update_promotional_product');
+            Route::post('mark-as-todays-deal', 'markAsTodaysDeal');
+            Route::post('mark-as-featured', 'markAsFeatured');
+            Route::post('mark-as-flash-Sale', 'markAsFlashSale');
+            Route::get('get-active-flash-sales', 'getActiveFlashSalesForSeller');
         });
 
     });

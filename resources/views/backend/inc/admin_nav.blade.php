@@ -154,7 +154,7 @@
                         <a href="javascript:void(0)" role="button" id="view_all_notification"
                             aria-label="{{ translate('Open Notifications') }}" aria-expanded="false">
                             <span
-                                class="btn btn-topbar has-transition w-35px h-35px btn-circle p-0 border border-1 border-gray-400 d-flex align-items-center justify-content-center hov-bg-soft-light"
+                                class="btn btn-topbar has-transition w-35px h-35px btn-circle p-0 border border-1 border-light d-flex align-items-center justify-content-center btn-light"
                                 data-toggle="tooltip" data-title="{{ translate('Notification') }}">
                                 <span class="d-flex align-items-center position-relative">
                                     <div class="px-2 hov-svg-dark">
@@ -176,6 +176,31 @@
                     </div>
                 </div>
             @endcan
+            <div class="aiz-topbar-item mr-3">
+                <div class="d-flex align-items-center">
+                    <a href="javascript:void(0)" role="button" id="view_all_chat" aria-label="{{ translate('Open Seller Hub') }}"
+                        aria-expanded="false">
+                        <span
+                            class="btn btn-topbar has-transition w-35px h-35px btn-circle p-0 border border-1 border-dark bg-dark d-flex align-items-center justify-content-center"
+                            data-toggle="tooltip" data-title="{{ translate('Seller Hub') }}">
+                            <span class="d-flex align-items-center position-relative">
+                                <div class="px-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="14.4" viewBox="0 0 16 14.4">
+                                        <path id="f2cd9334b7a17bee252e9299db3517fa"
+                                            d="M9.8,6A5.8,5.8,0,0,0,4,11.8c0,7.2,9.6,8.6,9.6,8.6V17.6h.6A5.8,5.8,0,0,0,14.2,6ZM12,13a1,1,0,1,0-1-1A1,1,0,0,0,12,13Zm4.2-1a1,1,0,1,1-1-1A1,1,0,0,1,16.2,12ZM8.8,13a1,1,0,1,0-1-1A1,1,0,0,0,8.8,13Z"
+                                            transform="translate(-4 -6)" fill="#fff" fill-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                @if ($hasAnyUnseen ?? false)
+                                    <span
+                                        class="badge badge-sm badge-dot badge-circle badge-danger position-absolute absolute-top-right"
+                                        style="top: -5px!important; right: -1px!important;"></span>
+                                @endif
+                            </span>
+                        </span>
+                    </a>
+                </div>
+            </div>
             <div class="aiz-topbar-item">
                 <div class="align-items-stretch d-flex dropdown">
                     <a class="dropdown-toggle no-arrow text-dark" data-toggle="dropdown" href="javascript:void(0);"
@@ -244,7 +269,7 @@
                                         alt="Product Management" />
                                     <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('Product Management') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate('Create, setup and manage all your products') }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate('Create, setup and manage all your products') }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -256,7 +281,7 @@
                                     <img src="{{ static_asset('assets/img/sales.svg') }}" class="flex-shrink-0" alt="Sales" />
                                      <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('Sales') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate('View and manage all types of orders') }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate('View and manage all types of orders') }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -268,7 +293,7 @@
                                     <img src="{{ static_asset('assets/img/pos.svg') }}" class="flex-shrink-0" alt="POS" />
                                      <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('POS') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate('View and manage all types of orders') }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate('View and manage all types of orders') }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -281,7 +306,7 @@
                                         alt="Promotion & Offers" />
                                      <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('Promotion & Offers') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate('Create and manage all promotions, offers and discounted products') }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate('Create and manage all promotions, offers and discounted products') }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -293,7 +318,7 @@
                                     <img src="{{ static_asset('assets/img/marketing-home.svg') }}" class="flex-shrink-0" alt="Marketing Home" />
                                      <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('Marketing Home') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate('Manage marketing needs for your site') }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate('Manage marketing needs for your site') }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -306,7 +331,7 @@
                                         alt="Marketing Analytics" />
                                      <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('Marketing Analytics') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate('Connect track and optimize your store marketing') }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate('Connect track and optimize your store marketing') }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -318,7 +343,7 @@
                                     <img src="{{ static_asset('assets/img/design-studio-home.svg') }}" class="flex-shrink-0" alt="Design Studio" />
                                      <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('Design Studio') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate("Manage your site's look, layout and content") }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate("Manage your site's look, layout and content") }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -330,7 +355,7 @@
                                     <img src="{{ static_asset('assets/img/qcm-reports.svg') }}" class="flex-shrink-0" alt="Reports" />
                                     <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('Reports') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate("See your sells earning and performance") }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate("See your sells earning and performance") }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -342,7 +367,7 @@
                                     <img src="{{ static_asset('assets/img/qcm-ai-studio.svg') }}" class="flex-shrink-0" alt="AI Studio" />
                                     <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('AI Studio') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate("Generate and edit with AI") }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate("Generate and edit with AI") }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -354,7 +379,7 @@
                                     <img src="{{ static_asset('assets/img/qcm-business-settings.svg') }}" class="flex-shrink-0" alt="Business Settings" />
                                      <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('Business Settings') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate('Manage core business operations orders, invoicing and delivery') }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate('Manage core business operations orders, invoicing and delivery') }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -366,7 +391,7 @@
                                     <img src="{{ static_asset('assets/img/qcm-feature-activation.svg') }}" class="flex-shrink-0" alt="Feature Activation" />
                                     <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('Feature Activation') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate("Customize how the business operates") }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate("Customize how the business operates") }}</span>
                                     </div>
                                 </a>
                             </div>
@@ -378,7 +403,7 @@
                                     <img src="{{ static_asset('assets/img/qcm-addon-manager.svg') }}" class="flex-shrink-0" alt="Addon Manager" />
                                     <div class="ml-3 flex-grow-1">
                                         <span class="fs-13 fw-500 text-reset d-block mb-1">{{ translate('Addon Manager') }}</span>
-                                        <span class="fs-12 fw-400 text-secondary d-block">{{ translate("Manage & Updates your add-ons") }}</span>
+                                        <span class="fs-12 fw-400 text-secondary d-block text-truncate-breakpoint">{{ translate("Manage & Updates your add-ons") }}</span>
                                     </div>
                                 </a>
                             </div>

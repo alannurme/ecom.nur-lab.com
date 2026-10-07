@@ -156,7 +156,7 @@ class SearchController extends Controller
 
         if ($brand_id != null) {
             $conditions = array_merge($conditions, ['brand_id' => $brand_id]);
-            $brand = Brand::where('slug', $request->brand)->first();
+            $brand = Brand::find($brand_id);
         } elseif ($request->brand != null) {
             $brand = Brand::where('slug', $request->brand)->first();
             $brand_id = ($brand != null) ? $brand->id : null;
@@ -497,9 +497,9 @@ class SearchController extends Controller
         $products = Product::where($conditions);
 
         if (count($category_list) > 0) {
-            $products_ids = ProductCategory::whereIn('category_id', $category_list)->pluck('product_id')->toArray();;
+            $products_ids = ProductCategory::whereIn('category_id', $category_list)->pluck('product_id')->toArray();
 
-            $products = Product::whereIn('id', $products_ids);
+            $products = $products->whereIn('id', $products_ids);
         }
 
 

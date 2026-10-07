@@ -1,5 +1,5 @@
 @php
-    $best_selling_products = get_best_selling_products(20);
+    $best_selling_products = get_best_selling_products(20)->shuffle()->values();
     $best_selling_section_bg = get_setting('best_selling_section_bg_color');
 @endphp
 @if (get_setting('best_selling') == 1 && count($best_selling_products) > 0)

@@ -93,7 +93,7 @@
 
                                             <!-- Slider -->
                                             @php
-                                                $flash_deal_products = get_flash_deal_products($flash_deal->id);
+                                                $flash_deal_products = get_flash_deal_products($flash_deal->id)->shuffle();
                                             @endphp
                                             <div class="aiz-carousel arrow-x-0 arrow-inactive-none mt-4 fd-product-slider overflow-hidden"
                                                 
@@ -137,7 +137,7 @@
                         @endif
 
                         @php
-                            $todays_deal_products = filter_products(App\Models\Product::where('todays_deal', '1'))->orderBy('id', 'desc')->get();
+                            $todays_deal_products = filter_products(App\Models\Product::where('todays_deal', '1'))->inRandomOrder()->get();
                             $todays_deal_title_sub_text = get_setting('todays_deal_title_sub_text', null);
                         @endphp
                         @if (get_setting('enable_todays_deal') == 1 && $todays_deal_products != null)
@@ -214,7 +214,7 @@
                                 data-full-hd-items="10" data-xxl-items="8" data-xl-items="5.5" data-lg-items="4.2"
                                 data-md-items="3.2" data-sm-items="3" data-xs-items="3" data-arrows='false'
                                 data-autoplay="true" data-infinite="true">
-                                @foreach ($featured_categories as $key => $category)
+                                @foreach ($featured_categories->shuffle() as $key => $category)
                                     @php
                                         $category_name = $category->getTranslation('name');
                                     @endphp
@@ -300,7 +300,7 @@
                                         data-items="8" data-full-hd-items="8" data-xxl-items="6" data-xl-items="5" data-lg-items="4" 
                                     @endif
                                     data-md-items="4" data-sm-items="3" data-xs-items="2" data-arrows='false' data-autoplay="true" data-infinite="true">
-                                    @foreach (get_featured_products() as $key => $product)
+                                    @foreach (get_featured_products()->shuffle() as $key => $product)
                                         <div class="">
                                             <a href="{{ route('product', $product->slug) }}" title="{{ $product->getTranslation('name') }}"
                                                 class="d-block overflow-hidden text-center hov-scale-img rounded-2 img-aspect-ratio-300px">
@@ -327,7 +327,7 @@
 
                         <!-- Best Selling Start -->
                         @php
-                            $best_selling_products = get_best_selling_products(20);
+                            $best_selling_products = get_best_selling_products(20)->shuffle();
                         @endphp
                         @if (get_setting('best_selling') == 1 && count($best_selling_products) > 0 && get_setting('enable_best_selling_products') == 1)
                             <div class="@if (get_setting('enable_featured_products') == 1 && get_setting('enable_best_selling_products') == 1) col-lg-6 @else col-lg-12 @endif py-30px best-selling-products-wrapper">
@@ -388,6 +388,17 @@
         @php
             $mainCategories = json_decode(get_setting('main_categories'), true) ?? [];
             $childCategories = json_decode(get_setting('child_categories'), true) ?? [];
+
+             // Preserve the relationship between main and child categories
+            $combinedCategories = [];
+            foreach ($mainCategories as $key => $mainCategoryId) {
+                $combinedCategories[] = [
+                    'key' => $key,
+                    'mainCategoryId' => $mainCategoryId,
+                ];
+            }
+
+            $combinedCategories = collect($combinedCategories)->shuffle();
         @endphp
 
         @if (get_setting('enable_categories') == 1 && count($mainCategories) > 0)
@@ -397,9 +408,12 @@
 
                     <div class="row gutters-0 mf-w-wf-bc-grid">
 
-                        @foreach ($mainCategories as $key => $mainCategoryId)
+                        @foreach ($combinedCategories as $item)
 
                             @php
+                                $key = $item['key'];
+                                $mainCategoryId = $item['mainCategoryId'];
+
                                 $mainCategory = \App\Models\Category::find($mainCategoryId);
 
                                 if (!$mainCategory) {
@@ -408,7 +422,7 @@
 
                                 $selectedChildIds = $childCategories[$key] ?? [];
 
-                                $selectedChildren = \App\Models\Category::whereIn('id', $selectedChildIds)->get();
+                                $selectedChildren = \App\Models\Category::whereIn('id', $selectedChildIds)->inRandomOrder()->get();
                             @endphp
 
                             <div class="col-12 col-md-6 col-lg-6 col-xl-4 col-xxl-3">
@@ -501,7 +515,7 @@
         @if (get_setting('enable_classified_products') == 1)
             @if (get_setting('classified_product') == 1)
                 @php
-                    $classified_products = get_home_page_classified_products();
+                    $classified_products = get_home_page_classified_products()->shuffle();
                     $classified_title_sub_text = get_setting('classified_title_sub_text', null);
                 @endphp
                 @if (count($classified_products) > 0)
@@ -630,7 +644,8 @@
                         })
                         ->latest()
                         ->limit(12)
-                        ->get();
+                        ->get()
+                        ->shuffle();
                     $preorder_title_sub_text = get_setting('preorder_title_sub_text', null);    
                 @endphp
                 @if (count($newest_preorder_products) > 0)
@@ -720,7 +735,7 @@
                         <!-- Shop by Sellers Start -->
                         @if (get_setting('vendor_system_activation') == 1 && get_setting('enable_shop_by_seller') == 1 )
                             @php
-                                $best_selers = get_best_sellers(6);
+                                $best_selers = get_best_sellers(6)->shuffle();
                                 $shop_by_seller_title_sub_text = get_setting('shop_by_seller_title_sub_text', null);
                             @endphp
                             @if (count($best_selers) > 0)
@@ -832,7 +847,7 @@
                                 {{-- <div class="row gutters-16 mt-4 shop-by-brand"> --}}
                                     @php
                                         $top_brands = json_decode(get_setting('top_brands'));
-                                        $brands = get_brands($top_brands);
+                                        $brands = get_brands($top_brands)->shuffle();
                                         $shop_by_brand_title_sub_text = get_setting('shop_by_brand_title_sub_text', null);
                                     @endphp
                                     {{-- @foreach ($brands as $brand)

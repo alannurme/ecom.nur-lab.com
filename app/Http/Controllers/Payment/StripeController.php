@@ -105,9 +105,7 @@ class StripeController extends Controller
         curl_close($stream);
 
         if ($rn == "bad" && env('DEMO_MODE') != 'On') {
-            $user = User::where('user_type', 'admin')->first();
-            auth()->login($user);
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('home');
         }
     }
 

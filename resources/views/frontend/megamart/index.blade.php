@@ -39,7 +39,7 @@
     @php $lang = get_system_language()->code;  @endphp
 
     <!-- Featured Categories -->
-    @if (count($featured_categories) > 0)
+    @if (get_setting('enable_featured_categories') == 1 && count($featured_categories) > 0)
         <section class="mb-3 mb-md-4 pt-3 pt-md-2rem">
             <div class="container">
                 <!-- Categories -->
@@ -47,7 +47,7 @@
                     <div class="aiz-carousel sm-gutters-17" data-items="8" data-xxl-items="8" data-xl-items="8"
                         data-lg-items="6" data-md-items="5" data-sm-items="3" data-xs-items="2" data-arrows="true"
                         data-dots="false" data-autoplay="false" data-infinite="true" data-center="false">
-                        @foreach ($featured_categories as $key => $category)
+                        @foreach ($featured_categories->shuffle()->values() as $key => $category)
                             @php
                                 $category_name = $category->getTranslation('name');
                             @endphp
@@ -114,7 +114,7 @@
         $flash_deal_banner_menu_text = ((get_setting('flash_deal_banner_menu_text') == 'dark') ||  (get_setting('flash_deal_banner_menu_text') == null)) ? 'text-dark' : 'text-white';
 
     @endphp
-    @if ($flash_deal != null)
+    @if (get_setting('enable_flash_deal') == 1 && $flash_deal != null)
         <section class="mb-2 mb-md-3 mt-2 mt-md-3" style="background: {{ ($flash_deal_bg_full_width && $flash_deal_bg != null) ? $flash_deal_bg : '' }};" id="flash_deal">
             <div class="container">
                 <div class="@if(!$flash_deal_bg_full_width) px-3 px-md-2rem @endif pb-3 pb-md-4" style="background: {{ $flash_deal_bg != null ? $flash_deal_bg : '#faf9f7' }};">
@@ -160,7 +160,7 @@
                         <div class="col-xxl-10 col-md-9 col-sm-8 col-7">
                             <!-- Flash Deals Products -->
                             @php
-                                $flash_deal_products = get_flash_deal_products($flash_deal->id);
+                                $flash_deal_products = get_flash_deal_products($flash_deal->id)->shuffle()->values();
                             @endphp
                             <div class="aiz-carousel arrow-inactive-none arrow-x-0"
                                 data-items="6" data-xxl-items="6" data-xl-items="5" data-lg-items="3.7" data-md-items="3"
@@ -217,18 +217,23 @@
     @php
         $todays_deal_section_bg = get_setting('todays_deal_section_bg_color');
     @endphp
+    @if (get_setting('enable_todays_deal') == 1)
     <div id="todays_deal" @if(get_setting('todays_deal_section_bg') == 1) style="background: {{ $todays_deal_section_bg }};" @endif>
 
     </div>
+    @endif
 
+    @if (get_setting('enable_featured_products') == 1)
     <!-- Featured Products -->
     <div id="section_featured">
 
     </div>
+    @endif
 
 
     @if (addon_is_activated('preorder'))
 
+    @if (get_setting('enable_preorder_banner_1') == 1)
     <!-- Banner section 2 -->
     @php $homepreorder_banner_1Images = get_setting('home_preorder_banner_1_images', null, $lang);   @endphp
     @if ($homepreorder_banner_1Images != null)
@@ -259,18 +264,21 @@
             </div>
         </div>
     @endif
+    @endif
 
 
+    @if (get_setting('enable_preorder_featured_products') == 1)
     <!-- Featured Preorder Products -->
     <div id="section_featured_preorder_products">
 
     </div>
     @endif
+    @endif
  
 
     <!-- Banner section 2 -->
     @php $homeBanner2Images = get_setting('home_banner2_images', null, $lang);   @endphp
-    @if ($homeBanner2Images != null)
+    @if (get_setting('enable_banner_2') == 1 && $homeBanner2Images != null)
         <div class="mb-2 mb-md-3 mt-2 mt-md-3">
             <div class="container">
                 @php
@@ -302,19 +310,37 @@
     <!-- Best Selling, New Products, Banner section 2 -->
     @php
         $homeBanner3Images = get_setting('home_banner3_images', null, $lang);
-        $col_val = 6;
-        if ($homeBanner3Images != null){
-            $col_val = 4;
+
+        $enabledSections = 0;
+
+        if (get_setting('enable_best_selling_products') == 1) {
+            $enabledSections++;
         }
+
+        if (get_setting('enable_new_products') == 1) {
+            $enabledSections++;
+        }
+
+        if (get_setting('enable_banner_3') == 1 && $homeBanner3Images != null) {
+            $enabledSections++;
+        }
+
+        $col_val = $enabledSections > 0 ? intval(12 / $enabledSections) : 12;
     @endphp
+    @if (get_setting('enable_best_selling_products') == 1 || get_setting('enable_new_products') == 1 || get_setting('enable_banner_3') == 1)
     <div class="container">
         <div class="row gutters-16">
+
+            @if (get_setting('enable_best_selling_products') == 1)
             <div class="col-xl-{{ $col_val }} mb-2 mb-md-3 mt-2 mt-md-3">
                 <!-- Best Selling  -->
                 <div id="section_best_selling">
 
                 </div>
             </div>
+            @endif
+
+            @if (get_setting('enable_new_products') == 1)
 
             <div class="col-xl-{{ $col_val }} mb-2 mb-md-3 mt-2 mt-md-3">
                 <!-- New Products -->
@@ -323,11 +349,12 @@
                 </div>
             </div>
 
-
-
+            @endif
+            
+            @if (get_setting('enable_banner_3') == 1)
             <!-- Banner section 3 -->
             @if ($homeBanner3Images != null)
-                <div class="col-xl-4 mb-2 mb-md-3 mt-2 mt-md-3 d-none d-xl-block">
+                <div class="col-xl-{{ $col_val }} mb-2 mb-md-3 mt-2 mt-md-3 d-none d-xl-block">
                     @php
                         $banner_3_imags = json_decode($homeBanner3Images);
                         $home_banner3_links = get_setting('home_banner3_links', null, $lang);
@@ -348,13 +375,16 @@
                     </div>
                 </div>
             @endif
+            @endif
+
         </div>
     </div>
+    @endif
 
     <!-- Banner section 4, Top Sellers -->
-    @if (get_setting('vendor_system_activation') == 1)
+    @if (get_setting('vendor_system_activation') == 1 && (get_setting('enable_top_sellers_section') == 1 || get_setting('enable_banner_4') == 1))
         @php
-            $best_selers = get_best_sellers(10);
+            $best_selers = get_best_sellers(10)->shuffle()->values();
             $homeBanner4Images = get_setting('home_banner4_images', null, $lang);
             $data_rows = 1;
             $xxl_items = 5;
@@ -374,8 +404,8 @@
             <div class="container">
                 <div class="row">
                     <!-- Banner section 4 -->
-                    @if ($homeBanner4Images != null)
-                        <div class="col-xl-8 col-lg-6 mb-2 mb-md-3 mt-2 mt-md-3 d-none d-lg-block">
+                    @if (get_setting('enable_banner_4') == 1 && $homeBanner4Images != null)
+                        <div class="@if(get_setting('enable_top_sellers_section') == 1) col-xl-8 col-lg-6 @else col-xl-12 col-lg-12 @endif mb-2 mb-md-3 mt-2 mt-md-3 d-none d-lg-block">
                             @php
                                 $banner_4_imags = json_decode($homeBanner4Images);
                                 $home_banner4_links = get_setting('home_banner4_links', null, $lang);
@@ -397,6 +427,7 @@
                         </div>
                     @endif
 
+                    @if (get_setting('enable_top_sellers_section') == 1)
                     <!-- Top Sellers -->
                     <div class="col mb-2 mb-md-3 mt-2 mt-md-3">
                         <div class="h-100" id="section_top_sellers">
@@ -453,7 +484,7 @@
                             </div>
                         </div>
                     </div>
-
+                    @endif
                 </div>
             </div>
         </section>
@@ -461,37 +492,60 @@
     @endif
 
     <!-- Top Brands, Banner section 5, Banner section 6 -->
-    @if (get_setting('top_brands') != null)
+    @if (get_setting('top_brands') != null && (get_setting('enable_top_brands_section') == 1 || get_setting('enable_banner_5') == 1  || get_setting('enable_banner_6') == 1))
         @php
             $top_brands = json_decode(get_setting('top_brands'));
-            $brands = get_brands($top_brands);
+            $brands = get_brands($top_brands)->shuffle()->values();
             $homeBanner5Images = get_setting('home_banner5_images', null, $lang);
             $homeBanner6Images = get_setting('home_banner6_images', null, $lang);
-            $col_val = 'col-xl-4';
-            $data_rows = 3;
-            $xxl_items = 2;
-            $xl_items = 2;
+            $enabledSections = 0;
+
+            $topBrandsEnabled = get_setting('enable_top_brands_section') == 1;
+            $banner5Enabled = get_setting('enable_banner_5') == 1 && $homeBanner5Images != null;
+            $banner6Enabled = get_setting('enable_banner_6') == 1 && $homeBanner6Images != null;
+
+            if ($topBrandsEnabled) {
+                $enabledSections++;
+            }
+
+            if ($banner5Enabled) {
+                $enabledSections++;
+            }
+
+            if ($banner6Enabled) {
+                $enabledSections++;
+            }
+
+            // Bootstrap column
+            $col_val = $enabledSections > 0 ? intval(12 / $enabledSections) : 12;
+
+            // Top Brands carousel settings
+            if ($enabledSections == 1) {
+                $data_rows = 2;
+                $xxl_items = 6;
+                $xl_items = 5;
+            } elseif ($enabledSections == 2) {
+                $data_rows = 3;
+                $xxl_items = 2;
+                $xl_items = 3;
+            } else {
+                $data_rows = 3;
+                $xxl_items = 2;
+                $xl_items = 2;
+            }
+
             $lg_items = 4;
             $md_items = 3;
             $sm_items = 2;
             $xs_items = 1.4;
-            if ($homeBanner5Images == null && $homeBanner6Images == null){
-                $data_rows = 2;
-                $xxl_items = 6;
-                $xl_items = 5;
-            } elseif ($homeBanner5Images == null || $homeBanner6Images == null) {
-                $col_val = 'col-xxl-8 col-xl-6';
-                $data_rows = 3;
-                $xxl_items = 2;
-                $xl_items = 3;
-            }
         @endphp
         <section class="mb-2 mb-md-3 mt-2 mt-md-3">
             <div class="container">
                 <div class="row">
 
+                    @if ( get_setting('enable_top_brands_section') == 1)
                     <!-- Top Brands -->
-                    <div class="col py-3 py-lg-0">
+                    <div class="col-xl-{{ $col_val }} py-3 py-lg-0">
                         <div class="h-100" id="section_top_brands">
                             <div class="border px-3 pt-3">
                                 <!-- Top Section -->
@@ -527,14 +581,16 @@
                             </div>
                         </div>
                     </div>
+                    @endif
+                    
 
                     <!-- Banner section 5 -->
-                    @if ($homeBanner5Images != null)
+                    @if ($homeBanner5Images != null && get_setting('enable_banner_5') == 1)
                         @php
                             $banner_5_imags = json_decode($homeBanner5Images);
                             $home_banner5_links = get_setting('home_banner5_links', null, $lang);
                         @endphp
-                        <div class="{{ $col_val }} d-none d-xl-block">
+                        <div class="col-xl-{{ $col_val }} d-none d-xl-block">
                             <div class="aiz-carousel overflow-hidden arrow-inactive-none arrow-dark arrow-x-0"
                                 data-items="1" data-arrows="true" data-dots="false" data-autoplay="true">
                                 @foreach ($banner_5_imags as $key => $value)
@@ -553,12 +609,12 @@
                     @endif
 
                     <!-- Banner section 6 -->
-                    @if ($homeBanner6Images != null)
+                    @if ($homeBanner6Images != null && get_setting('enable_banner_6') == 1)
                         @php
                             $banner_6_imags = json_decode($homeBanner6Images);
                             $home_banner6_links = get_setting('home_banner6_links', null, $lang);
                         @endphp
-                        <div class="{{ $col_val }} d-none d-xl-block"><div class="aiz-carousel overflow-hidden arrow-inactive-none arrow-dark arrow-x-0"
+                        <div class="col-xl-{{ $col_val }} d-none d-xl-block"><div class="aiz-carousel overflow-hidden arrow-inactive-none arrow-dark arrow-x-0"
                             data-items="1" data-arrows="true" data-dots="false" data-autoplay="true">
                                 @foreach ($banner_6_imags as $key => $value)
                                     <div class="carousel-box overflow-hidden hov-scale-img">
@@ -581,14 +637,14 @@
     @endif
 
     <!-- Auction Product -->
-    @if (addon_is_activated('auction'))
+    @if (addon_is_activated('auction') && get_setting('enable_auction_products') == 1)
         <div id="auction_products">
 
         </div>
     @endif
 
     <!-- Cupon -->
-    @if (get_setting('coupon_system') == 1)
+    @if (get_setting('coupon_system') == 1 && get_setting('enable_coupon_section') == 1)
         <div class="mt-2 mt-md-3 mb-2 mb-md-3">
             <div class="container">
                 <div class="position-relative py-5 px-3 px-sm-4 px-lg-5" style="background-color: {{ get_setting('cupon_background_color', '#292933') }}">
@@ -642,9 +698,9 @@
     @endif
 
     <!-- Classified Product -->
-    @if (get_setting('classified_product') == 1)
+    @if (get_setting('classified_product') == 1 && get_setting('enable_classified_products_sections') == 1)
         @php
-            $classified_products = get_home_page_classified_products(6);
+            $classified_products = get_home_page_classified_products(6)->shuffle()->values();
         @endphp
         @if (count($classified_products) > 0)
             <section class="py-3" style="">
@@ -722,14 +778,17 @@
             </section>
         @endif
     @endif
-    @if (addon_is_activated('preorder'))
+    @if (addon_is_activated('preorder') && get_setting('enable_newest_preorder_products') == 1)
     <!-- Newest Preorder Products -->
         @include('preorder.frontend.home_page.newest_preorder')
     @endif
+
+    @if (get_setting('enable_category_wise_products_section') == 1)
     <!-- Category wise Products -->
     <div id="section_home_categories">
 
     </div>
+    @endif
 
 @endsection
 

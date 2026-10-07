@@ -23,6 +23,7 @@ use App\Utility\SearchUtility;
 use Carbon\Carbon;
 use DB;
 use Hash;
+use Illuminate\Support\Facades\Auth;
 
 class ShopController extends Controller
 {
@@ -284,5 +285,61 @@ class ShopController extends Controller
         }
 
         return $this->failed(translate('Something Went Wrong!'));
+    }
+
+    public function fulfilment_rate()
+    {
+        $sellerId = Auth::user()->id;
+
+        $counts = Order::where('seller_id', $sellerId)
+            ->selectRaw('delivery_status, COUNT(*) as total')
+            ->groupBy('delivery_status')
+            ->pluck('total', 'delivery_status');
+
+        $allOrder = $counts->sum();
+        $total = $allOrder > 0 ? $allOrder : 1;
+
+        $statusMap = [
+            'pending'   => 'pending',
+            'confirmed' => 'confirmed',
+            'processed' => 'on_the_way',
+            'shipped'   => 'picked_up',
+            'delivered' => 'delivered',
+            'cancelled' => 'cancelled',
+        ];
+
+        $orderStatus = [];
+        foreach ($statusMap as $key => $dbStatus) {
+            $count = $counts->get($dbStatus, 0);
+            $orderStatus[] = [
+                'status_key' => $key,
+                'count' => $count,
+                'percentage' => round(($count / $total) * 100, 1),
+            ];
+        }
+
+        $fulfilmentRate = round(($counts->get('delivered', 0) / $total) * 100, 1);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'fulfilment_rate' => $fulfilmentRate,
+                'order_status' => $orderStatus,
+            ],
+        ]);
+    }
+
+    public function getColor()
+    {
+        $seller = Auth::user()->id;
+        $shop = Shop::where('user_id' , $seller)->first();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'bg_color' => $shop->navbar_bg_color ?? '#5B346C',
+                'text_color' => $shop->navbar_text_color ?? 'white',
+            ],
+        ]);
     }
 }

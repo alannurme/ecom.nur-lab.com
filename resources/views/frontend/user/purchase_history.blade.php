@@ -7,7 +7,7 @@
     <!-- Tabs & Filters -->
     <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
         <ul class="nav nav-tabs purchase-history-tab border-0 fs-12 ml-n3" id="orderTabs">
-            @foreach (['All', 'Unpaid', 'Confirmed', 'Picked_Up', 'Delivered', 'To Review'] as $status)
+            @foreach ($all_status as $status)
             <li class="nav-item">
                 <button class="nav-link {{ $loop->first ? 'active' : '' }}"
                     onclick="changeTab(this, '{{ Str::slug($status) }}')">

@@ -9,7 +9,8 @@
     })
     ->latest()
     ->limit(12)
-    ->get();
+    ->get()
+    ->shuffle()->values();
 @endphp
 @if (count($newest_preorder_products) > 0)
     <section class="py-4">

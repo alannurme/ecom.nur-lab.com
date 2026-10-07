@@ -23,7 +23,12 @@ class PurchaseHistoryController extends Controller
      */
     public function index(Request $request)
     {
-     return view('frontend.user.purchase_history');
+        if(get_setting('enable_ratings_and_review_section') == 1){
+            $all_status = ['All', 'Unpaid', 'Confirmed', 'Picked_Up', 'Delivered', 'To Review'];
+        }else{
+            $all_status = ['All', 'Unpaid', 'Confirmed', 'Picked_Up', 'Delivered'];
+        }
+        return view('frontend.user.purchase_history', compact('all_status'));
     }
 
     public function digital_index()

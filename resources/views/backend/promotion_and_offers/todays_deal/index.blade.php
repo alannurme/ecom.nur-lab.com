@@ -207,8 +207,9 @@
 
         function filterProductByCategory() {
             var searchKey = $('input[name=search_product_keyword]').val();
+            var seller = $('select[name=todays_deal_seller]').val();
             var selectedCategory = $('select[name=selected_Products_category]').val();
-            $.post('{{ route('todays_deal_products.search') }}', { _token: AIZ.data.csrf, product_id: null, search_key:searchKey, category:selectedCategory, product_type:"physical",single_select: 0 }, function(data){
+            $.post('{{ route('todays_deal_products.search') }}', { _token: AIZ.data.csrf, product_id: null, search_key:searchKey, category:selectedCategory, seller:seller, product_type:"physical",single_select: 0 }, function(data){
                 $('#products-list').html(data);
                 AIZ.plugins.sectionFooTable('#products-list');
             });

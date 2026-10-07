@@ -54,6 +54,7 @@ Route::group(['prefix' => 'v2', 'middleware' => ['app_language']], function () {
         Route::controller(DeliveryBoyController::class)->group(function () {
             Route::get('earning/{id}', 'earning')->middleware('auth:sanctum');
             Route::get('collection/{id}', 'collection')->middleware('auth:sanctum');
+            Route::get('cancel-request-list/{id}', 'cancel_request_list')->middleware('auth:sanctum');
             Route::get('cancel-request/{id}', 'cancel_request')->middleware('auth:sanctum');
             Route::get('earning-summary/{id}', 'earning_summary')->middleware('auth:sanctum');
             Route::get('dashboard-summary/{id}', 'dashboard_summary')->middleware('auth:sanctum');

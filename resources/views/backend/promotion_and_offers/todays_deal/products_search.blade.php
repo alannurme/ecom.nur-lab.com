@@ -24,6 +24,9 @@
                 </div>
               </td>
               <td class="py-2" style="vertical-align: middle;">
+                  <span>{{ ucfirst($product->added_by) }}</span>
+              </td>
+              <td class="py-2" style="vertical-align: middle;">
                   <span>{{ single_price($product->unit_price) }}</span>
               </td>
             </tr>

@@ -79,7 +79,7 @@ class HomeController extends Controller
 
     public function load_todays_deal_section()
     {
-        $todays_deal_products = filter_products(Product::where('todays_deal', '1'))->orderBy('id', 'desc')->get();
+        $todays_deal_products = filter_products(Product::where('todays_deal', '1'))->orderBy('id', 'desc')->get()->shuffle();
         return view('frontend.' . get_setting('homepage_select') . '.partials.todays_deal', compact('todays_deal_products'));
     }
 
@@ -95,7 +95,8 @@ class HomeController extends Controller
             $newest_products = filter_products(Product::latest())
                 ->skip($offset)
                 ->take($limit)
-                ->get();
+                ->get()
+                ->shuffle();
 
             return view(
                 'frontend.' . get_setting('homepage_select') . '.partials.newest_products_section',
@@ -109,7 +110,8 @@ class HomeController extends Controller
             function () use ($limit) {
                 return filter_products(Product::latest())
                     ->take($limit)
-                    ->get();
+                    ->get()
+                    ->shuffle();
             }
         );
 
@@ -161,7 +163,8 @@ class HomeController extends Controller
             })
             ->latest()
             ->limit(12)
-            ->get();
+            ->get()
+            ->shuffle();
         // });
         return view('frontend.' . get_setting('homepage_select') . '.partials.preorder_products_section', compact('preorder_products'));
     }
@@ -1038,24 +1041,6 @@ class HomeController extends Controller
     {
         $products = filter_products(Product::where('added_by', 'admin'))->with('taxes')->paginate(12)->appends(request()->query());
         return view('frontend.inhouse_products', compact('products'));
-    }
-
-    public function import_data(Request $request)
-    {
-        $upload_path = $request->file('uploaded_file')->store('uploads', 'local');
-        $sql_path = $request->file('sql_file')->store('uploads', 'local');
-
-        $zip = new ZipArchive;
-        $zip->open(base_path('public/'.$upload_path));
-        $zip->extractTo('public/uploads/all');
-
-        $zip1 = new ZipArchive;
-        $zip1->open(base_path('public/'.$sql_path));
-        $zip1->extractTo('public/uploads');
-
-        Artisan::call('cache:clear');
-        $sql_path = base_path('public/uploads/demo_data.sql');
-        DB::unprepared(file_get_contents($sql_path));
     }
 
     public function sendRegVerificationCode(Request $request)

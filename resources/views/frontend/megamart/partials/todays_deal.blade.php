@@ -39,7 +39,7 @@
                     <div class="c-scrollbar-light overflow-hidden px-4 px-md-5 pb-3 pt-3 pt-md-3 pb-md-5">
                         <div class="h-100 d-flex flex-column justify-content-center">
                             <div class="todays-deal aiz-carousel" data-items="{{ $xxl_items }}" data-xxl-items="{{ $xxl_items }}" data-xl-items="{{ $xxl_items }}" data-lg-items="5" data-md-items="4" data-sm-items="3" data-xs-items="2" data-arrows="true" data-dots="false" data-autoplay="true" data-infinite="true">
-                                @foreach ($todays_deal_products as $key => $product)
+                                @foreach ($todays_deal_products->shuffle()->values() as $key => $product)
                                     <div class="carousel-box h-100 px-3 px-lg-0">
                                         <a href="{{ route('product', $product->slug) }}" class="h-100 overflow-hidden hov-scale-img mx-auto" title="{{  $product->getTranslation('name')  }}">
                                             <!-- Image -->

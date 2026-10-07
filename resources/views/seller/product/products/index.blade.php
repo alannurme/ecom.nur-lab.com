@@ -300,7 +300,7 @@
             $.ajax({
                 url: `{{ route('seller.products.filter' ) }}?page=${page}`,
                 method: 'GET',
-                data: { type: type, product_type: slug, search: keyword, selected_filter:selected_filter},
+                data: { type: type, product_type: slug, search: keyword, selected_filter:selected_filter, brand_id: brand_id, category_id: category_id },
                 success: function(response) {
                     $('#tab-content').html(response.html);
                     initFooTable();

@@ -1,7 +1,7 @@
 @if (get_setting('home_categories') != null)
 @php
 $home_categories = json_decode(get_setting('home_categories'));
-$categories = get_category($home_categories);
+$categories = get_category($home_categories)->shuffle()->values();
 @endphp
 @foreach ($categories as $category_key => $category)
 @php
@@ -34,7 +34,7 @@ $category_name = $category->getTranslation('name');
                     data-lg-items="3" data-md-items="2" data-sm-items="2"
                     data-xs-items="2" data-arrows="true" data-infinite="false">
 
-                    @foreach (get_cached_products($category->id) as $product_key => $product)
+                    @foreach (get_cached_products($category->id)->shuffle()->values() as $product_key => $product)
                     <div class="carousel-box px-3 position-relative has-transition border-right border-top border-bottom border-left @if ($product_key == 0) border-left @endif hov-animate-outline">
                         @include('frontend.'.get_setting('homepage_select').'.partials.product_box_1', ['product' => $product])
                     </div>

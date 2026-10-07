@@ -104,6 +104,204 @@
                                     </div>
                                 </div>
                             </li>
+                        @elseif (get_setting('megamenu_element') == 13)
+                            <li class="nav-item">
+                                <a class="nav-link dropdown-toggle fs-13 fw-semibold top-text-color-visibility"
+                                    style="color: {{ $topHeaderTextColor }}"
+                                    href="#"
+                                    id="mega-menu"
+                                    role="button"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false">
+                                    <i class="las la-bars fs-13"></i>
+                                    <span class="ml-1 mr-2">{{ translate('All Category') }}</span>
+                                </a>
+
+                                <!-- Megamenu Design 3 Start -->
+                                <div class="dropdown-menu mega-dropdown-menu bg-white w-100 left-0 right-0 c-scrollbar-light"
+                                    aria-labelledby="mega-menu">
+                                    <div class="@if (get_setting('show_full_width_header') == 'on') layout-container mx-auto px-3 @else container @endif py-4">
+                                        <div class="megamenu-desingn-three">
+                                            @php
+                                                $mega_categories_three = get_level_zero_categories()->take(7);
+                                            @endphp
+                                            <div class="row border-bottom pb-3">
+                                                @foreach ($mega_categories_three->slice(0, 6) as $mega_cat)
+                                                    @php
+                                                        $mega_cat_name  = $mega_cat->getTranslation('name');
+                                                        $sub_categories = $mega_cat->childrenCategories ?? collect();
+                                                    @endphp
+                                                    <div class="col-2">
+                                                        <ul class="list-unstyled mb-3">
+                                                            <li class="fs-16 fw-700 mb-2">
+                                                                <a class="text-reset hov-text-primary"
+                                                                    href="{{ route('products.category', $mega_cat->slug) }}">
+                                                                    {{ $mega_cat_name }}
+                                                                </a>
+                                                            </li>
+
+                                                            @if ($sub_categories->count())
+                                                                @include('frontend.partials.mega_sub_items', [
+                                                                    'categories' => $sub_categories,
+                                                                    'depth' => 0
+                                                                ])
+                                                            @endif
+                                                        </ul>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                            <div class="row pt-4">
+                                                <div class="col-4">
+                                                    <ul class="list-unstyled mb-3">
+                                                        <li class="fs-14 fw-700 mb-2">
+                                                            <a class="text-reset hov-text-primary"
+                                                                href="{{ route('flash-deals') }}">
+                                                                {{ translate('Flash Sales') }}
+                                                            </a>
+                                                        </li>
+                                                        <li class="fs-14 fw-700 mb-2">
+                                                            <a class="text-reset hov-text-primary"
+                                                                href="{{ route('todays-deal') }}">
+                                                                {{ translate("Today's Deals") }}
+                                                            </a>
+                                                        </li>
+                                                        <li class="fs-14 fw-700 mb-2">
+                                                            <a class="text-reset hov-text-primary"
+                                                                href="{{ route('brands.all') }}">
+                                                                {{ translate('Brands') }}
+                                                            </a>
+                                                        </li>
+                                                        <li class="fs-14 fw-700 mb-2">
+                                                            <a class="text-reset hov-text-primary"
+                                                                href="{{ route('sellers') }}">
+                                                                {{ translate('Sellers') }}
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="w-100 h-160px overflow-hidden rounded-2">
+                                                        <img src="{{ uploaded_asset(get_setting('megamenu_banner1')) }}" alt="Logo"
+                                                            class="img-fit w-100 h-100">
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="w-100 h-160px overflow-hidden rounded-2">
+                                                        <img src="{{ uploaded_asset(get_setting('megamenu_banner2')) }}" alt="Logo"
+                                                            class="img-fit w-100 h-100">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- More Items Button -->
+                                            <div class="mt-1 d-flex justify-content-end">
+                                                <a href="{{ route('categories.all') }}"
+                                                    class="btn btn-primary text-blue fs-16 fw-bold bg-transparent border-0 hov-opacity-70 has-transition px-0">
+                                                    {{ translate('More Items') }}
+                                                </a>
+                                            </div>
+
+                                        </div>
+                                    </div>  
+                                </div>  
+                            </li>   
+                        @elseif (get_setting('megamenu_element') == 14)
+                            <li class="nav-item">
+                                <a class="nav-link dropdown-toggle fs-13 fw-semibold top-text-color-visibility"
+                                    style="color: {{ $topHeaderTextColor }}"
+                                    href="#"
+                                    id="mega-menu"
+                                    role="button"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false">
+                                    <i class="las la-bars fs-13"></i>
+                                    <span class="ml-1 mr-2">{{ translate('All Category') }}</span>
+                                </a>
+
+                                <div class="dropdown-menu mega-dropdown-menu bg-white w-100 left-0 right-0 c-scrollbar-light"
+                                    aria-labelledby="mega-menu">
+                                    <div class="@if (get_setting('show_full_width_header') == 'on') layout-container mx-auto px-3 @else container @endif py-4">
+                                        <!-- Megamenu Design 2 Start -->
+                                        <div class="megamenu-desingn-four">
+                                            @php
+                                                $mega_categories_four = get_level_zero_categories()->take(8);
+                                            @endphp
+                                            <div class="row">
+                                                @foreach ($mega_categories_four->slice(0, 4) as $mega_cat)
+                                                    @php
+                                                        $mega_cat_name  = $mega_cat->getTranslation('name');
+                                                        $sub_categories = $mega_cat->childrenCategories ?? collect();
+                                                    @endphp
+                                                    <div class="col-2">
+                                                        <ul class="list-unstyled mb-3">
+                                                            <li class="fs-16 fw-700 mb-2">
+                                                                <a class="text-reset hov-text-primary"
+                                                                    href="{{ route('products.category', $mega_cat->slug) }}">
+                                                                    {{ $mega_cat_name }}
+                                                                </a>
+                                                            </li>
+
+                                                            @if ($sub_categories->count())
+                                                                @include('frontend.partials.mega_sub_items', [
+                                                                    'categories' => $sub_categories,
+                                                                    'depth' => 0
+                                                                ])
+                                                            @endif
+                                                        </ul>
+                                                    </div>
+                                                @endforeach
+
+                                                <div class="col-4">
+                                                    <div class="w-100 h-160px overflow-hidden rounded-2">
+                                                        <img src="{{ uploaded_asset(get_setting('megamenu_banner1')) }}" alt="Logo"
+                                                            class="img-fit w-100 h-100">
+                                                    </div>
+                                                </div>
+
+                                                @foreach ($mega_categories_four->slice(4, 4) as $mega_cat)
+                                                    @php
+                                                        $mega_cat_name  = $mega_cat->getTranslation('name');
+                                                        $sub_categories = $mega_cat->childrenCategories ?? collect();
+                                                    @endphp
+                                                    <div class="col-2">
+                                                        <ul class="list-unstyled mb-3">
+                                                            <li class="fs-16 fw-700 mb-2">
+                                                                <a class="text-reset hov-text-primary"
+                                                                    href="{{ route('products.category', $mega_cat->slug) }}">
+                                                                    {{ $mega_cat_name }}
+                                                                </a>
+                                                            </li>
+
+                                                            @if ($sub_categories->count())
+                                                                @include('frontend.partials.mega_sub_items', [
+                                                                    'categories' => $sub_categories,
+                                                                    'depth' => 0
+                                                                ])
+                                                            @endif
+                                                        </ul>
+                                                    </div>
+                                                @endforeach
+
+                                                <div class="col-4">
+                                                    <div class="w-100 h-160px overflow-hidden rounded-2">
+                                                        <img src="{{ uploaded_asset(get_setting('megamenu_banner1')) }}" alt="Logo"
+                                                            class="img-fit w-100 h-100">
+                                                    </div>
+                                                </div>
+                                            </div> 
+                                            <!-- More Items Button -->
+                                            <div class="mt-1 d-flex justify-content-end">
+                                                <a href="{{ route('categories.all') }}"
+                                                    class="btn btn-primary text-blue fs-16 fw-bold bg-transparent border-0 hov-opacity-70 has-transition px-0">
+                                                    {{ translate('More Items') }}
+                                                </a>
+                                            </div>
+                                        </div> 
+                                    </div> 
+                                </div> 
+                            </li>
                         @else
                             <li class="nav-item">
                                 <!-- Menu Bar -->
@@ -807,8 +1005,13 @@
                                 <i class="las la-user fs-24 has-transition"></i>
                             </div>
                             <div class="d-flex align-items-center" style="gap: 8px;">
+                                @if (env("DEMO_MODE") == "On")
+                                <a href="{{ route('handleDemoLogin') }}"
+                                    class="fs-13 fw-500 hov-opacity-50 has-transition top-text-color-visibility" style="color: {{ $topHeaderTextColor }}">{{ translate('Login') }}</a>
+                                @else
                                 <a href="{{ route('user.login') }}"
                                     class="fs-13 fw-500 hov-opacity-50 has-transition top-text-color-visibility" style="color: {{ $topHeaderTextColor }}">{{ translate('Login') }}</a>
+                                @endif
                                 <span class="text-gray">|</span>
                                 <a href="{{ route('user.registration') }}"
                                     class="fs-13 fw-500 hov-opacity-50 has-transition top-text-color-visibility" style="color: {{ $topHeaderTextColor }}">{{ translate('Registration') }}</a>
@@ -851,7 +1054,11 @@
                     <i class="las la-user fs-24 has-transition"></i>
                 </div>
                 <div class="d-flex align-items-center" style="gap: 8px;">
+                    @if (env("DEMO_MODE") == "On")
+                    <a href="{{ route('handleDemoLogin') }}" class="fs-13 fw-500 text-reset hov-text-blue has-transition">{{ translate('Login') }}</a>
+                    @else
                     <a href="{{ route('user.login') }}" class="fs-13 fw-500 text-reset hov-text-blue has-transition">{{ translate('Login') }}</a>
+                    @endif
                     <span class="text-gray">|</span>
                     <a href="{{ route('user.registration') }}" class="fs-13 fw-500 text-reset hov-text-blue has-transition">{{ translate('Registration') }}</a>
                 </div>

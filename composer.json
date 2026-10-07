@@ -46,6 +46,8 @@
         "spatie/laravel-sitemap": "^7.3",
         "stichoza/google-translate-php": "^5.2",
         "stripe/stripe-php": "^10.5",
+        "symfony/http-client": "^7.4",
+        "symfony/mailgun-mailer": "^7.1",
         "twilio/sdk": "^6.44",
         "unicodeveloper/laravel-paystack": "^1.0"
     },

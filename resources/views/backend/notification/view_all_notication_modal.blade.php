@@ -10,25 +10,28 @@
 <!-- Offcanvas Body -->
 <div class="global-right-offcanvas-body position-absolute w-100 h-100 py-2 px-0" style="padding-bottom: 200px!important;">
     <div class="notifications">
-        <ul class="nav nav-tabs nav-justified" role="tablist">
+        <ul class="nav nav-tabs nav-justified px-30px border-blue" role="tablist">
             <li class="nav-item flex-grow-0">
-                <a class="nav-link text-dark active px-30px" data-toggle="tab" data-type="order"
+                <a class="nav-link text-reset active px-0 mr-3" data-toggle="tab" data-type="order"
                     href="javascript:void(0);" data-target="#orders-notifications" role="tab"
                     id="orders-tab">{{ translate('Orders') }}</a>
             </li>
             @if (addon_is_activated('preorder'))
                 <li class="nav-item flex-grow-0">
-                    <a class="nav-link text-dark px-30px" data-toggle="tab" data-type="preorder" href="javascript:void(0);"
+                    <a class="nav-link text-reset px-0 mx-3 position-relative" data-toggle="tab" data-type="preorder" href="javascript:void(0);"
                         data-target="#preorders-notifications" role="tab"
-                        id="preorders-tab">{{ translate('Preorders') }}</a>
+                        id="preorders-tab"><span>{{ translate('Preorders') }}</span>
+                        <span class="badge badge-sm badge-dot badge-circle badge-danger position-absolute absolute-top-right"
+                            style="top: 1px!important; right: -14px!important;"></span>
+                    </a>
                 </li>
             @endif
             <li class="nav-item flex-grow-0">
-                <a class="nav-link text-dark px-30px" data-toggle="tab" data-type="seller" href="javascript:void(0);"
+                <a class="nav-link text-reset px-0 mx-3" data-toggle="tab" data-type="seller" href="javascript:void(0);"
                     data-target="#sellers-notifications" role="tab" id="sellers-tab">{{ translate('Sellers') }}</a>
             </li>
             <li class="nav-item flex-grow-0">
-                <a class="nav-link text-dark px-30px" data-toggle="tab" data-type="seller" href="javascript:void(0);"
+                <a class="nav-link text-reset px-0 ml-3" data-toggle="tab" data-type="seller" href="javascript:void(0);"
                     data-target="#payouts-notifications" role="tab" id="sellers-tab">{{ translate('Payouts') }}</a>
             </li>
         </ul>

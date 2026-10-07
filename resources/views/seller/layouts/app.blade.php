@@ -1,3 +1,4 @@
+{{-- app blade --}}
 <!doctype html>
 @if(\App\Models\Language::where('code', Session::get('locale', Config::get('app.locale')))->first()->rtl == 1)
 <html dir="rtl" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -70,9 +71,6 @@
             --navbar-search-focus-border: {{ Auth::user()->shop->navbar_text_color == 'black' ? '#7c8191' : '#dfe3f0' }};
         }
 
-        .seller-sidenav-search:focus-within{
-            border: 1px solid var(--navbar-search-focus-border) !important;
-        }
 
         .seller-search-menu-placeholder::placeholder{
             color: {{ Auth::user()->shop->navbar_text_color ?? 'white' }} !important;
@@ -81,6 +79,10 @@
 
         .login-nav-item:hover .user-icon-circle i{
             color:  {{ get_setting('top_header_text_color') }} !important;
+        }
+
+        .seller-sidenav-search:focus-within{
+            border: 1px solid var(--navbar-search-focus-border) !important;
         }
 
     </style>
@@ -187,16 +189,14 @@
         })
 
         if ($('#lang-change').length > 0) {
-            $('#lang-change .dropdown-menu a').each(function() {
-                $(this).on('click', function(e){
-                    e.preventDefault();
-                    var $this = $(this);
-                    var locale = $this.data('flag');
-                    $.post('{{ route('language.change') }}',{_token:'{{ csrf_token() }}', locale:locale}, function(data){
-                        location.reload();
-                    });
+            $('#lang-change a').on('click', function(e) {
+                e.preventDefault();
 
+                var locale = $(this).data('flag');
+                $.post('{{ route('language.change') }}',{_token:'{{ csrf_token() }}', locale:locale}, function(data){
+                    location.reload();
                 });
+
             });
         }
         function menuSearch(){
@@ -236,7 +236,12 @@
             openGlobalRightOffcanvas('note', noteType);
         });
 
-        function openGlobalRightOffcanvas(type = 'note', extraParam = null) {
+        $(document).on('click', '#view_all_chat', function (e) {
+            e.preventDefault();
+            openGlobalRightOffcanvas('all_chat');
+        });
+
+        function openGlobalRightOffcanvas(type = 'note', extraParam = null, onLoaded = null) {
             globalRightOffcanvas.classList.add('active');
             globalOverlay.classList.add('active');
             document.body.classList.add('body-no-scroll');
@@ -245,6 +250,7 @@
 
             const urls = {
                 note: "{{ route('seller.ajax_add_note_modal') }}",
+                all_chat: "{{ route('seller.admin_view_all_chat_modal') }}"
             };
 
             const postData = { _token: AIZ.data.csrf };
@@ -289,6 +295,10 @@
                             $(this).val('');
                         });
                     });
+
+                    if (typeof onLoaded === 'function') {
+                        onLoaded();
+                    }
                 },
                 error: function () {
                     globalRightOffcanvas.innerHTML =
@@ -301,6 +311,8 @@
             globalRightOffcanvas.classList.remove('active');
             globalOverlay.classList.remove('active');
             document.body.classList.remove('body-no-scroll');
+
+            $('#view_all_chat .badge-danger').remove();
         }
 
         function closeGlobalRightOffcanvas() {
@@ -399,6 +411,192 @@
             });
         });
 
+        function loadTabContent(url, $container, onSuccess) {
+            $container.html('<div class="footable-loader mt-5"><span class="fooicon fooicon-loader"></span></div>');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}' },
+                success: function (html) {
+                    $container.html(html);
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(html);
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Tab load failed:', xhr.status, xhr.responseText);
+                    $container.html('<p class="text-danger p-3 text-center">{{ translate("Failed to load") }}</p>');
+                }
+            });
+        }
+
+        $(document).on('shown.bs.tab', '#nav-messages-tab', function (e) {
+            loadTabContent('{{ route("seller.admin_seller_chat.show") }}', $('#chat-single-view'));
+        });
+
+        $(document).on('click', '.js-send-chat-message', function (e) {
+            e.preventDefault();
+            var btn = $(this);
+            var input = $('.js-chat-message-input');
+            var msg = input.val().trim();
+            if (!msg) return;
+
+            $.ajax({
+                url: '{{ route("seller.admin_seller_chat.send_message") }}',
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}', message: msg },
+                success: function (res) {
+                    if (res.success) {
+                        $('.js-no-message-placeholder').remove();
+
+                        var messageHtml = `
+                            <div class="d-flex flex-column align-items-end justify-content-end">
+                                <p class="mb-1 bg-white border border-gray-300 rounded-2 px-10px py-10px d-inline-block">
+                                    <span class="fs-13 fw-400 text-reset d-block">${res.message}</span>
+                                    <span class="fs-11 fw-400 text-gray d-block mt-1 text-right w-100">${res.time}</span>
+                                </p>
+                            </div>`;
+                        $('.js-chat-messages-body').append(messageHtml);
+                        input.val('');
+
+                        var container = $('.js-chat-messages-body').closest('.c-scrollbar-light');
+                        container.scrollTop(container[0].scrollHeight);
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Message send failed:', xhr.status, xhr.responseText);
+                }
+            });
+        });  
+        
+        var noticesLoaded = false;
+        var requestsLoaded = false;
+        var promotionsLoaded = false;
+        var plusLoaded = false;
+        var pendingSubTab = null;
+
+        $(document).on('shown.bs.tab', '#nav-notices-tab', function (e) {
+            loadTabContent('{{ route("seller.admin_seller_hub.notices") }}', $('#nav-notices'));
+        });
+
+        $(document).on('shown.bs.tab', '#nav-requests-tab', function (e) {
+            loadTabContent('{{ route("seller.admin_seller_hub.requests") }}', $('#nav-requests'));
+        });
+
+        $(document).on('shown.bs.tab', '#nav-promotions-tab', function (e) {
+            loadTabContent('{{ route("seller.admin_seller_hub.promotions") }}', $('#nav-promotions'));
+        });
+
+        $(document).on('shown.bs.tab', '#nav-plus-tab', function (e) {
+            loadTabContent('{{ route("seller.admin_seller_hub.plus") }}', $('#nav-plus'), function () {
+                if (AIZ.plugins.bootstrapSelect) {
+                    AIZ.plugins.bootstrapSelect('refresh');
+                }
+                if (pendingSubTab) {
+                    var sub = pendingSubTab;
+                    pendingSubTab = null;
+                    activateTab(sub);
+                }
+            });
+        });
+
+        function activateTab(tabId) {
+            var $tab = $('#' + tabId);
+            if ($tab.hasClass('active')) {
+                $tab.trigger('shown.bs.tab');
+            } else {
+                $tab.tab('show');
+            }
+        }
+
+        $(document).on('click', '.js-request-submit-btn', function (e) {
+            e.preventDefault();
+            var btn = $(this);
+
+            var selectedItem = $('.js-request-items option:selected').val();
+
+            if (!selectedItem) {
+                AIZ.plugins.notify('warning', '{{ translate("Please select an item") }}');
+                return;
+            }
+
+            var itemName = ($('.js-request-item-name').val() || '').trim();
+            if (itemName === '') {
+                AIZ.plugins.notify('warning', '{{ translate("Please fill item name") }}');
+                return;
+            }
+
+            var fieldMap = {
+                category:          'category_name',
+                brand:              'brand_name',
+                color:              'color_name',
+                attribute:          'attribute_name',
+                unit:               'unit_name',
+                measurement_point:  'measurement_point_name',
+                warranty:           'warranty_name',
+            };
+
+            var field = fieldMap[selectedItem];
+
+            var payload = {
+                _token: AIZ.data.csrf,
+                items: [selectedItem],
+                message: $('.js-request-message').val()
+            };
+
+            if (field) {
+                payload[field] = itemName;
+            }
+
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: '{{ route("seller.admin_seller_hub.request_store") }}',
+                type: 'POST',
+                data: payload,
+                success: function (res) {
+                    if (res.success) {
+                        AIZ.plugins.notify('success', res.message);
+                        closeglobalRightOffcanvas();
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        var errors = xhr.responseJSON?.errors ?? {};
+                        var first = Object.values(errors)[0];
+                        AIZ.plugins.notify('danger', first || '{{ translate("Validation failed") }}');
+                    } else {
+                        AIZ.plugins.notify('danger', '{{ translate("Something went wrong") }}');
+                    }
+                },
+                complete: function () {
+                    btn.prop('disabled', false);
+                }
+            });
+        });
+
+        $(document).on('click', '.js-goto-messages', function (e) {
+            e.preventDefault();
+            openGlobalRightOffcanvas('all_chat', null, function () {
+                activateTab('nav-messages-tab');
+            });
+        });
+
+        $(document).on('shown.bs.tab', '#nav-messages-tab', function (e) {
+            $('#nav-messages-tab .bg-danger').remove();
+            loadTabContent('{{ route("seller.admin_seller_chat.show") }}', $('#chat-single-view'));
+        });
+
+        $(document).on('click', '.js-goto-create-request', function (e) {
+            e.preventDefault();
+            activateTab('nav-plus-tab');
+        });
+
+        $(document).on('click', '.js-notice-board-view-all', function (e) {
+            e.preventDefault();
+            openGlobalRightOffcanvas('all_chat');
+        });
     </script>
 
 </body>

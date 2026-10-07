@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductTranslation;
 use App\Services\WholesaleService;
 use App\Services\ProductTaxService;
+use App\Services\FrequentlyBoughtProductService;
 use App\Http\Requests\WholesaleProductRequest;
 use App\Http\Resources\V2\Seller\ProductCollection;
 use App\Http\Resources\V2\Seller\WholesaleProductDetailsCollection;
@@ -48,7 +49,7 @@ class WholesaleProductController extends Controller
 
         //VAT & Tax
         if ($request->tax_id) {
-            (new productTaxService)->store($request->only([
+            (new ProductTaxService)->store($request->only([
                 'tax_id', 'tax', 'tax_type', 'product_id'
             ]));
         }

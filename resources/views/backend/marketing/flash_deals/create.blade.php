@@ -117,7 +117,23 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-6 mt-2 mt-md-0">
+                    {{-- Seller --}}
+                    <div class="col-md-6">
+                        <select class="form-control aiz-selectpicker" name="flash_deal_seller"
+                            onchange="flashDealFilterProducts()" data-placeholder="{{ translate('Choose Seller') }}"
+                            data-live-search="true">
+                            <option value="">
+                                {{ translate('Choose Seller') }}
+                            </option>
+                            @foreach($sellers as $seller)
+                                <option value="{{ $seller->id }}">{{ $seller->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                {{-- Search --}}
+                <div class="row gutters-5 mt-3">
+                    <div class="col-md-12">
                         <input type="text" class="form-control" name="flash_deal_search_keyword"
                             onkeyup="flashDealFilterProducts()" placeholder="{{ translate('Search by Product Name') }}">
                     </div>
@@ -159,6 +175,7 @@
             document.body.classList.remove('body-no-scroll');
             $('#flash-deal-products-list').html('');
             $('select[name=flash_deal_category]').val('').trigger('change');
+            $('select[name=flash_deal_seller]').val('').trigger('change');
             $('input[name=flash_deal_search_keyword]').val('');
         }
         function closeOffcanvas() { closeRightcanvas(); }
@@ -172,6 +189,7 @@
             clearTimeout(flashDealSearchTimer);
             flashDealSearchTimer = setTimeout(function () {
                 const category = $('select[name=flash_deal_category]').val();
+                const seller = $('select[name=flash_deal_seller]').val();
                 const searchKey = $('input[name=flash_deal_search_keyword]').val();
 
                 $('#flash-deal-products-list').html(
@@ -183,6 +201,7 @@
                     {
                         _token: '{{ csrf_token() }}',
                         category: category,
+                        seller: seller,
                         search_key: searchKey
                     },
                     function (data) {

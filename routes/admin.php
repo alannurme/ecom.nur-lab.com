@@ -76,6 +76,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\NewUpdateController;
 use App\Http\Controllers\PickupController;
+use App\Http\Controllers\SellerHubController;
 use App\Http\Controllers\ShippingBoxSizeController;
 use App\Http\Controllers\ShippingSystemController;
 use App\Http\Controllers\UnitController;
@@ -92,7 +93,7 @@ use Illuminate\Support\Facades\Route;
   |
  */
 //Update Routes
-Route::controller(UpdateController::class)->group(function () {
+Route::controller(UpdateController::class)->middleware(['auth', 'admin', 'prevent-back-history'])->group(function () {
     Route::post('/update', 'step0')->name('update');
     Route::get('/update/step1', 'step1')->name('update.step1');
     Route::get('/update/step2', 'step2')->name('update.step2');
@@ -427,6 +428,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
         // Header Selection
         Route::post('/select-header', 'select_header')->name('settings.select-header');
         Route::post('/select-footer', 'select_footer')->name('settings.select-footer');
+        Route::post('/select-all-category-layout', 'select_all_category_layout')->name('settings.select-all-category-layout');
         Route::post('/select-megamenu', 'select_megamenu')->name('settings.select-megamenu');
         //custom product visitors
         Route::post('/custom-product-visitors', 'customProductVisitorsUpdate')->name('custom_product_visitors.update');
@@ -507,6 +509,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
             Route::get('/manage-admin-panel', 'manage_admin_panel')->name('website.manage_admin_panel');
             Route::get('/select-homepage', 'select_homepage')->name('website.select-homepage');
             Route::get('/select-header', 'select_header')->name('website.select-header');
+            Route::get('/product-details-section', 'product_details_section')->name('product_details_section');
+            Route::get('/select-all-category-layout', 'select_all_category_layout')->name('select_all_category_layout');
             Route::get('/select-footer', 'select_footer')->name('website.select-footer');
             Route::get('/select-megamenu', 'select_megamenu')->name('website.select-megamenu');
             Route::get('/authentication-layout-settings', 'authentication_layout_settings')->name('website.authentication-layout-settings');
@@ -590,6 +594,8 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
         Route::post('/promotional-products-search', 'search')->name('promotional_products.search');     
         Route::get('/promotional-products-filter', 'filter')->name('promotional_products.filter');     
         Route::get('/promotion-and-offers-dashboard', 'dashboard')->name('promotion_and_offers_dashboard');     
+        Route::get('/seller-promotional-products-index', 'seller_index')->name('seller_promotional_products.index');     
+        Route::get('/seller-promotional-products-filter', 'seller_filter')->name('seller_promotional_products.filter');     
 
     });
 
@@ -1037,6 +1043,33 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
 
     });
 
-});
+    
+    Route::post('/all-chat-modal', [AdminController::class, 'view_all_chat_modal'])->name('admin_view_all_chat_modal');
+    
+    Route::controller(SellerHubController::class)->group(function () {
+        Route::post('/chat/{seller_id}/show', 'view_single_chat')->name('admin_seller_chat.show');
+        Route::post('/chat/send-message', 'send_chat_message')->name('admin_seller_chat.send_message');
+        Route::post('/chat/list', 'view_chat_list')->name('admin_seller_chat.list');
+        Route::post('/seller-hub/notices', 'view_notices_tab')->name('admin_seller_hub.notices');
+        Route::post('/seller-hub/requests', 'view_requests_tab')->name('admin_seller_hub.requests');
+        Route::post('/seller-hub/promotions', 'view_promotions_tab')->name('admin_seller_hub.promotions');
+        Route::post('/seller-hub/preset-notice', 'view_preset_notice_tab')->name('admin_seller_hub.preset_notice');
+        Route::post('/seller-hub/plus', 'view_plus_tab')->name('admin_seller_hub.plus');
+        Route::post('/seller-hub/plus-notice', 'view_plus_notice_tab')->name('admin_seller_hub.plus_notice');
+        Route::post('/seller-hub/plus-message', 'view_plus_message_tab')->name('admin_seller_hub.plus_message');
+        Route::post('/seller-hub/plus-promotion', 'view_plus_promotion_tab')->name('admin_seller_hub.plus_promotion');
+        Route::post('/seller-hub/plus-message/store', 'store_plus_message')->name('admin_seller_hub.plus_message_store');
+        Route::post('seller-hub/plus-promotion', 'plusPromotion')->name('admin_seller_hub.plus_promotion');
+        Route::post('seller-hub/plus-promotion-store', 'plusPromotionStore')->name('admin_seller_hub.plus_promotion_store');  
+        Route::post('seller-hub/plus-notice-store', 'plusNoticeStore')->name('admin_seller_hub.plus_notice_store');
+        Route::post('seller-hub/preset-notice/toggle-status', 'presetNoticeToggleStatus')->name('admin_seller_hub.preset_notice_toggle_status');
+        Route::post('seller-hub/preset-notice/delete', 'presetNoticeDelete')->name('admin_seller_hub.preset_notice_delete');
+        Route::post('seller-hub/preset-notice/edit', 'presetNoticeEdit')->name('admin_seller_hub.preset_notice_edit');
+        Route::post('seller-hub/plus-notice-update', 'plusNoticeUpdate')->name('admin_seller_hub.plus_notice_update');  
+        Route::get('seller-requests-index', 'seller_requests_index')->name('seller_requests.index');  
+        Route::get('seller-requests-filter', 'seller_requests_filter')->name('seller_requests.filter');  
+    });
 
-Route::get('/system/sitemap-item-add/{item}', [AdminController::class, 'SitemapItems'])->name('sitemap_item_add');
+    Route::get('/system/sitemap-item-add/{item}', [AdminController::class, 'SitemapItems'])->name('sitemap_item_add');
+    
+});

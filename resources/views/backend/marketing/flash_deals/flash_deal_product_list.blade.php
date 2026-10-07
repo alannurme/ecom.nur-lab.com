@@ -3,6 +3,7 @@
     <thead>
         <tr>
             <th>{{ translate('Product') }}</th>
+            <th>{{ translate('Added By') }}</th>
             <th>{{ translate('Price') }}</th>
         </tr>
     </thead>
@@ -28,6 +29,9 @@
                          onerror="this.src='{{ static_asset('assets/img/placeholder.jpg') }}'">
                     <span>{{ $product->getTranslation('name') }}</span>
                 </div>
+            </td>
+            <td class="py-2" style="vertical-align: middle; white-space: nowrap;">
+                {{ ucfirst($product->added_by) }}
             </td>
             <td class="py-2" style="vertical-align: middle; white-space: nowrap;">
                 {{ single_price($product->unit_price) }}

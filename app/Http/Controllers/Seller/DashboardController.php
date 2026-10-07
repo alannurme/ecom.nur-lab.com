@@ -5,14 +5,20 @@ namespace App\Http\Controllers\Seller;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
+use App\Models\SellerAdminNotice;
+use App\Models\SellerAdminPromotion;
+use App\Models\Shop;
 use Auth;
 use Carbon\Carbon;
 use DB;
 use Artisan;
 use Illuminate\Http\Request;
+use App\Services\SellerHubService;
 
 class DashboardController extends Controller
 {
+    public function __construct(protected SellerHubService $sellerHubService) {}
+    
     public function index()
     {
         $authUserId = auth()->user()->id;
@@ -79,6 +85,9 @@ class DashboardController extends Controller
         $data['deliveredPercent'] = round(($data['deliveredOrder'] / $total) * 100, 1);
         $data['cancelledPercent'] = round(($data['cancelledOrder'] / $total) * 100, 1);
 
+        $hubData = $this->sellerHubService->getHubData($authUserId);
+        $data = array_merge($data, $hubData);
+
         return view('seller.dashboard', $data);
     }
 
@@ -87,5 +96,26 @@ class DashboardController extends Controller
         Artisan::call('optimize:clear');
         flash(translate('Cache cleared successfully'))->success();
         return back();
+    }
+
+    public function view_all_chat_modal(Request $request)
+    {
+        $shops = Shop::all();
+        $sellerId = Auth::id();
+        $hubData = $this->sellerHubService->getHubData($sellerId);
+
+        SellerAdminNotice::whereHas('sellers', function ($q) use ($sellerId) {
+            $q->where('seller_admin_notice_sellers.seller_id', $sellerId);
+        })->get()->each(function ($notice) use ($sellerId) {
+            $notice->sellers()->updateExistingPivot($sellerId, ['seen' => 1]);
+        });
+
+        SellerAdminPromotion::whereHas('sellers', function ($q) use ($sellerId) {
+            $q->where('seller_admin_promotion_sellers.seller_id', $sellerId);
+        })->get()->each(function ($promotion) use ($sellerId) {
+            $promotion->sellers()->updateExistingPivot($sellerId, ['seen' => 1]);
+        });
+
+        return view('seller.chats.all_chat_modal', array_merge(['shops' => $shops], $hubData));
     }
 }

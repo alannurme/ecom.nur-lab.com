@@ -303,8 +303,8 @@ class ProductController extends Controller
             $case2 = '%' . $name . '%';
 
             $products->orderByRaw('CASE
-                WHEN name LIKE "'.$case1.'" THEN 1
-                WHEN name LIKE "'.$case2.'" THEN 2
+                WHEN name LIKE "' . $case1 . '" THEN 1
+                WHEN name LIKE "' . $case2 . '" THEN 2
                 ELSE 3
                 END');
         }
@@ -401,28 +401,60 @@ class ProductController extends Controller
         }
         
         $total_queries = ProductQuery::where('product_id', $product->id)->count();
-        $answered_queries = ProductQuery::where('product_id', $product->id)
-            ->whereNotNull('reply')
+        $product_queries = ProductQuery::where('product_id', $product->id)
             ->latest('id')
             ->paginate(10);
         
         return response()->json([
             'success' => true,
-            'data' => $answered_queries->map(function($query) {
+            'data' => $product_queries->map(function($query) {
                 return [
                     'question' => $query->question,
                     'answer' => $query->reply,
                     'asked_at' => $query->created_at->format('Y-m-d H:i:s'),
-                    'answered_at' => $query->updated_at->format('Y-m-d H:i:s')
+                    'answered_at' => $query->reply ? $query->updated_at->format('Y-m-d H:i:s') : null
                 ];
             }),
             'total_queries' => $total_queries, 
             'pagination' => [
-                'current_page' => $answered_queries->currentPage(),
-                'per_page' => $answered_queries->perPage(),
-                'total' => $answered_queries->total(),
-                'last_page' => $answered_queries->lastPage()
+                'current_page' => $product_queries->currentPage(),
+                'per_page' => $product_queries->perPage(),
+                'total' => $product_queries->total(),
+                'last_page' => $product_queries->lastPage()
             ]
         ]);
+    }
+
+    public function storeQueriesProducts(Request $request)
+    {
+        $request->validate([
+            'slug' => 'required|string|exists:products,slug',
+            'question' => 'required|string|max:1000',
+        ]);
+
+        $product = Product::where("slug", $request->input('slug'))->first();
+
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product not found'
+            ], 404);
+        }
+
+        $productQuery = new ProductQuery();
+        $productQuery->product_id = $product->id;
+        $productQuery->customer_id = auth()->id();
+        $productQuery->seller_id = $product->user_id;
+        $productQuery->question = $request->input('question');
+        $productQuery->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your query has been submitted successfully.',
+            'data' => [
+                'question' => $productQuery->question,
+                'asked_at' => $productQuery->created_at->format('Y-m-d H:i:s'),
+            ]
+        ], 201);
     }
 }

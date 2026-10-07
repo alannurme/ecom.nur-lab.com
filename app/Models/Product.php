@@ -229,4 +229,9 @@ class Product extends Model
             'gtin' => $this->gtin ?? '',
         ];
     }
+
+    public function participateProduct()
+    {
+        return $this->hasMany(SellerAdminPromotionParticipateProduct::class, 'product_id');
+    }
 }

@@ -120,6 +120,42 @@
                         </label>
                     </div>
                     @endcanany
+                    @can('select_all_category_layout')
+                        <div class="col-6 col-md-6 col-lg-3 col-xl-3 mb-3">
+                            <a href="{{ route('select_all_category_layout') }}">
+                                <div
+                                    class="design-studio-card border border-2 border-gray-300 bg-white has-transition rounded-2 p-3 p-lg-4 overflow-hidden">
+                                    <div class="d-flex align-items-start justify-content-between">
+                                        <img src="{{ static_asset('assets/img/design-studio/megamenu.svg') }}"
+                                            class="flex-shrink-0" alt="">
+                                    </div>
+                                    <div class="mt-3">
+                                        <h6 class="fs-15 fw-bold text-dark mb-1">{{ translate('All Category Layout') }}</h6>
+                                        <span
+                                            class="fs-12 fw-400 text-truncate d-block w-100 text-muted">{{ translate('Choose your style') }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    @endcan
+                    @can('product_details_section')
+                        <div class="col-6 col-md-6 col-lg-3 col-xl-3 mb-3">
+                            <a href="{{ route('product_details_section') }}">
+                                <div
+                                    class="design-studio-card border border-2 border-gray-300 bg-white has-transition rounded-2 p-3 p-lg-4 overflow-hidden">
+                                    <div class="d-flex align-items-start justify-content-between">
+                                        <img src="{{ static_asset('assets/img/design-studio/megamenu.svg') }}"
+                                            class="flex-shrink-0" alt="">
+                                    </div>
+                                    <div class="mt-3">
+                                        <h6 class="fs-15 fw-bold text-dark mb-1">{{ translate('Product Details') }}</h6>
+                                        <span
+                                            class="fs-12 fw-400 text-truncate d-block w-100 text-muted">{{ translate('Choose your style') }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    @endcan
                 </div>
 
                 <!-- Tab Pane Content Areas -->

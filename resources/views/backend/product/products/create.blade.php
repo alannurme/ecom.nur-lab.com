@@ -483,7 +483,7 @@
                                             <label for="meta_keywords" class="col-from-label fs-14 fw-500">{{ translate('Tags') }}
                                                 <span class="text-danger">*</span></label>
                                             <input type="text" id="meta_keywords" name="meta_keywords[]" class="form-control aiz-tag-input"
-                                                name="" placeholder="{{ translate('Type and hit enter to add a tag') }}">
+                                                placeholder="{{ translate('Type and hit enter to add a tag') }}">
                                         </div>
                                     </div>
                                 </div>
@@ -1807,8 +1807,17 @@
     function handleTagify($input, fieldValue) {
         let tagifyTags = fieldValue;
         if (typeof fieldValue === 'string') {
-            try { tagifyTags = JSON.parse(fieldValue); } 
-            catch (e) { tagifyTags = fieldValue.split(',').map(t => ({ value: t.trim() })); }
+            const trimmed = fieldValue.trim();
+            if (trimmed.startsWith('[')) {
+                try {
+                    tagifyTags = JSON.parse(trimmed);
+                } catch (e) {
+                    console.error('Failed to parse Tag JSON:', trimmed, e);
+                    tagifyTags = []; 
+                }
+            } else {
+                tagifyTags = trimmed.split(',').map(t => ({ value: t.trim() })).filter(t => t.value);
+            }
         } else if (Array.isArray(fieldValue) && typeof fieldValue[0] === 'string') {
             tagifyTags = fieldValue.map(tag => ({ value: tag }));
         }
@@ -1818,7 +1827,6 @@
             tagifyInstance.removeAllTags();
             tagifyInstance.addTags(tagifyTags);
         } else {
-            // Fallback
             let tagValues = tagifyTags.map(t => t.value || t).join(',');
             $input.val(tagValues).trigger('change');
         }

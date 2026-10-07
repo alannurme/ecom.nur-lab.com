@@ -34,7 +34,7 @@
                         <!-- Products Section -->
                         <div class="px-xl-1 ">
                             <div class="aiz-carousel arrow-none" data-items="{{ $xxl_items }}" data-xl-items="{{ $xl_items }}" data-lg-items="{{ $lg_items }}"  data-md-items="{{ $md_items }}" data-sm-items="2" data-xs-items="2" data-arrows='true' data-infinite='false'>
-                                @foreach ($preorder_products as $key => $product)
+                                @foreach ($preorder_products->shuffle()->values() as $key => $product)
                                 @include('preorder.frontend.product_box4',['product' => $product])
                                 @endforeach
                             </div>

@@ -18,7 +18,7 @@
             </div>
         </div>
         <div class="aiz-side-nav-wrap">
-            <div class="px-3 mb-3" style="color: {{ Auth::user()->shop->navbar_text_color ?? 'white' }}">
+            <div class="px-3 mb-3">
                 <div class="px-2 px-lg-3 rounded-2 d-flex align-items-center justify-content-between seller-sidenav-search"
                     @if (Auth::user()->shop->navbar_text_color == 'black')
                         style="border: 1px solid rgba(0, 0, 0, 0.3); color: {{ Auth::user()->shop->navbar_text_color }};"
@@ -27,6 +27,7 @@
                     @endif>
                     <input class="px-0 form-control bg-transparent border-0 flex-grow-1 seller-search-menu-placeholder"
                         type="text" name="" placeholder="{{ translate('Search in menu') }}" id="menu-search"
+                        style="color: {{ Auth::user()->shop->navbar_text_color ?? 'white' }};"
                         onkeyup="menuSearch()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0" width="16" height="16"
                         viewBox="0 0 16 16">
@@ -676,6 +677,13 @@
                             style="color: {{ Auth::user()->shop->navbar_text_color ?? 'white' }}"></span>
                     </a>
                     <ul class="aiz-side-nav-list level-2">
+                        <li class="aiz-side-nav-item">
+                            <a href="{{ route('seller.promotional_products.index') }}" class="aiz-side-nav-link"
+                                style="color: {{ Auth::user()->shop->navbar_text_color ?? 'white' }}">
+                                <span class="aiz-side-nav-text"
+                                    style="color: {{ Auth::user()->shop->navbar_text_color ?? 'white' }}">{{ translate('Promotional Product') }}</span>
+                            </a>
+                        </li>
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('seller.categories_wise_product_discount') }}" class="aiz-side-nav-link"
                                 style="color: {{ Auth::user()->shop->navbar_text_color ?? 'white' }}">

@@ -848,7 +848,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 mt-3 mt-md-0">
                             <div
                                 class="d-flex flex-column"
                                 style="gap: 19px"

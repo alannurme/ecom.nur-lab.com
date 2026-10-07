@@ -199,7 +199,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-12 col-md-12 col-xl-6 mb-4">
+        <div class="col-sm-6 col-md-6 col-xl-3 mb-4">
             <div class="card h-450px mb-0 h-100 py-20px">
                 <div class="px-25px">
                     <div class="d-flex flex-wrap align-items-center justify-content-between" style="gap: 4px;">
@@ -322,6 +322,201 @@
                                 <div class="progress-bar h-100 rounded-pill" role="progressbar"
                                     style="width: {{ $cancelledPercent }}%; background-color: #F76464;" aria-valuenow="40"
                                     aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-sm-6 col-md-6 col-xl-3 mb-4">
+            <div class="card shadow-none h-450px mb-0 h-100" style="border-color: #5B346C!important;">
+                <div class="card-body px-0">
+                    <div class="d-flex align-items-center justify-content-between px-25px">
+                        <div class="card-title text-primary fs-16 fw-600 mb-0">{{ translate('Seller Hub') }}</div>
+                        <a href="javascript:void(0);" class="js-notice-board-view-all text-blue fs-13 fw-500">{{ translate('View All') }}</a>
+                    </div>
+
+                    <ul class="nav nav-tabs sp-noticeboard-tabs border-0 d-flex align-items-center mt-3 px-25px" id="sp-noticeboard" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link border-0 px-0 fs-10 fw-400 text-dark opacity-70 hov-opacity-100 active has-transition" id="all-notice-tab" data-toggle="tab" href="#all-noitce" role="tab">{{ translate('All') }}</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link border-0 px-0 fs-10 fw-400 text-dark opacity-70 hov-opacity-100 has-transition" id="notices-tab" data-toggle="tab" href="#notices" role="tab">
+                                <span class="d-flex align-items-center position-relative">
+                                    {{ translate('Notices') }}
+                                    @if ($hasUnseenNotices)
+                                        <span class="badge badge-sm badge-dot badge-circle badge-danger position-absolute" style="top: -2px; right: -6px; width: 4px; height: 4px;"></span>
+                                    @endif
+                                </span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link border-0 px-0 fs-10 fw-400 text-dark opacity-70 hov-opacity-100 has-transition" id="requests-tab" data-toggle="tab" href="#requests" role="tab">{{ translate('Requests') }}</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link border-0 px-0 fs-10 fw-400 text-dark opacity-70 hov-opacity-100 has-transition position-relative" id="promotions-tab" data-toggle="tab" href="#promotions" role="tab">
+                                <span class="d-flex align-items-center position-relative">
+                                    {{ translate('Promotions') }}
+                                    @if ($hasUnseenPromotions)
+                                        <span class="badge badge-sm badge-dot badge-circle badge-danger position-absolute" style="top: -2px; right: -6px; width: 4px; height: 4px;"></span>
+                                    @endif
+                                </span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link border-0 px-0 fs-10 fw-400 text-dark opacity-70 hov-opacity-100 has-transition position-relative" id="messages-tab" data-toggle="tab" href="#messages" role="tab">
+                                <span class="d-flex align-items-center position-relative">
+                                    {{ translate('Messages') }}
+                                    @if ($hasUnseenMessages)
+                                        <span class="badge badge-sm badge-dot badge-circle badge-danger position-absolute" style="top: -2px; right: -6px; width: 4px; height: 4px;"></span>
+                                    @endif
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mt-3 pl-25px pr-15px" id="sp-noticeboard-tab-content">
+
+                        {{-- All --}}
+                        <div class="tab-pane fade show active" id="all-noitce" role="tabpanel" aria-labelledby="all-notice-tab">
+                            <div class="d-flex flex-column pr-10px c-scrollbar-light" style="gap: 12px; max-height: 300px; overflow-y: auto;">
+                                @forelse ($activities->take(8) as $activity)
+                                    @if ($activity['type'] === 'notice')
+                                        @php $notice = $activity['data']; @endphp
+                                        <div class="rounded-1 p-2" style="background-color: {{ $notice->bg_color_hex }};">
+                                            <span class="fs-13 fw-400">{{ $notice->message }}</span>
+                                            @if ($notice->id === 1)
+                                                <div>
+                                                    <a href="{{ route('seller.shop.verify') }}" class="fs-14 fw-bold hov-text-blue has-transition">{{ translate('here.') }}</a>
+                                                </div>
+                                            @elseif ($notice->id === 2)
+                                                <a href="{{ route('seller.shop.index') }}" class="fs-14 fw-bold hov-text-blue has-transition">{{ translate('this.') }}</a>
+                                            @elseif ($notice->id === 3 && !empty($notice->expiry_date))
+                                                <span class="fs-13 fw-400 text-danger"> {{ $notice->expiry_date }}</span>
+                                            @endif
+                                        </div>
+
+                                    @elseif ($activity['type'] === 'promotion')
+                                        @php $promotion = $activity['data']; @endphp
+                                        <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                            <span class="fs-13 fw-400">
+                                                {{ translate('Admin created a promotion offer for') }}
+                                                @if ($promotion->flash_sale_id && $promotion->flashSale)
+                                                    <a class="fs-13 fw-700 text-reset has-transition">{{ $promotion->flashSale->title }}</a>
+                                                    <span class="fs-13 fw-400 text-dark">{{ translate('for') }}</span>
+                                                    <a class="fs-13 fw-700 text-reset has-transition">{{ translate('FLASH DEALS') }}</a>
+                                                @else
+                                                    <a class="fs-13 fw-700 text-reset has-transition">{{ $promotion->promo_type_label }}</a>
+                                                @endif
+                                            </span>
+                                        </div>
+
+                                    @elseif ($activity['type'] === 'message')
+                                        @php $conversation = $activity['data']; @endphp
+                                        <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                            <span class="fs-13 fw-400">{{ translate('Admin sent a message:') }} {{ \Illuminate\Support\Str::limit($conversation->lastSellerMessage->message, 40) }}</span>
+                                            <a href="javascript:void(0);" class="js-goto-messages fs-14 fw-bold hov-text-blue has-transition d-block">{{ translate('View') }}</a>
+                                        </div>
+
+                                    @elseif ($activity['type'] === 'request')
+                                        @php $req = $activity['data']; $item = $req->item_label; @endphp
+                                        <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                            <span class="fs-13 fw-400">
+                                                @if ($item)
+                                                    {{ translate('You requested to add a') }} <a class="fs-13 fw-700 text-reset has-transition">{{ translate($item['type']) }}</a> {{ translate('named') }} <a class="fs-13 fw-700 text-reset has-transition">{{ $item['value'] }}</a>.
+                                                @endif
+                                            </span>
+                                        </div>
+                                    @endif
+                                @empty
+                                    <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                        <span class="fs-13 fw-400">{{ translate('No activity found') }}</span>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        {{-- Notices --}}
+                        <div class="tab-pane fade" id="notices" role="tabpanel" aria-labelledby="notices-tab">
+                            <div class="d-flex flex-column pr-10px c-scrollbar-light" style="gap: 12px; max-height: 300px; overflow-y: auto;">
+                                @forelse ($allNotices as $notice)
+                                    <div class="rounded-1 p-2" style="background-color: {{ $notice->bg_color_hex }};">
+                                        <span class="fs-13 fw-400">{{ $notice->message }}</span>
+                                        @if ($notice->id === 1)
+                                            <div>
+                                                <a href="{{ route('seller.shop.verify') }}" class="fs-14 fw-bold hov-text-blue has-transition">{{ translate('here.') }}</a>
+                                            </div>
+                                        @elseif ($notice->id === 2)
+                                            <a href="{{ route('seller.shop.index') }}" class="fs-14 fw-bold hov-text-blue has-transition">{{ translate('this.') }}</a>
+                                        @elseif ($notice->id === 3 && !empty($notice->expiry_date))
+                                            <span class="fs-13 fw-400 text-danger"> {{ $notice->expiry_date }}</span>
+                                        @endif
+                                    </div>
+                                @empty
+                                    <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                        <span class="fs-13 fw-400">{{ translate('No notices found') }}</span>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        {{-- Requests --}}
+                        <div class="tab-pane fade" id="requests" role="tabpanel" aria-labelledby="requests-tab">
+                            <div class="d-flex flex-column pr-10px c-scrollbar-light" style="gap: 12px; max-height: 300px; overflow-y: auto;">
+                                @forelse ($requests as $req)
+                                    @php $item = $req->item_label; @endphp
+                                    <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                        <span class="fs-13 fw-400">
+                                            @if ($item)
+                                                {{ translate('You requested to add a') }} <a class="fs-13 fw-700 text-reset has-transition">{{ translate($item['type']) }}</a> {{ translate('named') }} <a class="fs-13 fw-700 text-reset has-transition">{{ $item['value'] }}</a>.
+                                            @endif
+                                        </span>
+                                    </div>
+                                @empty
+                                    <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                        <span class="fs-13 fw-400">{{ translate('No requests found') }}</span>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        {{-- Promotions --}}
+                        <div class="tab-pane fade" id="promotions" role="tabpanel" aria-labelledby="promotions-tab">
+                            <div class="d-flex flex-column pr-10px c-scrollbar-light" style="gap: 12px; max-height: 300px; overflow-y: auto;">
+                                @forelse ($promotions as $promotion)
+                                    <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                        <span class="fs-13 fw-400">
+                                            {{ translate('Admin created a promotion offer for') }}
+                                            @if ($promotion->flash_sale_id && $promotion->flashSale)
+                                                <a class="fs-13 fw-700 text-reset has-transition">{{ $promotion->flashSale->title }}</a>
+                                                <span class="fs-13 fw-400 text-dark">{{ translate('for') }}</span>
+                                                <a class="fs-13 fw-700 text-reset has-transition">{{ translate('FLASH DEALS') }}</a>
+                                            @else
+                                                <a class="fs-13 fw-700 text-reset has-transition">{{ $promotion->promo_type_label }}</a>
+                                            @endif
+                                        </span>
+                                    </div>
+                                @empty
+                                    <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                        <span class="fs-13 fw-400">{{ translate('No promotions found') }}</span>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
+                        {{-- Messages --}}
+                        <div class="tab-pane fade" id="messages" role="tabpanel" aria-labelledby="messages-tab">
+                            <div class="d-flex flex-column pr-10px c-scrollbar-light" style="gap: 12px; max-height: 300px; overflow-y: auto;">
+                                @if ($conversations->isNotEmpty() && $conversations->first()->lastSellerMessage)
+                                    <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                        <span class="fs-13 fw-400">{{ translate('Admin sent a message:') }} {{ \Illuminate\Support\Str::limit($conversations->first()->lastSellerMessage->message, 60) }}</span>
+                                        <a href="javascript:void(0);" class="js-goto-messages fs-14 fw-bold hov-text-blue has-transition d-block">{{ translate('View') }}</a>
+                                    </div>
+                                @else
+                                    <div class="rounded-1 p-2" style="background-color: #F7F7FA;">
+                                        <span class="fs-13 fw-400">{{ translate('No messages yet') }}</span>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -454,7 +649,7 @@
                 </div>
             </a>
             <a href="{{ route('seller.products.create') }}" class="d-block w-100">
-                <div class="card bg-light shadow-none h-lg-110px h-xl-90px hov-opacity-80 has-transition">
+                <div class="card bg-white hov-bg-light border-dashed shadow-none h-lg-110px h-xl-90px has-transition">
                     <div class="card-body d-flex align-items-center justify-content-center">
                         <div class="card-title text-center text-primary fs-16 fw-bold mb-0">
                             {{ translate('+ Add New Product') }}
@@ -981,6 +1176,32 @@
             if (hasPhoto || hasSelfie) {
                 $('#photoSelfieRequiredAlert').addClass('d-none');
             }
+        });
+
+        $(document).on('shown.bs.tab', '#notices-tab', function () {
+            $('#notices-tab .badge-danger').remove();
+            $.post('{{ route("seller.admin_seller_hub.notices") }}', { _token: '{{ csrf_token() }}' });
+        });
+
+        $(document).on('shown.bs.tab', '#promotions-tab', function () {
+            $('#promotions-tab .badge-danger').remove();
+            $.post('{{ route("seller.admin_seller_hub.promotions") }}', { _token: '{{ csrf_token() }}' });
+        });
+
+        $(document).on('shown.bs.tab', '#messages-tab', function () {
+            $('#messages-tab .badge-danger').remove();
+            $.post('{{ route("seller.admin_seller_chat.show") }}', { _token: '{{ csrf_token() }}' });
+        });
+
+        $(document).on('shown.bs.tab', '#all-notice-tab', function () {
+            $('#notices-tab .badge-danger').remove();
+            $('#promotions-tab .badge-danger').remove();
+            $.post('{{ route("seller.admin_seller_hub.notices") }}', { _token: '{{ csrf_token() }}' });
+            $.post('{{ route("seller.admin_seller_hub.promotions") }}', { _token: '{{ csrf_token() }}' });
+        });
+
+        $(document).on('shown.bs.tab', '#notices-tab, #promotions-tab, #messages-tab, #all-notice-tab', function () {
+            $('#view_all_chat .badge-danger').remove();
         });
     </script>
 

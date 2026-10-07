@@ -7,14 +7,6 @@
 				<div class="col">
 					<h1 class="h3">{{ translate('Homepage Settings (Re-Classic)') }}</h1>
 				</div>
-				{{-- <div class="col text-right">
-					<a class="btn has-transition btn-xs p-0 hov-svg-danger" href="{{ route('home') }}"
-						target="_blank" data-toggle="tooltip" data-placement="top" data-title="{{ translate('View Tutorial Video') }}">
-						<svg xmlns="http://www.w3.org/2000/svg" width="19.887" height="16" viewBox="0 0 19.887 16">
-							<path id="_42fbab5a39cb8436403668a76e5a774b" data-name="42fbab5a39cb8436403668a76e5a774b" d="M18.723,8H5.5A3.333,3.333,0,0,0,2.17,11.333v9.333A3.333,3.333,0,0,0,5.5,24h13.22a3.333,3.333,0,0,0,3.333-3.333V11.333A3.333,3.333,0,0,0,18.723,8Zm-3.04,8.88-5.47,2.933a1,1,0,0,1-1.473-.88V13.067a1,1,0,0,1,1.473-.88l5.47,2.933a1,1,0,0,1,0,1.76Zm-5.61-3.257L14.5,16l-4.43,2.377Z" transform="translate(-2.17 -8)" fill="#9da3ae"/>
-						</svg>
-					</a>
-				</div> --}}
 			</div>
 		</div>
 
@@ -27,6 +19,13 @@
 						<a class="nav-link" id="home-slider-tab" href="#home_slider"
 							data-toggle="tab" data-target="#home_slider" type="button" role="tab" aria-controls="home_slider" aria-selected="true">
 							{{ translate('Home Slider') }}
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="featured-categories-tab" href="#featured_categories" data-toggle="tab"
+							data-target="#featured_categories" type="button" role="tab" aria-controls="featured_categories"
+							aria-selected="false">
+							{{ translate('Featured Categories') }}
 						</a>
 					</li>
 					<!-- Today's Deal -->
@@ -64,6 +63,12 @@
 						<a class="nav-link" id="preorder-banner-2-tab" href="#preorder_banner_1"
 							data-toggle="tab" data-target="#preorder_banner_1" type="button" role="tab" aria-controls="preorder_banner_1" aria-selected="false">
 							{{ translate('Preorder Banner 1') }}
+						</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="preorder-featured-products-tab" href="#preorder_featured_products"
+							data-toggle="tab" data-target="#preorder_featured_products" type="button" role="tab" aria-controls="preorder_featured_products" aria-selected="false">
+							{{ translate('Preorder Featured Products') }}
 						</a>
 					</li>
 					@endif
@@ -298,12 +303,62 @@
 						</form>
 					</div>
 
+					<div class="tab-pane fade" id="featured_categories" role="tabpanel"
+						aria-labelledby="featured-categories-tab">
+						<form action="{{ route('business_settings.update') }}" method="POST" enctype="multipart/form-data">
+							@csrf
+							<input type="hidden" name="tab" value="featured_categories">
+							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									<div class="col-lg-12">
+							
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_featured_categories = get_setting('enable_featured_categories') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_featured_categories">
+													<input type="checkbox" name="enable_featured_categories" value="1"
+														{{ $enable_featured_categories == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Featured Categories') }}</span>
+											</div>
+										</div>
+											
+									</div>
+								</div>
+								<div class="mt-4 text-right">
+									<button type="submit"
+										class="btn btn-success w-230px btn-md rounded-2 fs-14 fw-700 shadow-success">{{ translate('Save') }}</button>
+								</div>
+							</div>
+						</form>
+					</div>
+
 					<!-- Today's Deal -->
 					<div class="tab-pane fade" id="todays_deal" role="tabpanel" aria-labelledby="todays-deal-tab">
 						<form action="{{ route('business_settings.update') }}" method="POST" enctype="multipart/form-data">
 							@csrf
 							<input type="hidden" name="tab" value="todays_deal">
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16 mb-2">
+									<div class="col-lg-12">
+										<div class="w-100">
+											<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+												@php $enable_todays_deal = get_setting('enable_todays_deal') @endphp
+												<div class="d-flex align-items-center">
+													<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+														<input type="hidden" name="types[]" value="enable_todays_deal">
+														<input type="checkbox" name="enable_todays_deal" value="1"
+															{{ $enable_todays_deal == 1 ? 'checked' : '' }}>
+														<span></span>
+													</label>
+													<span class="d-block" style="margin-top: -6px">{{ translate("Enable Today's Deal") }}</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
 								<div class="row">
 									<!-- Large Banner -->
 									<div class="col-lg-6">
@@ -355,6 +410,24 @@
 							<input type="hidden" name="types[][{{ $lang }}]" value="home_banner1_links">
 
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_banner_1 = get_setting('enable_banner_1') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_banner_1">
+													<input type="checkbox" name="enable_banner_1" value="1"
+														{{ $enable_banner_1 == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Banner 1') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
 								<div class="w-100">
 									<label class="col-from-label fs-13 fw-500 mb-0">{{ translate('Banner & Links (Max 3)') }}</label>
                                     <div class="small text-muted mb-3">{{ translate("Minimum dimensions required: 436px width X 236px height.") }}</div>
@@ -463,10 +536,29 @@
 							<input type="hidden" name="tab" value="flash_deals">
 							<div class="bg-white p-3 p-sm-2rem">
 								<div class="row gutters-16">
+									<div class="col-lg-12">
+										<div class="w-100">
+
+											<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+												@php $enable_flash_deal = get_setting('enable_flash_deal') @endphp
+												<div class="d-flex align-items-center">
+													<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+														<input type="hidden" name="types[]" value="enable_flash_deal">
+														<input type="checkbox" name="enable_flash_deal" value="1"
+															{{ $enable_flash_deal == 1 ? 'checked' : '' }}>
+														<span></span>
+													</label>
+													<span class="d-block" style="margin-top: -6px">{{ translate('Enable Flash Deal') }}</span>
+												</div>
+											</div>
+
+										</div>
+									</div>
+								</div>
+								<div class="row gutters-16">
 									<!-- Flash Deal Settings -->
-									<div class="col-lg-6">
-										<div class="p-4 border h-250px h-lg-300px" style="background: #fcfcfc;">
-											<p class="fs-14 fw-500 mb-3">{{ translate("Flash Deal Section Settings") }}</p>
+									<div class="col-lg-12">
+										
 											<!-- Background color -->
 											<div class="form-group">
 												<label class="col-from-label fs-13 fw-500">{{ translate('Background color') }}</label>
@@ -502,7 +594,7 @@
 													</div>
 												</div>
 											</div>
-										</div>
+									
 									</div>
 								</div>
 								<!-- Save Button -->
@@ -520,10 +612,26 @@
 							<input type="hidden" name="tab" value="featured">
 							<div class="bg-white p-3 p-sm-2rem">
 								<div class="row gutters-16">
+
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_featured_products = get_setting('enable_featured_products') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_featured_products">
+													<input type="checkbox" name="enable_featured_products" value="1"
+														{{ $enable_featured_products == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Featured Products') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
+								<div class="row gutters-16">
 									<!-- Featured Products Settings -->
-									<div class="col-lg-6">
-										<div class="p-4 border h-250px h-lg-300px" style="background: #fcfcfc;">
-											<p class="fs-14 fw-500 mb-3">{{ translate("Featured Products Section Settings") }}</p>
+									<div class="col-lg-12">
 											<!-- Background color -->
 											<div class="form-group">
 												<label class="col-from-label fs-13 fw-500">{{ translate('Background color') }}</label>
@@ -559,7 +667,7 @@
 													</div>
 												</div>
 											</div>
-										</div>
+										
 									</div>
 								</div>
 								<!-- Save Button -->
@@ -580,6 +688,24 @@
 							<input type="hidden" name="types[][{{ $lang }}]" value="home_preorder_banner_1_links">
 
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_preorder_banner_1 = get_setting('enable_preorder_banner_1') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_preorder_banner_1">
+													<input type="checkbox" name="enable_preorder_banner_1" value="1"
+														{{ $enable_preorder_banner_1 == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Preorder Banner 1') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
 								<div class="w-100">
 									<label class="col-from-label fs-13 fw-500 mb-0">{{ translate('Banner & Links (Max 3)') }}</label>
 									<div class="small text-muted mb-3">{{ translate("Minimum dimensions required: 1370px width X 360px height (If use a single banner).") }}</div>
@@ -681,6 +807,39 @@
 						</form>
 					</div>
 
+					<div class="tab-pane fade" id="preorder_featured_products" role="tabpanel" aria-labelledby="preorder-featured-products-tab">
+						<form action="{{ route('business_settings.update') }}" method="POST" enctype="multipart/form-data">
+							@csrf
+							<input type="hidden" name="tab" value="preorder_featured_products">
+
+							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_preorder_featured_products = get_setting('enable_preorder_featured_products') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_preorder_featured_products">
+													<input type="checkbox" name="enable_preorder_featured_products" value="1"
+														{{ $enable_preorder_featured_products == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Preorder Featured Products') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
+
+								<!-- Save Button -->
+								<div class="mt-4 text-right">
+									<button type="submit" class="btn btn-success w-230px btn-md rounded-2 fs-14 fw-700 shadow-success">{{ translate('Save') }}</button>
+								</div>
+							</div>
+						</form>
+					</div>
+
 					<!-- Banner Level 2 -->
 					<div class="tab-pane fade" id="banner_2" role="tabpanel" aria-labelledby="banner-2-tab">
 						<form action="{{ route('business_settings.update') }}" method="POST" enctype="multipart/form-data">
@@ -690,6 +849,24 @@
 							<input type="hidden" name="types[][{{ $lang }}]" value="home_banner2_links">
 
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_banner_2 = get_setting('enable_banner_2') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_banner_2">
+													<input type="checkbox" name="enable_banner_2" value="1"
+														{{ $enable_banner_2 == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Banner 2') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
 								<div class="w-100">
 									<label class="col-from-label fs-13 fw-500 mb-0">{{ translate('Banner & Links (Max 3)') }}</label>
                                     <div class="small text-muted mb-3">{{ translate("Minimum dimensions required: 1370px width X 360px height (If use a single banner).") }}</div>
@@ -798,10 +975,26 @@
 							<input type="hidden" name="tab" value="best_selling">
 							<div class="bg-white p-3 p-sm-2rem">
 								<div class="row gutters-16">
+
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_best_selling_products = get_setting('enable_best_selling_products') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_best_selling_products">
+													<input type="checkbox" name="enable_best_selling_products" value="1"
+														{{ $enable_best_selling_products == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Best Selling Products') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
+								<div class="row gutters-16">
 									<!-- Best Selling Products Settings -->
-									<div class="col-lg-6">
-										<div class="p-4 border h-250px h-lg-300px" style="background: #fcfcfc;">
-											<p class="fs-14 fw-500 mb-3">{{ translate("Best Selling Products Section Settings") }}</p>
+									<div class="col-lg-12">
 											<!-- Background color -->
 											<div class="form-group">
 												<label class="col-from-label fs-13 fw-500">{{ translate('Background color') }}</label>
@@ -837,7 +1030,7 @@
 													</div>
 												</div>
 											</div>
-										</div>
+										
 									</div>
 								</div>
 								<!-- Save Button -->
@@ -855,10 +1048,26 @@
 							<input type="hidden" name="tab" value="new_products">
 							<div class="bg-white p-3 p-sm-2rem">
 								<div class="row gutters-16">
+
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_new_products = get_setting('enable_new_products') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_new_products">
+													<input type="checkbox" name="enable_new_products" value="1"
+														{{ $enable_new_products == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable New Products') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
+								<div class="row gutters-16">
 									<!-- New Products Settings -->
-									<div class="col-lg-6">
-										<div class="p-4 border h-250px h-lg-300px" style="background: #fcfcfc;">
-											<p class="fs-14 fw-500 mb-3">{{ translate("New Products Section Settings") }}</p>
+									<div class="col-lg-12">
 											<!-- Background color -->
 											<div class="form-group">
 												<label class="col-from-label fs-13 fw-500">{{ translate('Background color') }}</label>
@@ -894,7 +1103,7 @@
 													</div>
 												</div>
 											</div>
-										</div>
+										
 									</div>
 								</div>
 								<!-- Save Button -->
@@ -914,6 +1123,24 @@
 							<input type="hidden" name="types[][{{ $lang }}]" value="home_banner3_links">
 
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_banner_3 = get_setting('enable_banner_3') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_banner_3">
+													<input type="checkbox" name="enable_banner_3" value="1"
+														{{ $enable_banner_3 == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Banner 3') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
 								<div class="w-100">
 									<label class="col-from-label fs-13 fw-500 mb-0">{{ translate('Banner & Links (Max 3)') }}</label>
                                     <div class="small text-muted mb-3">{{ translate("Minimum dimensions required: 436px width X 236px height (If use a single banner).") }}</div>
@@ -1022,6 +1249,24 @@
 							@csrf
 							<input type="hidden" name="tab" value="auction">
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_auction_products = get_setting('enable_auction_products') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_auction_products">
+													<input type="checkbox" name="enable_auction_products" value="1"
+														{{ $enable_auction_products == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Auction Products') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
                                 <!-- Section Settings -->
                                 <div class="row gutters-16">
                                     <div class="col-lg-6 order-lg-1">
@@ -1111,6 +1356,24 @@
 							@csrf
 							<input type="hidden" name="tab" value="coupon">
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_coupon_section = get_setting('enable_coupon_section') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_coupon_section">
+													<input type="checkbox" name="enable_coupon_section" value="1"
+														{{ $enable_coupon_section == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Coupon Section') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
 								<div class="w-100">
 									<div class="row gutters-16">
 										<!-- Background Image -->
@@ -1201,6 +1464,24 @@
 							@csrf
 							<input type="hidden" name="tab" value="newestPreorder">
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_newest_preorder_products = get_setting('enable_newest_preorder_products') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_newest_preorder_products">
+													<input type="checkbox" name="enable_newest_preorder_products" value="1"
+														{{ $enable_newest_preorder_products == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Newest Preorder Products Section') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
 								<div class="form-group">
 									<label class="col-from-label fs-13 fw-500">{{ translate("Banner") }}</label>
 									<div class="input-group " data-toggle="aizuploader" data-type="image">
@@ -1227,6 +1508,24 @@
 							@csrf
 							<input type="hidden" name="tab" value="home_categories">
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_category_wise_products_section = get_setting('enable_category_wise_products_section') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_category_wise_products_section">
+													<input type="checkbox" name="enable_category_wise_products_section" value="1"
+														{{ $enable_category_wise_products_section == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Category Wise Products Section') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
                                 <!-- Section Settings -->
                                 <div class="row gutters-16">
                                     <div class="col-lg-6">
@@ -1364,6 +1663,24 @@
 							@csrf
 							<input type="hidden" name="tab" value="classifieds">
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_classified_products_sections = get_setting('enable_classified_products_sections') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_classified_products_sections">
+													<input type="checkbox" name="enable_classified_products_sections" value="1"
+														{{ $enable_classified_products_sections == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Classified Products Section') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
                                 <!-- Section Settings -->
                                 <div class="row gutters-16">
                                     <div class="col-lg-6 order-lg-1">
@@ -1450,6 +1767,24 @@
 							<input type="hidden" name="tab" value="sellers">
 							<div class="bg-white p-3 p-sm-2rem">
 								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_top_sellers_section = get_setting('enable_top_sellers_section') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_top_sellers_section">
+													<input type="checkbox" name="enable_top_sellers_section" value="1"
+														{{ $enable_top_sellers_section == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Top Sellers Section') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
+								<div class="row gutters-16">
 									<!-- Top Sellers Settings -->
 									<div class="col-lg-6">
 										<div class="p-4 border h-250px h-lg-300px" style="background: #fcfcfc;">
@@ -1506,6 +1841,24 @@
 							@csrf
 							<input type="hidden" name="tab" value="brands">
 							<div class="bg-white p-3 p-sm-2rem">
+								<div class="row gutters-16">
+									
+									<div class="col-lg-12">
+										<div class="form-group mb-2 d-flex justify-content-between align-items-center">
+											@php $enable_top_brands_section = get_setting('enable_top_brands_section') @endphp
+											<div class="d-flex align-items-center">
+												<label class="aiz-switch aiz-switch-blue mb-0 pr-2">
+													<input type="hidden" name="types[]" value="enable_top_brands_section">
+													<input type="checkbox" name="enable_top_brands_section" value="1"
+														{{ $enable_top_brands_section == 1 ? 'checked' : '' }}>
+													<span></span>
+												</label>
+												<span class="d-block" style="margin-top: -6px">{{ translate('Enable Top Brands Section') }}</span>
+											</div>
+										</div>
+									</div>
+
+								</div>
 								<div class="row gutters-16">
 									<!-- Top Brands Settings -->
 									<div class="col-lg-6">

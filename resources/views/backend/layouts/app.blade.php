@@ -319,6 +319,11 @@
             openGlobalRightOffcanvas('all_notification');
         });
 
+        $(document).on('click', '#view_all_chat', function (e) {
+            e.preventDefault();
+            openGlobalRightOffcanvas('all_chat');
+        });
+
         function openGlobalRightOffcanvas(type = 'category', extraParam = null) {
             globalRightOffcanvas.classList.add('active');
             globalOverlay.classList.add('active');
@@ -336,7 +341,8 @@
                 measurement_point: "{{ route('admin_ajax_add_measurement_point_modal') }}",
                 unit: "{{ route('admin_ajax_add_unit_modal') }}",
                 warranty: "{{ route('admin_ajax_add_warranty_modal') }}",
-                all_notification: "{{ route('admin_view_all_notication_modal') }}"
+                all_notification: "{{ route('admin_view_all_notication_modal') }}",
+                all_chat: "{{ route('admin_view_all_chat_modal') }}"
             };
 
             const postData = { _token: AIZ.data.csrf };
@@ -393,6 +399,8 @@
             globalRightOffcanvas.classList.remove('active');
             globalOverlay.classList.remove('active');
             document.body.classList.remove('body-no-scroll');
+
+            $('#view_all_chat .badge-danger').remove();
         }
 
         function closeGlobalRightOffcanvas() {
@@ -934,7 +942,7 @@
                     if (res.success) {
                         AIZ.plugins.notify('success', res.message);
                         var newOption = new Option(res.measurement_point_name, res.measurement_point_id, true, true);
-                        $('#measurement_points').append(newOption).selectpicker('refresh'); // ← was #measurement_point
+                        $('#measurement_points').append(newOption).selectpicker('refresh');
                         closeglobalRightOffcanvas();
                     }
                 },
@@ -947,6 +955,548 @@
                     }
                     btn.prop('disabled', false);
                     btn.find('.spinner-border').remove();
+                }
+            });
+        });
+
+        function loadTabContent(url, $container, onSuccess) {
+            $container.html('<div class="footable-loader mt-5"><span class="fooicon fooicon-loader"></span></div>');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}' },
+                success: function (html) {
+                    $container.html(html);
+                    if (typeof onSuccess === 'function') {
+                        onSuccess(html);
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Tab load failed:', xhr.status, xhr.responseText);
+                    $container.html('<p class="text-danger p-3 text-center">{{ translate("Failed to load") }}</p>');
+                }
+            });
+        }
+
+        $(document).on('click', '.js-open-chat', function (e) {
+            e.preventDefault();
+            var sellerId = $(this).data('seller-id');
+            var url = "{{ route('admin_seller_chat.show', ['seller_id' => '__SELLER_ID__']) }}"
+                        .replace('__SELLER_ID__', sellerId);
+
+            loadTabContent(url, $('#chat-single-view'));
+            $('#chat-single-view').removeClass('d-none').css('display', '');
+            $('#chat-list-view').addClass('d-none').css('display', '');
+
+            $('#nav-messages-tab .bg-danger').remove();
+            $('#view_all_chat .badge-danger').remove();
+        });
+
+        $(document).on('click', '.js-back-to-chat-list', function (e) {
+            e.preventDefault();
+
+            loadTabContent('{{ route("admin_seller_chat.list") }}', $('#chat-list-view'));
+            $('#chat-list-view').removeClass('d-none').css('display', '');
+            $('#chat-single-view').addClass('d-none').css('display', '').empty();
+        });
+
+        $(document).on('click', '.js-send-chat-message', function (e) {
+            e.preventDefault();
+            var btn = $(this);
+            var sellerId = btn.data('seller-id');
+            var input = $('.js-chat-message-input');
+            var msg = input.val().trim();
+            if (!msg) return;
+
+            $.ajax({
+                url: '{{ route("admin_seller_chat.send_message") }}',
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}', seller_id: sellerId, message: msg },
+                success: function (res) {
+                    if (res.success) {
+                        $('.js-no-message-placeholder').remove();
+
+                        var messageHtml = `
+                            <div class="d-flex flex-column align-items-end justify-content-end">
+                                <p class="mb-1 bg-white border border-gray-300 rounded-2 px-10px py-10px d-inline-block">
+                                    <span class="fs-13 fw-400 text-reset d-block">${res.message}</span>
+                                    <span class="fs-11 fw-400 text-gray d-block mt-1 text-right w-100">${res.time}</span>
+                                </p>
+                            </div>`;
+                        $('.js-chat-messages-body').append(messageHtml);
+                        input.val('');
+
+                        var container = $('.js-chat-messages-body').closest('.c-scrollbar-light');
+                        container.scrollTop(container[0].scrollHeight);
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Message send failed:', xhr.status, xhr.responseText);
+                }
+            });
+        });   
+        
+        var noticesLoaded = false;
+        var requestsLoaded = false;
+        var promotionsLoaded = false;
+        var presetNoticeLoaded = false;
+        var plusLoaded = false;
+        var plusNoticeLoaded = false;
+        var plusMessageLoaded = false;
+        var plusPromotionLoaded = false;
+        var pendingSubTab = null;
+        var pendingNoticeEditData = null;
+
+        $(document).on('shown.bs.tab', '#nav-notices-tab', function (e) {
+            loadTabContent('{{ route("admin_seller_hub.notices") }}', $('#nav-notices'));
+        });
+
+        $(document).on('shown.bs.tab', '#nav-requests-tab', function (e) {
+            $('#nav-requests-tab .bg-danger').remove();
+            loadTabContent('{{ route("admin_seller_hub.requests") }}', $('#nav-requests'));
+        });
+
+        $(document).on('shown.bs.tab', '#nav-promotions-tab', function (e) {
+            $('#nav-promotions-tab .bg-danger').remove();
+            loadTabContent('{{ route("admin_seller_hub.promotions") }}', $('#nav-promotions'));
+        });
+
+        $(document).on('shown.bs.tab', '#nav-preset-notice-tab', function (e) {
+            loadTabContent('{{ route("admin_seller_hub.preset_notice") }}', $('#nav-preset-notice'));
+        });
+
+        $(document).on('shown.bs.tab', '#nav-plus-tab', function (e) {
+            loadTabContent('{{ route("admin_seller_hub.plus") }}', $('#nav-plus'), function () {
+                if (pendingSubTab) {
+                    var sub = pendingSubTab;
+                    pendingSubTab = null;
+                    activateTab(sub);
+                } else {
+                    loadPlusMessageContent();
+                }
+            });
+        });
+
+        function loadPlusMessageContent() {
+            loadTabContent('{{ route("admin_seller_hub.plus_message") }}', $('#plus-message'), function () {
+                if (AIZ.plugins.bootstrapSelect) {
+                    AIZ.plugins.bootstrapSelect('refresh');
+                }
+            });
+        }
+
+        $(document).on('shown.bs.tab', '#plus-message-tab', function (e) {
+            loadPlusMessageContent();
+        });
+
+        $(document).on('shown.bs.tab', '#plus-promotion-tab', function (e) {
+            loadTabContent('{{ route("admin_seller_hub.plus_promotion") }}', $('#plus-promotion'), function () {
+                if (AIZ.plugins.bootstrapSelect) {
+                    AIZ.plugins.bootstrapSelect('refresh');
+                }
+            });
+        });
+
+        $(document).on('change', '.js-plus-message-audience', function () {
+            var isSpecific = $(this).val() === 'specific';
+            var $select = $('.js-plus-message-sellers');
+            
+            $select.prop('disabled', !isSpecific);
+            
+            if ($select.hasClass('selectpicker') || $select.data('selectpicker')) {
+                $select.selectpicker('refresh');
+            } else if (AIZ.plugins.bootstrapSelect) {
+                AIZ.plugins.bootstrapSelect('refresh');
+            }
+        });
+
+        $(document).on('click', '#seller-hub-post-btn', function (e) {
+            e.preventDefault();
+
+            if ($('#plus-message').hasClass('active')) {
+                submitPlusMessage();
+            } else if ($('#plus-promotion').hasClass('active')) {
+                submitPlusPromotion();
+            } else if ($('#plus-notice').hasClass('active')) {
+                submitPlusNotice();
+            }
+        });
+
+        function submitPlusMessage() {
+            var audience = $('input[name="message_audience"]:checked').val();
+            var sellerIds = audience === 'specific' ? $('.js-plus-message-sellers').selectpicker('val') : [];
+            var content = $('.js-plus-message-content').val().trim();
+
+            if (!content) {
+                AIZ.plugins.notify('warning', '{{ translate("Please write message content") }}');
+                return;
+            }
+            if (audience === 'specific' && (!sellerIds || sellerIds.length === 0)) {
+                AIZ.plugins.notify('warning', '{{ translate("Please select at least one seller") }}');
+                return;
+            }
+
+            var btn = $('#seller-hub-post-btn');
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: '{{ route("admin_seller_hub.plus_message_store") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    audience: audience,
+                    seller_ids: sellerIds,
+                    content: content
+                },
+                success: function (res) {
+                    if (res.success) {
+                        AIZ.plugins.notify('success', res.message);
+                        closeglobalRightOffcanvas();
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Post message failed:', xhr.status, xhr.responseText);
+                    AIZ.plugins.notify('danger', '{{ translate("Something went wrong") }}');
+                },
+                complete: function () {
+                    btn.prop('disabled', false);
+                }
+            });
+        }
+
+        $(document).on('change', '.js-promo-audience', function () {
+            var isSpecific = $(this).val() === 'specific';
+            var $select = $('.js-promo-sellers');
+            $select.prop('disabled', !isSpecific);
+            if (AIZ.plugins.bootstrapSelect) {
+                AIZ.plugins.bootstrapSelect('refresh');
+            }
+        });
+
+        $(document).on('change', '.js-promo-type', function () {
+            var isFlashDeal = $(this).val() === 'flash_deals';
+            var $select = $('.js-promo-flash-deals');
+            $select.prop('disabled', !isFlashDeal);
+            if (AIZ.plugins.bootstrapSelect) {
+                AIZ.plugins.bootstrapSelect('refresh');
+            }
+        });
+
+        function submitPlusPromotion() {
+            var audience = $('input[name="promo_audience"]:checked').val();
+            var sellerIds = audience === 'specific' ? $('.js-promo-sellers').selectpicker('val') : [];
+
+            var promoType = $('input[name="promo_type"]:checked').val();
+            var flashDealId = promoType === 'flash_deals' ? $('.js-promo-flash-deals').selectpicker('val') : null;
+            var message = $('.js-promo-content').val().trim();
+
+            if (!promoType) {
+                AIZ.plugins.notify('warning', '{{ translate("Please select a promotion type") }}');
+                return;
+            }
+            if (audience === 'specific' && (!sellerIds || sellerIds.length === 0)) {
+                AIZ.plugins.notify('warning', '{{ translate("Please select at least one seller") }}');
+                return;
+            }
+            if (promoType === 'flash_deals' && !flashDealId) {
+                AIZ.plugins.notify('warning', '{{ translate("Please select a flash sale") }}');
+                return;
+            }
+
+            var btn = $('#seller-hub-post-btn');
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: '{{ route("admin_seller_hub.plus_promotion_store") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    audience: audience,
+                    seller_ids: sellerIds,
+                    promo_type: promoType,
+                    flash_sale_id: flashDealId,
+                    message: message,
+                },
+                success: function (res) {
+                    if (res.success) {
+                        AIZ.plugins.notify('success', res.message);
+                        closeglobalRightOffcanvas();
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        const first = Object.values(xhr.responseJSON?.errors ?? {})[0]?.[0];
+                        AIZ.plugins.notify('danger', first || '{{ translate("Validation failed") }}');
+                    } else {
+                        AIZ.plugins.notify('danger', '{{ translate("Something went wrong") }}');
+                    }
+                },
+                complete: function () {
+                    btn.prop('disabled', false);
+                }
+            });
+        }    
+
+        $(document).on('click', '.js-goto-create-promotion', function (e) {
+            e.preventDefault();
+            pendingSubTab = 'plus-promotion-tab';
+            activateTab('nav-plus-tab');
+        }); 
+        
+        $(document).on('change', '.js-notice-audience', function () {
+            var isSpecific = $(this).val() === 'specific';
+            var $select = $('.js-notice-sellers');
+            $select.prop('disabled', !isSpecific);
+            if (AIZ.plugins.bootstrapSelect) {
+                AIZ.plugins.bootstrapSelect('refresh');
+            }
+        });
+
+        $(document).on('change', '.js-notice-type', function () {
+            var isTemporary = $(this).val() === 'temporary';
+            $('.js-notice-datetime').prop('disabled', !isTemporary);
+        });
+
+        function submitPlusNotice() {
+            var audience = $('input[name="notice_audience"]:checked').val();
+            var sellerIds = audience === 'specific' ? $('.js-notice-sellers').selectpicker('val') : [];
+
+            var noticeType = $('input[name="notice_type"]:checked').val();
+            var noticeDatetime = noticeType === 'temporary' ? $('.js-notice-datetime').val() : null;
+            var message = $('.js-notice-content').val().trim();
+            var bgColor = $('input[name="bg_color"]:checked').val();
+            var savePreset = $('.js-notice-save-preset').is(':checked') ? 1 : 0;
+            var noticeId = $('.js-notice-id').val();
+            var isEdit = !!noticeId;
+
+            if (audience === 'specific' && (!sellerIds || sellerIds.length === 0)) {
+                AIZ.plugins.notify('warning', '{{ translate("Please select at least one seller") }}');
+                return;
+            }
+            if (noticeType === 'temporary' && !noticeDatetime) {
+                AIZ.plugins.notify('warning', '{{ translate("Please select date for temporary notice") }}');
+                return;
+            }
+            if (!message) {
+                AIZ.plugins.notify('warning', '{{ translate("Please write content") }}');
+                return;
+            }
+            if (!bgColor) {
+                AIZ.plugins.notify('warning', '{{ translate("Please select a background color") }}');
+                return;
+            }
+
+            var btn = $('#seller-hub-post-btn');
+            btn.prop('disabled', true);
+
+            var payload = {
+                _token: '{{ csrf_token() }}',
+                audience: audience,
+                seller_ids: sellerIds,
+                notice_type: noticeType,
+                notice_datetime: noticeDatetime,
+                message: message,
+                bg_color: bgColor,
+                save_as_preset: savePreset,
+            };
+
+            var url = '{{ route("admin_seller_hub.plus_notice_store") }}';
+            if (isEdit) {
+                payload.notice_id = noticeId;
+                url = '{{ route("admin_seller_hub.plus_notice_update") }}';
+            }
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: payload,
+                success: function (res) {
+                    if (res.success) {
+                        AIZ.plugins.notify('success', res.message);
+                        resetNoticeForm();
+                        closeglobalRightOffcanvas();
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        const first = Object.values(xhr.responseJSON?.errors ?? {})[0]?.[0];
+                        AIZ.plugins.notify('danger', first || '{{ translate("Validation failed") }}');
+                    } else {
+                        AIZ.plugins.notify('danger', '{{ translate("Something went wrong") }}');
+                    }
+                },
+                complete: function () {
+                    btn.prop('disabled', false);
+                }
+            });
+        }
+
+        $(document).on('click', '.js-goto-create-notice', function (e) {
+            e.preventDefault();
+            pendingNoticeEditData = null;
+            pendingSubTab = 'plus-notice-tab';
+            activateTab('nav-plus-tab');
+        });
+
+        $(document).on('click', '.js-goto-preset-notice', function (e) {
+            e.preventDefault();
+            activateTab('nav-preset-notice-tab');
+        });
+
+        function applyNoticeEditData() {
+            if (!pendingNoticeEditData) return;
+            var data = pendingNoticeEditData;
+            pendingNoticeEditData = null;
+
+            $('.js-notice-id').val(data.id || '');
+
+            if (data.audience === 'all') {
+                $('#notices-all-seller').prop('checked', true).trigger('change');
+            } else {
+                $('#notices-seller-form').prop('checked', true).trigger('change');
+                $('.js-notice-sellers').selectpicker('val', data.seller_ids);
+            }
+
+            var $typeRadio = $('input[name="notice_type"][value="' + data.notice_type + '"]');
+            if ($typeRadio.length) {
+                $typeRadio.prop('checked', true).trigger('change');
+            }
+            if (data.notice_type === 'temporary') {
+                $('.js-notice-datetime').val(data.notice_datetime);
+            }
+
+            $('.js-notice-content').val(data.message);
+
+            $('input[name="bg_color"]').each(function () {
+                $(this).prop('checked', $(this).val() === data.bg_color);
+            });
+
+            $('.js-notice-save-preset').prop('checked', data.save_as_preset);
+
+            $('#seller-hub-post-btn').text(data.id ? '{{ translate("Update") }}' : '{{ translate("Post") }}');
+        }
+
+        function resetNoticeForm() {
+            $('.js-notice-id').val('');
+            $('.js-notice-content').val('');
+            $('#seller-hub-post-btn').text('{{ translate("Post") }}');
+        }
+
+        $(document).on('change', '.js-preset-notice-status', function () {
+            var $checkbox = $(this);
+            var noticeId = $checkbox.data('notice-id');
+            var status = $checkbox.is(':checked') ? 1 : 0;
+
+            $.ajax({
+                url: '{{ route("admin_seller_hub.preset_notice_toggle_status") }}',
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}', notice_id: noticeId, status: status },
+                success: function (res) {
+                    if (res.success) {
+                        AIZ.plugins.notify('success', res.message);
+                    }
+                },
+                error: function () {
+                    $checkbox.prop('checked', !status);
+                    AIZ.plugins.notify('danger', '{{ translate("Something went wrong") }}');
+                }
+            });
+        });
+
+        $(document).on('click', '.js-preset-notice-delete', function (e) {
+            e.preventDefault();
+            var noticeId = $(this).data('notice-id');
+            var $item = $(this).closest('.border-bottom-dashed');
+
+            $.ajax({
+                url: '{{ route("admin_seller_hub.preset_notice_delete") }}',
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}', notice_id: noticeId },
+                success: function (res) {
+                    if (res.success) {
+                        AIZ.plugins.notify('success', res.message);
+                        $item.remove();
+                    }
+                },
+                error: function () {
+                    AIZ.plugins.notify('danger', '{{ translate("Something went wrong") }}');
+                }
+            });
+        });
+
+        $(document).on('click', '.js-preset-notice-edit', function (e) {
+            e.preventDefault();
+            var noticeId = $(this).data('notice-id');
+
+            $.ajax({
+                url: '{{ route("admin_seller_hub.preset_notice_edit") }}',
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}', notice_id: noticeId },
+                success: function (res) {
+                    if (!res.success) return;
+                    pendingNoticeEditData = res.notice;
+                    pendingSubTab = 'plus-notice-tab';
+                    activateTab('nav-plus-tab');
+                },
+                error: function () {
+                    AIZ.plugins.notify('danger', '{{ translate("Something went wrong") }}');
+                }
+            });
+        });  
+
+        function activateTab(tabId) {
+            var $tab = $('#' + tabId);
+            if ($tab.hasClass('active')) {
+                $tab.trigger('shown.bs.tab');
+            } else {
+                $tab.tab('show');
+            }
+        }
+
+        $(document).on('shown.bs.tab', '#plus-notice-tab', function (e) {
+            loadTabContent('{{ route("admin_seller_hub.plus_notice") }}', $('#plus-notice'), function () {
+                if (AIZ.plugins.bootstrapSelect) {
+                    AIZ.plugins.bootstrapSelect('refresh');
+                }
+                applyNoticeEditData();
+            });
+        });
+
+        $(document).on('click', '.js-open-message-from-activity', function (e) {
+            e.preventDefault();
+            var sellerId = $(this).data('seller-id');
+
+            activateTab('nav-messages-tab');
+
+            var url = "{{ route('admin_seller_chat.show', ['seller_id' => '__SELLER_ID__']) }}"
+                        .replace('__SELLER_ID__', sellerId);
+
+            loadTabContent(url, $('#chat-single-view'));
+            $('#chat-single-view').removeClass('d-none').css('display', '');
+            $('#chat-list-view').addClass('d-none').css('display', '');
+
+            $('#nav-messages-tab .bg-danger').remove();
+            $('#view_all_chat .badge-danger').remove();
+        });
+
+        $(document).on('click', '.js-preset-notice-postagain', function (e) {
+            e.preventDefault();
+            var noticeId = $(this).data('notice-id');
+
+            $.ajax({
+                url: '{{ route("admin_seller_hub.preset_notice_edit") }}',
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}', notice_id: noticeId },
+                success: function (res) {
+                    if (!res.success) return;
+                    pendingNoticeEditData = res.notice;
+                    pendingNoticeEditData.id = null;
+                    pendingSubTab = 'plus-notice-tab';
+                    activateTab('nav-plus-tab');
+                },
+                error: function () {
+                    AIZ.plugins.notify('danger', '{{ translate("Something went wrong") }}');
                 }
             });
         });

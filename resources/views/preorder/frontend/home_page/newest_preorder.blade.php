@@ -9,7 +9,8 @@
     })
     ->latest()
     ->limit(12)
-    ->get();
+    ->get()
+    ->shuffle();
 
         @endphp
         @if (count($newest_preorder_products) > 0)

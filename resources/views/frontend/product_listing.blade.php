@@ -49,6 +49,9 @@
     <section class="mb-1">
         <div class="container sm-px-0 pt-1">
             <form class="" id="search-form" action="" method="GET">
+                @if (isset($brand_id) && $brand_id != null)
+                    <input type="hidden" name="brand_id" value="{{ $brand_id }}">
+                @endif
                 <div class="row">
 
                     <!-- Sidebar Filters -->
@@ -632,20 +635,15 @@
                 }
             }
 
-            // category filter page some logic here
+            // category & brand filter page logic
             let category_id = <?php echo $category_id ?? 'null'; ?>;
             let brand_id = <?php echo $brand_id ?? 'null'; ?>;
             if (category_page_first_time && category_id !== null && category_id !== 0 && category_id !== undefined) {
                 formData += '&categories[]=' + category_id;
                 category_page_first_time = false;
-            } else if (brand_page_first_time && brand_id !== null && brand_id !== 0 && brand_id !== undefined) {
+            }
+            if (brand_id !== null && brand_id !== 0 && brand_id !== undefined && !formData.includes('brand_id=')) {
                 formData += "&brand_id=" + brand_id;
-                brand_page_first_time = false;
-            } else {
-                $('.hide_cat1').each(function() {
-                    this.style.setProperty('display', 'none', 'important');
-                });
-                $('.show_cat1').removeClass('d-none');
             }
 
             // alert(formData);

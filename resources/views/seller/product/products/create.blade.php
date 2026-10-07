@@ -1654,8 +1654,17 @@
     function handleTagify($input, fieldValue) {
         let tagifyTags = fieldValue;
         if (typeof fieldValue === 'string') {
-            try { tagifyTags = JSON.parse(fieldValue); } 
-            catch (e) { tagifyTags = fieldValue.split(',').map(t => ({ value: t.trim() })); }
+            const trimmed = fieldValue.trim();
+            if (trimmed.startsWith('[')) {
+                try {
+                    tagifyTags = JSON.parse(trimmed);
+                } catch (e) {
+                    console.error('Failed to parse Tag JSON:', trimmed, e);
+                    tagifyTags = []; 
+                }
+            } else {
+                tagifyTags = trimmed.split(',').map(t => ({ value: t.trim() })).filter(t => t.value);
+            }
         } else if (Array.isArray(fieldValue) && typeof fieldValue[0] === 'string') {
             tagifyTags = fieldValue.map(tag => ({ value: tag }));
         }
@@ -1665,7 +1674,6 @@
             tagifyInstance.removeAllTags();
             tagifyInstance.addTags(tagifyTags);
         } else {
-            // Fallback
             let tagValues = tagifyTags.map(t => t.value || t).join(',');
             $input.val(tagValues).trigger('change');
         }

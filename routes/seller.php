@@ -7,6 +7,8 @@ use App\Http\Controllers\Seller\GSTController;
 use App\Http\Controllers\Seller\NoteController;
 use App\Http\Controllers\Seller\PaymentController;
 use App\Http\Controllers\Seller\ProductController;
+use App\Http\Controllers\Seller\PromotionalProductController;
+use App\Http\Controllers\Seller\SellerHubController;
 use App\Http\Controllers\Seller\ShopController;
 use App\Http\Controllers\Seller\SizeChartController;
 use Illuminate\Support\Facades\Route;
@@ -237,6 +239,32 @@ Route::group(['namespace' => 'App\Http\Controllers\Seller', 'prefix' => 'seller'
         Route::post('/products-hsn-gst-single-update', 'updateHsnGstRate')->name('products.single-hsn-gst.update');
         Route::post('/bulk-product-gst-assign', 'updateBulkHsnGstRate')->name('products.bulk-product-gst-assign');
         Route::get('/products/gst/products/{type}', 'get_filter_products')->name('products.gst.filter');
+    });
+
+    Route::post('/all-chat-modal', [DashboardController::class, 'view_all_chat_modal'])->name('admin_view_all_chat_modal');
+    
+    Route::controller(SellerHubController::class)->group(function () {
+        Route::post('/chat', 'view_chat_tab')->name('admin_seller_chat.show');
+        Route::post('/chat/send-message', 'send_chat_message')->name('admin_seller_chat.send_message');
+        Route::post('/seller-hub/notices', 'view_notices_tab')->name('admin_seller_hub.notices');
+        Route::post('/seller-hub/requests', 'view_requests_tab')->name('admin_seller_hub.requests');
+        Route::post('/seller-hub/promotions', 'view_promotions_tab')->name('admin_seller_hub.promotions');
+        Route::post('/seller-hub/plus', 'view_plus_tab')->name('admin_seller_hub.plus');
+        Route::post('seller-hub/request-store', 'storeRequest')->name('admin_seller_hub.request_store');    
+    });
+
+    // Promotional Products
+    Route::controller(PromotionalProductController::class)->group(function () {
+        Route::get('/promotional-products-index', 'index')->name('promotional_products.index');     
+        Route::post('/promotional-products-update', 'update')->name('promotional_products.update');     
+        Route::post('/promotional-products-search', 'search')->name('promotional_products.search');     
+        Route::get('/promotional-products-filter', 'filter')->name('promotional_products.filter');   
+        Route::get('/promotional-products-select-modal', 'productSelectModal')->name('promotional_products.select_modal');
+        Route::post('/promotional-products-mark-todays-deal', 'markAsTodaysDeal')->name('promotional_products.mark_todays_deal');
+        Route::post('/promotional-products-mark-featured', 'markAsFeatured')->name('promotional_products.mark_featured');  
+        Route::get('/promotional-products-flash-sale-modal', 'flashSaleModal')->name('promotional_products.flash_sale_modal');
+        Route::post('/promotional-products-active-flash-sales', 'getActiveFlashSalesForSeller')->name('promotional_products.active_flash_sales');
+        Route::post('/promotional-products-mark-flash-sale', 'markAsFlashSale')->name('promotional_products.mark_flash_sale');
     });
 
 });

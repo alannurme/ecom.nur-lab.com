@@ -33,7 +33,36 @@ class AddonController extends Controller
     public function index()
     {
         $addons = Addon::query()->orderBy('name', 'asc')->get();
-        return view('backend.addons.index', compact('addons'));
+        $isOwnedCustomerFlutterApp = Addon::where('unique_identifier', 'customer_app')->exists();
+        $isOwnedSellerFlutterApp = Addon::where('unique_identifier', 'seller_app')->exists();
+        $isOwnedDeliveryBoyFlutterApp = Addon::where('unique_identifier', 'delivery_boy')->exists();
+        $isOwnedAffiliate = Addon::where('unique_identifier', 'affiliate_system')->exists();
+        $isOwnedRefund = Addon::where('unique_identifier', 'refund_request')->exists();
+        $isOwnedOtp = Addon::where('unique_identifier', 'otp_system')->exists();
+        $isOwnedGst = Addon::where('unique_identifier', 'gst_system')->exists();
+        $isOwnedSellerSubscription = Addon::where('unique_identifier', 'seller_subscription')->exists();
+        $isOwnedClubPoint = Addon::where('unique_identifier', 'club_point')->exists();
+        $isOwnedPos = Addon::where('unique_identifier', 'pos_system')->exists();
+        $isOwnedPreorder = Addon::where('unique_identifier', 'preorder')->exists();
+        $isOwnedAuction = Addon::where('unique_identifier', 'auction')->exists();
+        $isOwnedWholesale = Addon::where('unique_identifier', 'wholesale')->exists();
+        $isOwnedShiprocket = Addon::where('unique_identifier', 'shiprocket')->exists();
+        $isOwnedPathao = Addon::where('unique_identifier', 'pathao')->exists();
+        $isOwnedSteadfast = Addon::where('unique_identifier', 'steadfast')->exists();
+        $isOwnedRedx = Addon::where('unique_identifier', 'redx')->exists();
+        $isOwnedCybersource = Addon::where('unique_identifier', 'cybersource')->exists();
+        $isOwnedPaytm = Addon::where('unique_identifier', 'paytm')->exists();
+        $isOwnedAfricanpg = Addon::where('unique_identifier', 'african_pg')->exists();
+        $isOwnedUddoktaPay = Addon::where('unique_identifier', 'uddoktaPay')->exists();
+        $isOwnedOfflinePayment = Addon::where('unique_identifier', 'offline_payment')->exists();
+        return view('backend.addons.index', 
+            compact(
+                'addons', 'isOwnedCustomerFlutterApp','isOwnedSellerFlutterApp', 'isOwnedDeliveryBoyFlutterApp', 
+                'isOwnedAffiliate', 'isOwnedRefund', 'isOwnedOtp', 'isOwnedGst', 'isOwnedSellerSubscription', 'isOwnedClubPoint',
+                'isOwnedPos', 'isOwnedPreorder', 'isOwnedAuction', 'isOwnedWholesale', 'isOwnedShiprocket', 'isOwnedPathao', 'isOwnedSteadfast',
+                'isOwnedRedx', 'isOwnedCybersource', 'isOwnedPaytm', 'isOwnedAfricanpg', 'isOwnedUddoktaPay', 'isOwnedOfflinePayment'
+            )
+        );
     }
 
     /**

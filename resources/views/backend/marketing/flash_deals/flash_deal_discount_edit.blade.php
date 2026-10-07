@@ -6,6 +6,9 @@
                 <span class="fs-13 fw-400 text-gray">{{ translate('Product') }}</span>
             </td>
             <td data-breakpoints="lg" width="20%">
+                <span class="fs-13 fw-400 text-gray">{{ translate('Added By') }}</span>
+            </td>
+            <td data-breakpoints="lg" width="20%">
                 <span class="fs-13 fw-400 text-gray">{{ translate('Base Price') }}</span>
             </td>
             <td data-breakpoints="lg" width="25%">
@@ -28,6 +31,9 @@
                     <img class="size-60px img-fit mr-3" src="{{ uploaded_asset($product->thumbnail_img) }}">
                     <span>{{ $product->getTranslation('name') }}</span>
                 </div>
+            </td>
+            <td style="vertical-align: middle;">
+                <span>{{ ucfirst($product->added_by) }}</span>
             </td>
             <td style="vertical-align: middle;">
                 <span>{{ single_price($product->unit_price) }}</span>

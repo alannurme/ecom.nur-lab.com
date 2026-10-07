@@ -5,6 +5,9 @@
                 <span class="text-uppercase fs-10 fs-md-12 fw-700 text-gray">{{ translate('Product') }}</span>
             </th>
             <th data-breakpoints="lg" width="20%">
+                <span class="text-uppercase fs-10 fs-md-12 fw-700 text-gray">{{ translate('Added By') }}</span>
+            </th>
+            <th data-breakpoints="lg" width="20%">
                 <span class="text-uppercase fs-10 fs-md-12 fw-700 text-gray">{{ translate('Base Price') }}</span>
             </th>
             <th data-breakpoints="lg" width="25%">
@@ -26,6 +29,9 @@
                             <img class="size-60px img-fit mr-3" src="{{ uploaded_asset($product->thumbnail_img) }}">
                             <span>{{ $product->getTranslation('name') }}</span>
                         </div>
+                    </td>
+                    <td style="vertical-align: middle;">
+                        <span>{{ ucfirst($product->added_by) }}</span>
                     </td>
                     <td style="vertical-align: middle;">
                         <span>{{ single_price($product->unit_price) }}</span>

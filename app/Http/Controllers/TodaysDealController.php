@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Services\ProductService;
 
@@ -23,7 +24,8 @@ class TodaysDealController extends Controller
             ->with('childrenCategories')
             ->get();
         $product_types = ['Todays Deal Product List'];
-        return view('backend.promotion_and_offers.todays_deal.index', compact('seller_type', 'categories', 'product_types'));
+        $sellers = User::where('user_type', 'seller')->get();
+        return view('backend.promotion_and_offers.todays_deal.index', compact('seller_type', 'categories', 'product_types', 'sellers'));
     }
 
     public function update(Request $request)

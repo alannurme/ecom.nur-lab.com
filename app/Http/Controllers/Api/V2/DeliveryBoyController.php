@@ -6,6 +6,7 @@ use App\Http\Resources\V2\PurchaseHistoryMiniCollection;
 use App\Http\Resources\V2\DeliveryBoyPurchaseHistoryMiniCollection;
 use Illuminate\Http\Request;
 use App\Http\Resources\V2\DeliveryHistoryCollection;
+use App\Http\Resources\V2\DeliveryBoyCancelRequestCollection;
 use App\Http\Resources\V2\PurchaseHistoryCollection;
 use App\Http\Resources\V2\PurchaseHistoryItemsCollection;
 use App\Models\DeliveryBoy;
@@ -357,6 +358,15 @@ class DeliveryBoyController extends Controller
             'result' => true,
             'message' => translate('Delivery status changed to ').ucwords(str_replace('_',' ',$request->status))
         ]);
+    }
+
+    public function cancel_request_list($id)
+    {
+        $order_query = Order::query();
+        $order_query = $order_query->where('assign_delivery_boy', $id);
+        $order_query = $order_query->orderBy('created_at', 'desc')->where('delivery_status', '!=', 'cancelled')->where('cancel_request', 1);
+        
+        return new DeliveryBoyCancelRequestCollection($order_query->latest()->paginate(10));
     }
 
     public function cancel_request($id)

@@ -5,7 +5,7 @@
     @endphp
 
     <li class="mb-2 fs-14 " style="padding-left: {{ $depth * 12 }}px">
-       <a class="{{ $depth == 0 ? 'fw-600' : '' }} text-gray-dark hov-text-primary animate-underline-primary"
+       <a class="{{ $depth == 0 ? 'fw-600' : '' }} text-dark hov-text-primary animate-underline-primary"
             href="{{ route('products.category', $cat->slug) }}">
             {{ $cat_name }}
         </a>

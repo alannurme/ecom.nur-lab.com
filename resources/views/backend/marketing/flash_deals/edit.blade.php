@@ -91,7 +91,7 @@
                                         class="bg-transparent d-block w-100 py-2 px-3 border border-dashed border-gray-400 rounded-1 d-flex align-items-center justify-content-center file-upload-input text-reset hov-text-blue"
                                         onclick="openRightcanvas()">
                                         <i class="las la-plus"></i>
-                                        Add Product
+                                        {{ translate('Add Product') }}
                                     </button>
                                 </div>
                             </div>
@@ -146,7 +146,24 @@
                             @endforeach
                         </select>
                     </div>
+
+                    {{-- Seller --}}
                     <div class="col-md-6">
+                        <select class="form-control aiz-selectpicker" name="flash_deal_seller"
+                            onchange="flashDealFilterProducts()" data-placeholder="{{ translate('Choose Seller') }}"
+                            data-live-search="true">
+                            <option value="">
+                                {{ translate('Choose Seller') }}
+                            </option>
+                            @foreach($sellers as $seller)
+                                <option value="{{ $seller->id }}">{{ $seller->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                {{-- Search --}}
+                <div class="row gutters-5 mt-3">
+                    <div class="col-md-12">
                         <input type="text" class="form-control" name="flash_deal_search_keyword"
                             onkeyup="flashDealFilterProducts()" placeholder="{{ translate('Search by Product Name') }}">
                     </div>
@@ -217,6 +234,7 @@
             document.body.classList.remove('body-no-scroll');
             $('#flash-deal-products-list').html('');
             $('select[name=flash_deal_category]').val('').trigger('change');
+            $('select[name=flash_deal_seller]').val('').trigger('change');
             $('input[name=flash_deal_search_keyword]').val('');
         }
         function closeOffcanvas() { closeRightcanvas(); }
@@ -230,6 +248,7 @@
             clearTimeout(flashDealSearchTimer);
             flashDealSearchTimer = setTimeout(function () {
                 const category = $('select[name=flash_deal_category]').val();
+                const seller = $('select[name=flash_deal_seller]').val();
                 const searchKey = $('input[name=flash_deal_search_keyword]').val();
 
                 $('#flash-deal-products-list').html(
@@ -238,7 +257,7 @@
 
                 $.post(
                     '{{ route('flash_deals.product_search') }}',
-                    { _token: '{{ csrf_token() }}', category: category, search_key: searchKey },
+                    { _token: '{{ csrf_token() }}', category: category, seller: seller, search_key: searchKey },
                     function (data) {
                         $('#flash-deal-products-list').html(data);
                         addedProductIds.forEach(function (id) {

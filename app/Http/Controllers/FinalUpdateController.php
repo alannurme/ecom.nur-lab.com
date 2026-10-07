@@ -26,6 +26,10 @@ class FinalUpdateController extends Controller
 {
     public function step0(Request $request)
     {
+        if (!auth()->check() || auth()->user()->user_type !== 'admin') {
+            abort(403, 'Unauthorized. Only administrators can perform system updates.');
+        }
+
         if (env('DEMO_MODE') == 'On') {
             flash(translate('This action is disabled in demo mode'))->error();
             return back();
@@ -46,7 +50,11 @@ class FinalUpdateController extends Controller
                 if (!is_dir($dir))
                     mkdir($dir, 0777, true);
 
-                $path = Upload::findOrFail($request->update_zip)->file_name;
+                $upload = Upload::where('id', $request->update_zip)
+                    ->where('user_id', auth()->id())
+                    ->firstOrFail();
+
+                $path = $upload->file_name;
 
                 //Unzip uploaded update file and remove zip file.
                 $zip = new ZipArchive;

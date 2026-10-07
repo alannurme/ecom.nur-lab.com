@@ -105,6 +105,44 @@
                                 <input type="text" class="form-control" name="MAILGUN_SECRET" value="{{  env('MAILGUN_SECRET') }}" placeholder="{{ translate('MAILGUN SECRET') }}">
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <input type="hidden" name="types[]" value="MAIL_FROM_ADDRESS">
+                            <div class="col-md-3">
+                                <label class="col-from-label">{{translate('MAIL FROM ADDRESS')}}</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="email" class="form-control" name="MAIL_FROM_ADDRESS" value="{{  env('MAIL_FROM_ADDRESS') }}" placeholder="{{ translate('MAIL FROM ADDRESS') }}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <input type="hidden" name="types[]" value="MAIL_FROM_NAME">
+                            <div class="col-md-3">
+                                <label class="col-from-label">{{translate('MAIL FROM NAME')}}</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" name="MAIL_FROM_NAME" value="{{  env('MAIL_FROM_NAME') }}" placeholder="{{ translate('MAIL FROM NAME') }}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <input type="hidden" name="types[]" value="MAILGUN_ENDPOINT">
+                            <label class="col-md-3 col-form-label">
+                                {{ translate('MAILGUN ENDPOINT') }}
+                            </label>
+
+                            <div class="col-md-9">
+                                <select class="form-control aiz-selectpicker mb-2 mb-md-0" name="MAILGUN_ENDPOINT">
+                                    <option value="api.mailgun.net"
+                                        @if (env('MAILGUN_ENDPOINT', 'api.mailgun.net') == "api.mailgun.net") selected @endif>
+                                        api.mailgun.net
+                                    </option>
+
+                                    <option value="api.eu.mailgun.net"
+                                        @if (env('MAILGUN_ENDPOINT') == "api.eu.mailgun.net") selected @endif>
+                                        api.eu.mailgun.net
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group mb-0 text-right">
                         <button type="submit" class="btn btn-primary">{{translate('Save Configuration')}}</button>

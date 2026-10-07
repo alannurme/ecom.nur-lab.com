@@ -133,7 +133,9 @@
                                 @if (addon_is_activated('refund_request'))
                                     <th data-breakpoints="md">{{ translate('Refund Status') }}</th>
                                 @endif
-                                <th data-breakpoints="md" class="text-right pr-0">{{ translate('Review') }}</th>
+                                @if(get_setting('enable_ratings_and_review_section') == 1)
+                                    <th data-breakpoints="md" class="text-right pr-0">{{ translate('Review') }}</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody class="fs-14">
@@ -224,6 +226,7 @@
                                             @endif
                                         </td>
                                     @endif
+                                    @if(get_setting('enable_ratings_and_review_section') == 1)
                                     <td class="text-xl-right pr-0">
                                         @if ($orderDetail->delivery_status == 'delivered')
                                             @php
@@ -248,6 +251,7 @@
                                             <span class="text-danger">{{ translate('Not Delivered Yet') }}</span>
                                         @endif
                                     </td>
+                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>

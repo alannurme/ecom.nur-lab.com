@@ -32,8 +32,26 @@
                     @endforeach
                 </select>
             </div>
+
+            {{-- Seller --}}
             <div class="col-md-6">
-                <input type="text" class="form-control" name="search_product_keyword" onkeyup="filterProductByCategory()" placeholder="{{ translate('Search by Product Name') }}">
+                <select class="form-control aiz-selectpicker" name="todays_deal_seller"
+                    onchange="filterProductByCategory()" data-placeholder="{{ translate('Choose Seller') }}"
+                    data-live-search="true">
+                    <option value="">
+                        {{ translate('Choose Seller') }}
+                    </option>
+                    @foreach($sellers as $seller)
+                        <option value="{{ $seller->id }}">{{ $seller->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        {{-- Search --}}
+        <div class="row gutters-5 mt-3">
+            <div class="col-md-12">
+                <input type="text" class="form-control" name="search_product_keyword"
+                    onkeyup="flashDealFilterProducts()" placeholder="{{ translate('Search by Product Name') }}">
             </div>
         </div>
         <div class="mt-3" id="products-list"></div>

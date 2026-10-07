@@ -83,7 +83,7 @@ class ProductService
                     $meta_keywords[] = $keyword->value ?? null;
                 }
             }
-            $collection['meta_keywords'] = json_encode($meta_keywords);
+            $collection['meta_keywords'] = json_encode($meta_keywords, JSON_UNESCAPED_UNICODE);
         }
 
 
@@ -269,7 +269,7 @@ class ProductService
                     $meta_keywords[] = $keyword->value ?? null;
                 }
             }
-            $collection['meta_keywords'] = json_encode($meta_keywords);
+            $collection['meta_keywords'] = json_encode($meta_keywords, JSON_UNESCAPED_UNICODE);
         }
 
 
@@ -631,7 +631,7 @@ class ProductService
                     $meta_keywords[] = $keyword->value ?? null;
                 }
             }
-            $collection['meta_keywords'] = json_encode($meta_keywords);
+            $collection['meta_keywords'] = json_encode($meta_keywords, JSON_UNESCAPED_UNICODE);
         }
 
 
@@ -800,8 +800,8 @@ class ProductService
             $category = Category::with('childrenCategories')->find($collection['category']);
             $products = $category->products();
         }
-        
-        $products = in_array($auth_user->user_type, ['admin', 'staff']) ? $products->where('products.added_by', 'admin') : $products->where('products.user_id', $auth_user->id);
+
+        $products = $products->where('products.user_id', $auth_user->id);
         $products->where('published', '1')->where('auction_product', 0)->where('approved', '1');
 
         if($productType == 'physical'){
@@ -838,8 +838,14 @@ class ProductService
             $category = Category::with('childrenCategories')->find($collection['category']);
             $products = $category->products();
         }
+
+        // Seller filter
+        if ($collection->get('seller') != null) {
+            $products->where('added_by', 'seller')
+                    ->where('user_id', $collection->get('seller'));
+        }
         
-        $products = in_array($auth_user->user_type, ['admin', 'staff']) ? $products->where('products.added_by', 'admin') : $products->where('products.user_id', $auth_user->id);
+        $products = in_array($auth_user->user_type, ['admin', 'staff']) ? $products : $products->where('products.user_id', $auth_user->id);        
         $products->where('published', '1')->where('auction_product', 0)->where('approved', '1')->where('promotional', '1');
 
         if($productType == 'physical'){

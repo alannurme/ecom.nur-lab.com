@@ -780,6 +780,34 @@ class BusinessSettingsController extends Controller
         return redirect()->back();
     }
 
+    public function select_all_category_layout(Request $request)
+    {
+        $business_settings = BusinessSetting::where('type', 'all_category_element')->first();
+        if (!$business_settings) {
+            $business_settings = new BusinessSetting();
+            $business_settings->type = 'all_category_element';
+        }
+
+        $business_settings->value = $request->all_category_element;
+        $business_settings->save();
+        $selectedElementType = ElementType::find($request->all_category_element);
+        foreach ($selectedElementType->element_styles as $style) {
+            $businessSetting = BusinessSetting::where('type', $style->name)->first();
+            if (!$businessSetting) {
+                $businessSetting = new BusinessSetting();
+                $businessSetting->type = $style->name;
+                $businessSetting->value = $style->value;
+                $businessSetting->save();
+            }else{
+                $businessSetting->value = $style->value;
+                $businessSetting->save();
+            }
+        }
+        Artisan::call('cache:clear');
+        flash(translate('All Category layout updated successfully'))->success();
+        return redirect()->back();
+    }
+
     public function select_megamenu(Request $request)
     {
         $business_settings = BusinessSetting::where('type', 'megamenu_element')->first();

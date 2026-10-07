@@ -1,5 +1,5 @@
 @php
-    $best_selling_products = get_best_selling_products(20);
+    $best_selling_products = get_best_selling_products(20)->shuffle();
 @endphp
 @if (get_setting('best_selling') == 1 && count($best_selling_products) > 0)
     <section class="mb-2 mb-md-3 mt-2 mt-md-3">
