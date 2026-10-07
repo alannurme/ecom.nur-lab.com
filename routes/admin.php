@@ -995,6 +995,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
         Route::get('/marketing-analytics-dashboard', 'dashboard')->name('marketing_analytics_dashboard');
         Route::get('/google-analytics-report', 'google_analytics_report')->name('google-analytics-test.result');
         Route::get('/google-analytics', 'google_analytics_config')->name('google-analytics-config');
+        Route::get('/google-analytics/index', 'google_analytics_config')->name('google_analytics.index');
         Route::get('/google-tag-manager', 'google_tag_manager')->name('google-tag-manager-config');
         Route::get('/pixel-analytics/configuration', 'pixel_analytics')->name('pixel_analytics.index');
         Route::get('/pixel-capi/configuration', 'pixel_conversation_api')->name('pixel_conversation_api.index');
