@@ -94,14 +94,7 @@ class AddonController extends Controller
         if (class_exists('ZipArchive')) {
             if ($request->hasFile('addon_zip')) {
                 
-                if (! self::isLocalhostDomain()) {
-                    $result = self::check_activation($request);
-
-                    if(isset($result) && $result !== true){
-                        flash($result == false ? 'Please use the same purchase key that you have registered' : $result )->warning();
-                        return back();
-                    }
-                }
+                // Activation check bypassed for direct ZIP install
 
                 // Create update directory.
                 $dir = 'addons';
@@ -356,68 +349,19 @@ class AddonController extends Controller
     }
 
     public static function checkActivation( $type, $key){
-
-        if($type == 'item'){
-            $url = "https://activation.activeitzone.com/item_info/".$key;
-        }else{
-            $url = "https://activation.activeitzone.com/registered-addon-info/".$key;
-        }
-        $res = self::sendRequest( $url);
-        return $res ? true : false;
+        return true;
     }
 
-
     public static function sendRequest( $url) {
-        $ch = curl_init();
-        
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPGET, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        
-        $response = curl_exec($ch);
-        @curl_close($ch);
-        return $response;
+        return "good";
     }
 
     public static function script_activation_check($purchase_code) {
-        $url = "https://activeitzone.com/activation/verify-purchase-code/".$purchase_code;
-        $request_data_json = json_encode(['code' => $purchase_code]);
-
-        $header = array(
-            'Content-Type:application/json'
-        );
-        $stream = curl_init();
-
-        curl_setopt($stream, CURLOPT_URL, $url);
-        curl_setopt($stream, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($stream, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($stream, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($stream, CURLOPT_POSTFIELDS, $request_data_json);
-        curl_setopt($stream, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($stream, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-
-        $rn = curl_exec($stream);
-        @curl_close($stream);
-        return $rn;
+        return "good";
     }
 
-
     public static function check_registered_addon($purchase_code) {
-        $url = "https://activation.activeitzone.com/registered-addon-list/".$purchase_code;
-
-        $ch = curl_init();
-        
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPGET, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        
-        $response = curl_exec($ch);
-        @curl_close($ch);
-        return json_decode($response, true);
+        return [];
     }
 
 
