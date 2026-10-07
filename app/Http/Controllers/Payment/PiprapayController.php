@@ -23,14 +23,15 @@ class PiprapayController extends Controller
         $api_url = $base_url . '/checkout/redirect';
         $secret_key = env('PIPRAPAY_SECRET_KEY') ?: get_setting('PIPRAPAY_SECRET_KEY');
 
+        $user = Auth::user();
         $post_data = [
-            'api_key'        => $secret_key,
-            'secret_key'     => $secret_key,
-            'amount'         => 10,
-            'currency'       => 'BDT',
-            'customer_name'  => Auth::check() ? Auth::user()->name : 'Test User',
-            'customer_email' => Auth::check() && Auth::user()->email ? Auth::user()->email : 'test@nur-lab.com',
-            'redirect_url'   => route('piprapay.callback')
+            'full_name'     => $user ? $user->name : 'Test User',
+            'email_address' => ($user && $user->email) ? $user->email : 'customer@nur-lab.com',
+            'mobile_number' => ($user && $user->phone) ? $user->phone : '01700000000',
+            'amount'        => 10,
+            'currency'      => 'BDT',
+            'return_url'    => route('piprapay.callback'),
+            'webhook_url'   => route('piprapay.callback')
         ];
 
         $ch = curl_init();
@@ -44,6 +45,7 @@ class PiprapayController extends Controller
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Accept: application/json',
+            'MHS-PIPRAPAY-API-KEY: ' . $secret_key,
             'x-api-key: ' . $secret_key
         ]);
 
@@ -57,7 +59,9 @@ class PiprapayController extends Controller
         }
 
         $result = json_decode($response, true);
-        if (isset($result['url']) && !empty($result['url'])) {
+        if (isset($result['pp_url']) && !empty($result['pp_url'])) {
+            return redirect()->away($result['pp_url']);
+        } elseif (isset($result['url']) && !empty($result['url'])) {
             return redirect()->away($result['url']);
         } elseif (isset($result['payment_url']) && !empty($result['payment_url'])) {
             return redirect()->away($result['payment_url']);
@@ -67,7 +71,7 @@ class PiprapayController extends Controller
             return redirect()->away($result['data']['payment_url']);
         }
 
-        $msg = isset($result['message']) ? $result['message'] : json_encode($result);
+        $msg = isset($result['message']) ? $result['message'] : (isset($result['error']['message']) ? $result['error']['message'] : json_encode($result));
         flash(translate('PipraPay Test Response: ') . $msg)->warning();
         return back();
     }
@@ -98,19 +102,20 @@ class PiprapayController extends Controller
         $user = Auth::user();
         $name = $user ? $user->name : 'Customer';
         $email = ($user && $user->email) ? $user->email : 'customer@nur-lab.com';
+        $phone = ($user && $user->phone) ? $user->phone : '01700000000';
 
         $base_url = rtrim(env('PIPRAPAY_BASE_URL') ?: get_setting('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com/api'), '/');
         $api_url = $base_url . '/checkout/redirect';
         $secret_key = env('PIPRAPAY_SECRET_KEY') ?: get_setting('PIPRAPAY_SECRET_KEY');
 
         $post_data = [
-            'api_key'        => $secret_key,
-            'secret_key'     => $secret_key,
-            'amount'         => (float) $amount,
-            'currency'       => 'BDT',
-            'customer_name'  => $name,
-            'customer_email' => $email,
-            'redirect_url'   => route('piprapay.callback')
+            'full_name'     => $name,
+            'email_address' => $email,
+            'mobile_number' => $phone,
+            'amount'        => (float) $amount,
+            'currency'      => 'BDT',
+            'return_url'    => route('piprapay.callback'),
+            'webhook_url'   => route('piprapay.callback')
         ];
 
         $ch = curl_init();
@@ -121,6 +126,7 @@ class PiprapayController extends Controller
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Accept: application/json',
+            'MHS-PIPRAPAY-API-KEY: ' . $secret_key,
             'x-api-key: ' . $secret_key
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -137,7 +143,12 @@ class PiprapayController extends Controller
 
         $result = json_decode($response, true);
 
-        if (isset($result['status']) && $result['status'] === 'success' && isset($result['data']['payment_url'])) {
+        if (isset($result['pp_url']) && !empty($result['pp_url'])) {
+            if (isset($result['pp_id'])) {
+                Session::put('piprapay_trx_id', $result['pp_id']);
+            }
+            return redirect()->away($result['pp_url']);
+        } elseif (isset($result['status']) && $result['status'] === 'success' && isset($result['data']['payment_url'])) {
             if (isset($result['data']['trx_id'])) {
                 Session::put('piprapay_trx_id', $result['data']['trx_id']);
             }
@@ -170,6 +181,7 @@ class PiprapayController extends Controller
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Accept: application/json',
+            'MHS-PIPRAPAY-API-KEY: ' . $secret_key,
             'x-api-key: ' . $secret_key
         ]);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
