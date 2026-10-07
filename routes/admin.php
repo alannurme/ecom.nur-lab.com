@@ -1076,8 +1076,13 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'prevent-ba
 
     Route::get('/system/sitemap-item-add/{item}', [AdminController::class, 'SitemapItems'])->name('sitemap_item_add');
 
-    // Addon Safe Fallback Routes
-    Route::get('/backups', [BusinessSettingsController::class, 'general_setting'])->name('backups');
-    Route::get('/backup-restore-settings', [BusinessSettingsController::class, 'general_setting'])->name('backup_restore_settings.index');
+    // Database Backup & Restore Routes
+    Route::controller(\App\Http\Controllers\BackupController::class)->group(function () {
+        Route::get('/backups', 'index')->name('backups');
+        Route::get('/backup-restore-settings', 'index')->name('backup_restore_settings.index');
+        Route::get('/backups/create', 'create')->name('backups.create');
+        Route::get('/backups/download/{file_name}', 'download')->name('backups.download');
+        Route::get('/backups/destroy/{file_name}', 'destroy')->name('backups.destroy');
+    });
     
 });

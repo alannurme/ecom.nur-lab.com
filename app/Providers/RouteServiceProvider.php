@@ -89,6 +89,10 @@ class RouteServiceProvider extends ServiceProvider
     $this->mapUddoktapayRoutes();
 
     $this->mapRedxRoutes();
+
+    if (file_exists(base_path('routes/backup_restore.php'))) {
+        Route::middleware('web')->namespace($this->namespace)->group(base_path('routes/backup_restore.php'));
+    }
     
     $this->mapWebRoutes();
 
