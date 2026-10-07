@@ -17,6 +17,11 @@ use Session;
 
 class PiprapayController extends Controller
 {
+    private function getBaseUrl()
+    {
+        return rtrim(env('PIPRAPAY_BASE_URL', 'https://pay.nur-lab.com'), '/');
+    }
+
     public function pay(Request $request)
     {
         if (!Session::has('payment_type')) {
@@ -45,8 +50,9 @@ class PiprapayController extends Controller
         }
 
         $user = auth()->user();
-        $apiKey = env('PIPRAPAY_API_KEY') ?: env('PIPRAPAY_SECRET_KEY');
+        $apiKey = env('PIPRAPAY_API_KEY');
         $currencyCode = Currency::find(get_setting('system_default_currency'))?->code ?? 'BDT';
+        $baseUrl = $this->getBaseUrl();
 
         $postData = [
             'amount' => (float) $amount,
@@ -56,7 +62,7 @@ class PiprapayController extends Controller
             'redirect_url' => route('piprapay.callback')
         ];
 
-        $ch = curl_init('https://pay.nur-lab.com/api/checkout/redirect');
+        $ch = curl_init($baseUrl . '/api/checkout/redirect');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Authorization: Bearer ' . $apiKey,
             'Content-Type: application/json'
@@ -92,9 +98,10 @@ class PiprapayController extends Controller
             return redirect()->route('home');
         }
 
-        $apiKey = env('PIPRAPAY_API_KEY') ?: env('PIPRAPAY_SECRET_KEY');
+        $apiKey = env('PIPRAPAY_API_KEY');
+        $baseUrl = $this->getBaseUrl();
 
-        $ch = curl_init('https://pay.nur-lab.com/api/verify-payment');
+        $ch = curl_init($baseUrl . '/api/verify-payment');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Authorization: Bearer ' . $apiKey,
             'Content-Type: application/json'
@@ -128,5 +135,70 @@ class PiprapayController extends Controller
 
         flash(translate('PipraPay Payment Verification Failed'))->error();
         return redirect()->route('home');
+    }
+
+    public function testConnection(Request $request)
+    {
+        $baseUrl = rtrim($request->input('base_url', 'https://pay.nur-lab.com'), '/');
+        $apiKey = $request->input('api_key');
+
+        if (!$baseUrl || !$apiKey) {
+            return response()->json([
+                'status' => false,
+                'message' => translate('Base URL and API Key are required.')
+            ]);
+        }
+
+        $postData = [
+            'amount' => 1.00,
+            'currency' => 'BDT',
+            'customer_name' => 'Test User',
+            'customer_email' => 'test@nur-lab.com',
+            'redirect_url' => route('piprapay.callback')
+        ];
+
+        $ch = curl_init($baseUrl . '/api/checkout/redirect');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $apiKey,
+            'Content-Type: application/json'
+        ]);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        $responseJson = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($curlError) {
+            return response()->json([
+                'status' => false,
+                'message' => translate('Connection error: ') . $curlError
+            ]);
+        }
+
+        $response = json_decode($responseJson, true);
+
+        if ($httpCode == 200 && isset($response['status']) && $response['status'] == 'success') {
+            return response()->json([
+                'status' => true,
+                'message' => translate('Connection Successful! PipraPay API is working correctly.')
+            ]);
+        }
+
+        if (isset($response['message'])) {
+            return response()->json([
+                'status' => false,
+                'message' => translate('API Response Error: ') . $response['message']
+            ]);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => translate('Connection Failed (HTTP Code: ') . $httpCode . ')'
+        ]);
     }
 }

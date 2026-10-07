@@ -514,6 +514,7 @@ Route::any('/tap/callback', [TapController::class, 'callback'])->name('tap.callb
 
 // PipraPay
 Route::any('/piprapay/callback', [PiprapayController::class, 'callback'])->name('piprapay.callback');
+Route::post('/piprapay/test', [PiprapayController::class, 'testConnection'])->name('piprapay.test');
 
 //Blog Section
 Route::controller(BlogController::class)->group(function () {
