@@ -55,7 +55,7 @@ class PiprapayController extends Controller
         }
 
         $user = auth()->user();
-        $apiKey = env('PIPRAPAY_API_KEY');
+        $apiKey = trim(env('PIPRAPAY_API_KEY'));
         $currencyCode = Currency::find(get_setting('system_default_currency'))?->code ?? 'BDT';
         $baseUrl = $this->getBaseUrl();
 
@@ -70,6 +70,7 @@ class PiprapayController extends Controller
         $ch = curl_init($baseUrl . '/api/checkout/redirect');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Authorization: Bearer ' . $apiKey,
+            'Accept: application/json',
             'Content-Type: application/json'
         ]);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
@@ -103,12 +104,13 @@ class PiprapayController extends Controller
             return redirect()->route('home');
         }
 
-        $apiKey = env('PIPRAPAY_API_KEY');
+        $apiKey = trim(env('PIPRAPAY_API_KEY'));
         $baseUrl = $this->getBaseUrl();
 
         $ch = curl_init($baseUrl . '/api/verify-payment');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Authorization: Bearer ' . $apiKey,
+            'Accept: application/json',
             'Content-Type: application/json'
         ]);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
@@ -145,7 +147,7 @@ class PiprapayController extends Controller
     public function testConnection(Request $request)
     {
         $baseUrl = $this->getBaseUrl($request->input('base_url'));
-        $apiKey = $request->input('api_key');
+        $apiKey = trim($request->input('api_key'));
 
         if (!$baseUrl || !$apiKey) {
             return response()->json([
@@ -165,6 +167,7 @@ class PiprapayController extends Controller
         $ch = curl_init($baseUrl . '/api/checkout/redirect');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Authorization: Bearer ' . $apiKey,
+            'Accept: application/json',
             'Content-Type: application/json'
         ]);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
@@ -194,7 +197,7 @@ class PiprapayController extends Controller
             ]);
         }
 
-        $msg = $response['error']['message'] ?? $response['message'] ?? translate('Connection Failed (HTTP Code: ') . $httpCode . ')';
+        $msg = $response['error']['message'] ?? $response['message'] ?? (translate('Connection Failed (HTTP Code: ') . $httpCode . ')');
         return response()->json([
             'status' => false,
             'message' => $msg
