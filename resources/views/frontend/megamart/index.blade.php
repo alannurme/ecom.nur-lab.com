@@ -226,7 +226,7 @@
     @if (get_setting('enable_featured_products') == 1)
     <!-- Featured Products -->
     <div id="section_featured">
-
+        @include('frontend.'.get_setting('homepage_select').'.partials.featured_products_section')
     </div>
     @endif
 
@@ -335,7 +335,7 @@
             <div class="col-xl-{{ $col_val }} mb-2 mb-md-3 mt-2 mt-md-3">
                 <!-- Best Selling  -->
                 <div id="section_best_selling">
-
+                    @include('frontend.'.get_setting('homepage_select').'.partials.best_selling_section')
                 </div>
             </div>
             @endif
@@ -345,7 +345,7 @@
             <div class="col-xl-{{ $col_val }} mb-2 mb-md-3 mt-2 mt-md-3">
                 <!-- New Products -->
                 <div id="section_newest">
-
+                    @include('frontend.'.get_setting('homepage_select').'.partials.newest_products_section', ['newest_products' => filter_products(\App\Models\Product::latest())->take(12)->get()->shuffle()])
                 </div>
             </div>
 

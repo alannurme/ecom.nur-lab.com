@@ -12,16 +12,19 @@
         <!-- Image -->
         <a href="{{ $product_url }}" class="d-block h-100 position-relative image-hover-effect">
             <img
-                class="lazyload mx-auto img-fit has-transition product-main-image"
+                class="mx-auto img-fit has-transition product-main-image"
                 src="{{ get_image($product->thumbnail) }}"
                 alt="{{ $product->getTranslation('name') }}"
                 title="{{ $product->getTranslation('name') }}"
+                loading="eager"
                 onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
             <img
                 class="lazyload mx-auto img-fit has-transition product-hover-image position-absolute"
-                src="{{ get_first_product_image($product->thumbnail, $product->photos) }}"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
+                data-src="{{ get_first_product_image($product->thumbnail, $product->photos) }}"
                 alt="{{ $product->getTranslation('name') }}"
                 title="{{ $product->getTranslation('name') }}"
+                loading="lazy"
                 onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
         </a>
         @php

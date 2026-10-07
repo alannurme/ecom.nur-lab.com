@@ -1567,7 +1567,9 @@
             }, randomDelay);
         }
         if (Array.isArray(saleAlertProducts) && saleAlertProducts.length) {
-            startRandomAlerts();
+            window.addEventListener('load', function() {
+                setTimeout(startRandomAlerts, 6000);
+            });
         }
 
         function pushGA4Event(ga4Data) {
