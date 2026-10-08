@@ -2485,11 +2485,15 @@ class Admin extends BaseController
             $paymentUrl = $resData['data']['payment_url'] ?? ($resData['payment_url'] ?? ($resData['url'] ?? ''));
             if (!empty($paymentUrl)) {
                 return redirect()->to($paymentUrl);
+            } else {
+                $err = $resData['message'] ?? ($resData['error']['message'] ?? json_encode($resData));
+                echo "<script>alert('PipraPay API Gateway Error:\\n" . addslashes($err) . "'); window.history.back();</script>";
+                exit;
             }
         }
 
-        $cleanBaseUrl = str_replace('/api', '', $baseUrl);
-        return redirect()->to(!empty($cleanBaseUrl) ? $cleanBaseUrl : 'https://pay.nur-lab.com');
+        echo "<script>alert('Could not connect to PipraPay Gateway API endpoint.'); window.history.back();</script>";
+        exit;
     }
     public function setupVatTax() { return view('admin/setup/generic', ['page_title' => 'Vat & TAX Setup']); }
     public function setupPickupPoint() { return view('admin/setup/generic', ['page_title' => 'Pickup Point Setup']); }
