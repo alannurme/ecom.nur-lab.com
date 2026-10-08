@@ -152,7 +152,8 @@
                             </button>
                         </div>
                         <div class="col-6">
-                            <button type="button" class="btn btn-block btn-outline-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 16px;" onclick="alert('PipraPay sandbox active.');">
+                            <?php $isSandbox = !empty($payment_methods['piprapay_sandbox']); ?>
+                            <button type="button" class="btn btn-block btn-outline-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 16px;" onclick="alert('PipraPay is currently in <?= $isSandbox ? 'Sandbox (Test) Mode' : 'Live Mode' ?>.');">
                                 <i class="las la-vial mr-1"></i> Test (10 ৳)
                             </button>
                         </div>

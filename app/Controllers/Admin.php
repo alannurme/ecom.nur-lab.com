@@ -2427,11 +2427,12 @@ class Admin extends BaseController
     public function setupPaymentMethods() {
         $settingModel = new \App\Models\SettingModel();
         $payment_methods = [
-            'cash_on_delivery' => (int)$settingModel->getSetting('cash_on_delivery', 1),
-            'piprapay'          => (int)$settingModel->getSetting('piprapay', 1),
-            'piprapay_sandbox'  => (int)$settingModel->getSetting('piprapay_sandbox', 1),
-            'piprapay_base_url' => $settingModel->getSetting('piprapay_base_url', ''),
-            'piprapay_api_key'  => $settingModel->getSetting('piprapay_api_key', '')
+            'cash_on_delivery'       => (int)$settingModel->getSetting('cash_on_delivery', 1),
+            'piprapay'               => (int)$settingModel->getSetting('piprapay', 1),
+            'piprapay_sandbox'       => (int)$settingModel->getSetting('piprapay_sandbox', 1),
+            'piprapay_display_title' => $settingModel->getSetting('piprapay_display_title', 'PipraPay / Online Payment'),
+            'piprapay_base_url'      => $settingModel->getSetting('piprapay_base_url', ''),
+            'piprapay_api_key'       => $settingModel->getSetting('piprapay_api_key', '')
         ];
         return view('admin/setup/payment_methods', ['payment_methods' => $payment_methods]);
     }
@@ -2447,7 +2448,7 @@ class Admin extends BaseController
                 $this->db->table('business_settings')->insert(['type' => $key, 'value' => $val]);
             }
         }
-        return redirect()->back()->with('success', 'Payment method settings updated successfully.');
+        return redirect()->to(base_url('admin/setup/payment-methods'))->with('success', 'Payment method settings updated successfully.');
     }
     public function setupVatTax() { return view('admin/setup/generic', ['page_title' => 'Vat & TAX Setup']); }
     public function setupPickupPoint() { return view('admin/setup/generic', ['page_title' => 'Pickup Point Setup']); }
