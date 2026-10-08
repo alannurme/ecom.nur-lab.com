@@ -1,6 +1,6 @@
 <?= $this->include('admin/layouts/header') ?>
 
-<div class="col-12 col-sm-12 col-lg-10 mx-auto">
+<div class="col-12">
     <div class="aiz-titlebar text-left pb-5px">
         <div class="row align-items-center">
             <div class="col-auto">
@@ -99,6 +99,7 @@
                         <th class="text-uppercase fs-11 fw-700 text-secondary">Level</th>
                         <th class="text-uppercase fs-11 fw-700 text-secondary">Featured</th>
                         <th class="text-uppercase fs-11 fw-700 text-secondary">Hot Category</th>
+                        <th class="text-uppercase fs-11 fw-700 text-secondary">Home Section</th>
                         <th class="text-right text-uppercase fs-11 fw-700 text-secondary">Options</th>
                     </tr>
                 </thead>
@@ -124,12 +125,12 @@
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <span class="text-dark fs-14 fw-500"><?= esc($category['name']) ?></span>
+                                    <span class="text-dark fs-14 fw-600"><?= esc(html_entity_decode($category['name'] ?? '')) ?></span>
                                     <?php if (!empty($category['digital']) && $category['digital'] == 1): ?>
-                                        <span class="badge badge-secondary fs-12 py-1 px-10px rounded-pill ml-1">Digital</span>
+                                        <span class="badge badge-inline bg-soft-info text-info font-weight-bold px-2 py-1 fs-11 ml-2" style="font-size: 11px; font-weight: 600;">Digital</span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?= !empty($category['parent_name']) ? esc($category['parent_name']) : '—' ?></td>
+                                <td><?= !empty($category['parent_name']) ? esc(html_entity_decode($category['parent_name'])) : '—' ?></td>
                                 <td><?= esc($category['order_level'] ?? 0) ?></td>
                                 <td><?= esc($category['level'] ?? 0) ?></td>
                                 <td>
@@ -141,6 +142,12 @@
                                 <td>
                                     <label class="aiz-switch aiz-switch-success mb-0">
                                         <input type="checkbox" onchange="updateCategoryStatus(<?= $category['id'] ?>, 'hot_category', this.checked)" <?= (!empty($category['hot_category']) && $category['hot_category'] == 1) ? 'checked' : '' ?>>
+                                        <span class="slider round"></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <label class="aiz-switch aiz-switch-success mb-0" data-toggle="tooltip" title="Showcase on Home Page">
+                                        <input type="checkbox" onchange="updateCategoryStatus(<?= $category['id'] ?>, 'home_showcase', this.checked)" <?= (!empty($category['home_showcase']) && $category['home_showcase'] == 1) ? 'checked' : '' ?>>
                                         <span class="slider round"></span>
                                     </label>
                                 </td>

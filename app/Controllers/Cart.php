@@ -75,6 +75,8 @@ class Cart extends BaseController
             ];
         }
 
+        $this->session->set('cart', $cart);
+
         $totalItems = 0;
         $totalPrice = 0.0;
         foreach ($cart as $cItem) {
@@ -98,6 +100,6 @@ class Cart extends BaseController
             $this->session->set('cart', $cart);
         }
 
-        return redirect()->to(base_url('cart'))->with('success', 'Item removed from cart.');
+        return redirect()->back()->with('success', 'Item removed from cart.');
     }
 }

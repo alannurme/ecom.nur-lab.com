@@ -20,6 +20,17 @@
         }
     }
 
+    @media (min-width: 1200px) {
+        .col-xl-1-5 {
+            flex: 0 0 20%;
+            max-width: 20%;
+        }
+        .col-xl-1-7 {
+            flex: 0 0 14.2857%;
+            max-width: 14.2857%;
+        }
+    }
+
     /* Custom Modern Section Headers */
     .section-title-wrap {
         display: flex;
@@ -875,6 +886,94 @@
             </div>
         </div>
 
+        <!-- 6.5. Home Showcase Categories (Banner Left, Randomized Products Right) -->
+        <?php if (!empty($home_showcase_categories)): ?>
+            <?php foreach ($home_showcase_categories as $showcaseCat): ?>
+                    <div class="mb-5">
+                        <div class="section-title-wrap mb-3">
+                            <div class="section-title-main">
+                                <span class="p-2 rounded-circle text-primary d-inline-flex align-items-center justify-content-center" style="background:#eff6ff; width:36px; height:36px;">
+                                    <i class="las la-layer-group fs-20" style="color:#2563eb;"></i>
+                                </span>
+                                <span><?= esc(html_entity_decode($showcaseCat['name'] ?? '')) ?></span>
+                            </div>
+                            <a href="<?= base_url('category/' . esc($showcaseCat['slug'] ?? '')) ?>" class="btn-view-all">
+                                View All <i class="las la-arrow-right"></i>
+                            </a>
+                        </div>
+
+                        <div class="row gutters-10">
+                            <!-- Left Banner Card (Compact & Vertically Centered) -->
+                            <div class="col-xl-3 col-lg-4 col-md-4 mb-3 mb-md-0 align-self-center">
+                                <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white p-3 d-flex flex-column align-items-center text-center" style="border-radius: 16px; border: 1px solid #e2e8f0;">
+                                    <?php 
+                                        $bannerSrc = !empty($showcaseCat['banner_img']) ? base_url($showcaseCat['banner_img']) : (!empty($showcaseCat['cover_img']) ? base_url($showcaseCat['cover_img']) : base_url('assets/img/placeholder.jpg'));
+                                    ?>
+                                    <div class="position-relative overflow-hidden rounded-3 mb-3 w-100" style="aspect-ratio: 1 / 1; border-radius: 12px;">
+                                        <img src="<?= $bannerSrc ?>" 
+                                             alt="<?= esc($showcaseCat['name'] ?? '') ?>" 
+                                             class="w-100 h-100 img-fit" 
+                                             style="object-fit: cover; border-radius: 12px;"
+                                             onerror="this.onerror=null;this.src='<?= base_url('assets/img/placeholder.jpg') ?>';">
+                                    </div>
+                                    <div class="text-center w-100">
+                                        <h5 class="fw-800 text-dark fs-15 mb-1" style="letter-spacing: -0.3px;"><?= esc(html_entity_decode($showcaseCat['name'] ?? '')) ?></h5>
+                                        <p class="fs-12 text-muted mb-3">Explore items & deals</p>
+                                        <a href="<?= base_url('category/' . esc($showcaseCat['slug'] ?? '')) ?>" class="btn btn-primary rounded-pill fw-700 px-3 py-2 fs-12 shadow-sm w-100" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: none;">
+                                            Shop Now <i class="las la-arrow-right ml-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Products Grid (10 Items - 2 Rows x 5 Cols) -->
+                            <div class="col-xl-9 col-lg-8 col-md-8">
+                                <div class="row gutters-5">
+                                    <?php foreach (array_slice($showcaseCat['products'], 0, 10) as $product): ?>
+                                        <?php 
+                                            $finalPrice = $productModel->calculateFinalPrice($product);
+                                            $unitPrice = (float)$product['unit_price'];
+                                        ?>
+                                        <div class="col-xl-1-5 col-lg-3 col-md-4 col-6 mb-2">
+                                            <div class="modern-product-card" style="padding: 0.4rem;">
+                                                <?php if (($product['discount'] ?? 0) > 0): ?>
+                                                    <div class="discount-badge-modern" style="top: 8px; left: 8px; font-size: 0.65rem; padding: 0.2rem 0.5rem;">
+                                                        <?= ($product['discount_type'] ?? '') === 'percent' ? '-' . (int)$product['discount'] . '%' : 'OFF' ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                                <div class="img-wrap" style="aspect-ratio: 1 / 1; height: auto;">
+                                                    <img src="<?= !empty($product['thumbnail_img']) ? base_url($product['thumbnail_img']) : base_url('assets/img/placeholder.jpg') ?>"
+                                                         alt="<?= esc($product['name']) ?>"
+                                                         onerror="this.onerror=null;this.src='<?= base_url('assets/img/placeholder.jpg') ?>';">
+                                                </div>
+                                                <div class="product-content-modern" style="padding-top: 0.35rem;">
+                                                    <h4 class="product-title-modern" style="font-size: 0.8125rem; height: 2.1rem; margin-bottom: 0.25rem;">
+                                                        <a href="<?= base_url('product/' . esc($product['slug'])) ?>" class="text-reset">
+                                                            <?= esc($product['name']) ?>
+                                                        </a>
+                                                    </h4>
+                                                    <div class="product-footer-row" style="padding-top: 0.25rem;">
+                                                        <div class="product-price-wrap">
+                                                            <span class="price-current" style="font-size: 0.95rem;">৳<?= number_format($finalPrice, 0) ?></span>
+                                                            <?php if ($finalPrice < $unitPrice): ?>
+                                                                <span class="price-old" style="font-size: 0.75rem;">৳<?= number_format($unitPrice, 0) ?></span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <button type="button" onclick="addToCartDirect(<?= $product['id'] ?>, event)" class="btn-quick-cart" title="Add to Cart" style="cursor: pointer; width: 32px !important; height: 32px !important; font-size: 1rem !important; border-radius: 8px !important;">
+                                                            <i class="las la-shopping-cart"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
         <!-- 7. New Arrivals Section -->
         <?php if (!empty($latest_products)): ?>
             <div class="mb-5">
@@ -891,42 +990,37 @@
                 </div>
 
                 <div class="row gutters-5">
-                    <?php foreach (array_slice($latest_products, 0, 12) as $product): ?>
+                    <?php foreach (array_slice($latest_products, 0, 24) as $product): ?>
                         <?php 
                             $finalPrice = $productModel->calculateFinalPrice($product);
                             $unitPrice = (float)$product['unit_price'];
                         ?>
-                        <div class="col-xxl-2 col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <div class="modern-product-card">
-                                <?php if ($product['discount'] > 0): ?>
-                                    <div class="discount-badge-modern">
-                                        <?= $product['discount_type'] === 'percent' ? '-' . (int)$product['discount'] . '%' : 'OFF' ?>
+                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
+                            <div class="modern-product-card" style="padding: 0.4rem;">
+                                <?php if (($product['discount'] ?? 0) > 0): ?>
+                                    <div class="discount-badge-modern" style="top: 8px; left: 8px; font-size: 0.65rem; padding: 0.2rem 0.5rem;">
+                                        <?= ($product['discount_type'] ?? '') === 'percent' ? '-' . (int)$product['discount'] . '%' : 'OFF' ?>
                                     </div>
                                 <?php endif; ?>
-                                <div class="img-wrap">
+                                <div class="img-wrap" style="aspect-ratio: 1 / 1; height: auto;">
                                     <img src="<?= !empty($product['thumbnail_path']) ? base_url($product['thumbnail_path']) : base_url('assets/img/placeholder.jpg') ?>"
                                          alt="<?= esc($product['name']) ?>"
                                          onerror="this.onerror=null;this.src='<?= base_url('assets/img/placeholder.jpg') ?>';">
-                                    <div class="product-action-overlay">
-                                        <a href="<?= base_url('product/' . esc($product['slug'])) ?>" class="action-btn-circle" title="View Details">
-                                            <i class="las la-eye"></i>
-                                        </a>
-                                    </div>
                                 </div>
-                                <div class="product-content-modern">
-                                    <h4 class="product-title-modern">
+                                <div class="product-content-modern" style="padding-top: 0.35rem;">
+                                    <h4 class="product-title-modern" style="font-size: 0.8125rem; height: 2.1rem; margin-bottom: 0.25rem;">
                                         <a href="<?= base_url('product/' . esc($product['slug'])) ?>" class="text-reset">
                                             <?= esc($product['name']) ?>
                                         </a>
                                     </h4>
-                                    <div class="product-footer-row">
+                                    <div class="product-footer-row" style="padding-top: 0.25rem;">
                                         <div class="product-price-wrap">
-                                            <span class="price-current">৳<?= number_format($finalPrice, 0) ?></span>
+                                            <span class="price-current" style="font-size: 0.95rem;">৳<?= number_format($finalPrice, 0) ?></span>
                                             <?php if ($finalPrice < $unitPrice): ?>
-                                                <span class="price-old">৳<?= number_format($unitPrice, 0) ?></span>
+                                                <span class="price-old" style="font-size: 0.75rem;">৳<?= number_format($unitPrice, 0) ?></span>
                                             <?php endif; ?>
                                         </div>
-                                        <button type="button" onclick="addToCartDirect(<?= $product['id'] ?>, event)" class="btn-quick-cart" title="Add to Cart" style="cursor: pointer;">
+                                        <button type="button" onclick="addToCartDirect(<?= $product['id'] ?>, event)" class="btn-quick-cart" title="Add to Cart" style="cursor: pointer; width: 32px !important; height: 32px !important; font-size: 1rem !important; border-radius: 8px !important;">
                                             <i class="las la-shopping-cart"></i>
                                         </button>
                                     </div>
@@ -938,61 +1032,7 @@
             </div>
         <?php endif; ?>
 
-        <!-- 8. Category-wise Products Showcase -->
-        <?php if (!empty($category_wise_products)): ?>
-            <?php foreach ($category_wise_products as $item): ?>
-                <div class="mb-5">
-                    <div class="section-title-wrap">
-                        <div class="section-title-main">
-                            <span><?= esc($item['category']['name']) ?></span>
-                        </div>
-                        <a href="<?= base_url('category/' . esc($item['category']['slug'])) ?>" class="btn-view-all">
-                            Explore Category <i class="las la-arrow-right"></i>
-                        </a>
-                    </div>
-                    <div class="row gutters-5">
-                        <?php foreach (array_slice($item['products'], 0, 6) as $product): ?>
-                            <?php 
-                                $finalPrice = $productModel->calculateFinalPrice($product);
-                                $unitPrice = (float)$product['unit_price'];
-                            ?>
-                            <div class="col-xxl-2 col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                                <div class="modern-product-card">
-                                    <div class="img-wrap">
-                                        <img src="<?= !empty($product['thumbnail_path']) ? base_url($product['thumbnail_path']) : base_url('assets/img/placeholder.jpg') ?>"
-                                             alt="<?= esc($product['name']) ?>"
-                                             onerror="this.onerror=null;this.src='<?= base_url('assets/img/placeholder.jpg') ?>';">
-                                        <div class="product-action-overlay">
-                                            <a href="<?= base_url('product/' . esc($product['slug'])) ?>" class="action-btn-circle" title="View Details">
-                                                <i class="las la-eye"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="product-content-modern">
-                                        <h4 class="product-title-modern">
-                                            <a href="<?= base_url('product/' . esc($product['slug'])) ?>" class="text-reset">
-                                                <?= esc($product['name']) ?>
-                                            </a>
-                                        </h4>
-                                        <div class="product-footer-row">
-                                            <div class="product-price-wrap">
-                                                <span class="price-current">৳<?= number_format($finalPrice, 0) ?></span>
-                                                <?php if ($finalPrice < $unitPrice): ?>
-                                                    <span class="price-old">৳<?= number_format($unitPrice, 0) ?></span>
-                                                <?php endif; ?>
-                                            </div>
-                                            <button type="button" onclick="addToCartDirect(<?= $product['id'] ?>, event)" class="btn-quick-cart" title="Add to Cart" style="cursor: pointer;">
-                                                <i class="las la-shopping-cart"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+
 
         <!-- 9. Top Sellers Section -->
         <?php if (!empty($shops)): ?>

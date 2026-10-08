@@ -73,10 +73,11 @@ class Home extends BaseController
             'hot_categories'        => $categoryModel->getHotCategories(12),
             'featured_products'     => $productModel->getFeaturedProducts(10),
             'todays_deals'          => $productModel->getTodaysDeals(10),
-            'latest_products'       => $productModel->getLatestProducts(16),
+            'latest_products'       => $productModel->getLatestProducts(24),
             'auction_products'      => $auction_products,
             'wholesale_products'    => $wholesale_products,
             'category_wise_products'=> $categoryWiseProducts,
+            'home_showcase_categories' => $categoryModel->getHomeShowcaseCategories(6),
             'shops'                 => $shops,
             'brands'                => $brands,
             'productModel'          => $productModel

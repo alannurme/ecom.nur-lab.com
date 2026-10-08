@@ -1,7 +1,7 @@
 <?= view('admin/layouts/header', ['page_title' => $page_title, 'site_name' => $site_name]) ?>
 
 <div class="row">
-    <div class="col-10 col-sm-10 col-lg-10 mx-auto">
+<div class="col-12">
         <div class="aiz-titlebar text-left pb-5px">
             <div class="row align-items-center">
                 <div class="col-auto">

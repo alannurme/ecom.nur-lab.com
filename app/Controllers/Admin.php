@@ -515,7 +515,7 @@ class Admin extends BaseController
         $field = $this->request->getPost('field');
         $status = $this->request->getPost('status');
 
-        if (!empty($id) && in_array($field, ['featured', 'hot_category'])) {
+        if (!empty($id) && in_array($field, ['featured', 'hot_category', 'home_showcase'])) {
             $val = ($field === 'hot_category') ? (string)($status ? 1 : 0) : ($status ? 1 : 0);
             $this->db->table('categories')->where('id', $id)->update([$field => $val]);
             return $this->response->setJSON(['status' => 1, 'message' => 'Category updated successfully']);
@@ -1831,9 +1831,9 @@ class Admin extends BaseController
     {
         $settingModel = new \App\Models\SettingModel();
         $defaultWarranties = [
-            ['id' => 1, 'text' => '1 Year Official Brand Warranty', 'type' => 'Brand Warranty', 'duration' => '1 Year'],
-            ['id' => 2, 'text' => '6 Months Replacement Guarantee', 'type' => 'Replacement', 'duration' => '6 Months'],
-            ['id' => 3, 'text' => '2 Years Free Service Warranty', 'type' => 'Service Warranty', 'duration' => '2 Years']
+            ['id' => 1, 'name' => '1 Year Official Brand Warranty', 'text' => '1 Year Official Brand Warranty', 'type' => 'Brand Warranty', 'duration' => '1', 'period_type' => 'years', 'description' => 'Official manufacturer warranty', 'status' => 1],
+            ['id' => 2, 'name' => '6 Months Replacement Guarantee', 'text' => '6 Months Replacement Guarantee', 'type' => 'Replacement', 'duration' => '6', 'period_type' => 'months', 'description' => 'Direct store replacement guarantee', 'status' => 1],
+            ['id' => 3, 'name' => '2 Years Free Service Warranty', 'text' => '2 Years Free Service Warranty', 'type' => 'Service Warranty', 'duration' => '2', 'period_type' => 'years', 'description' => 'Free labor and service warranty', 'status' => 1]
         ];
         $warrantiesJson = $settingModel->getSetting('warranties', null);
         if ($warrantiesJson === null) {
@@ -1851,11 +1851,13 @@ class Admin extends BaseController
 
     public function storeWarranty()
     {
-        $text = trim($this->request->getPost('text') ?? '');
-        $type = trim($this->request->getPost('type') ?? 'Brand Warranty');
-        $duration = trim($this->request->getPost('duration') ?? '1 Year');
+        $name = trim($this->request->getPost('name') ?? $this->request->getPost('text') ?? '');
+        $duration = trim($this->request->getPost('duration') ?? '1');
+        $periodType = trim($this->request->getPost('period_type') ?? 'months');
+        $description = trim($this->request->getPost('description') ?? '');
+        $status = $this->request->getPost('status') !== null ? (int)$this->request->getPost('status') : 1;
 
-        if (!empty($text)) {
+        if (!empty($name)) {
             $settingModel = new \App\Models\SettingModel();
             $warrantiesJson = $settingModel->getSetting('warranties', '[]');
             $warranties = json_decode($warrantiesJson, true) ?: [];
@@ -1868,10 +1870,14 @@ class Admin extends BaseController
             }
 
             $warranties[] = [
-                'id' => $maxId + 1,
-                'text' => $text,
-                'type' => $type,
-                'duration' => $duration
+                'id'          => $maxId + 1,
+                'name'        => $name,
+                'text'        => $name,
+                'type'        => $name,
+                'duration'    => $duration,
+                'period_type' => $periodType,
+                'description' => $description,
+                'status'      => $status
             ];
 
             $jsonVal = json_encode(array_values($warranties));
@@ -1885,26 +1891,31 @@ class Admin extends BaseController
             return redirect()->back()->with('success', 'Warranty policy added successfully.');
         }
 
-        return redirect()->back()->with('error', 'Warranty policy text cannot be empty.');
+        return redirect()->back()->with('error', 'Warranty policy name cannot be empty.');
     }
 
     public function updateWarranty()
     {
         $id = (int)$this->request->getPost('id');
-        $text = trim($this->request->getPost('text') ?? '');
-        $type = trim($this->request->getPost('type') ?? 'Brand Warranty');
-        $duration = trim($this->request->getPost('duration') ?? '1 Year');
+        $name = trim($this->request->getPost('name') ?? $this->request->getPost('text') ?? '');
+        $duration = trim($this->request->getPost('duration') ?? '1');
+        $periodType = trim($this->request->getPost('period_type') ?? 'months');
+        $description = trim($this->request->getPost('description') ?? '');
+        $status = $this->request->getPost('status') !== null ? (int)$this->request->getPost('status') : 0;
 
-        if ($id > 0 && !empty($text)) {
+        if ($id > 0 && !empty($name)) {
             $settingModel = new \App\Models\SettingModel();
             $warrantiesJson = $settingModel->getSetting('warranties', '[]');
             $warranties = json_decode($warrantiesJson, true) ?: [];
 
             foreach ($warranties as &$w) {
                 if (isset($w['id']) && $w['id'] == $id) {
-                    $w['text'] = $text;
-                    $w['type'] = $type;
-                    $w['duration'] = $duration;
+                    $w['name']        = $name;
+                    $w['text']        = $name;
+                    $w['duration']    = $duration;
+                    $w['period_type'] = $periodType;
+                    $w['description'] = $description;
+                    $w['status']      = $status;
                     break;
                 }
             }

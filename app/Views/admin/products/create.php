@@ -339,15 +339,29 @@
 
                 <!-- Related Categories -->
                 <div class="border border-gray-300 rounded-2 bg-white px-3 px-lg-4 py-3 py-lg-4 mb-4">
-                    <h5 class="fs-16 fw-700 border-bottom-dashed mb-3 pb-2">Related Categories</h5>
-                    <div class="form-group mb-0">
-                        <select class="form-control aiz-selectpicker" name="category_ids[]" id="category_ids" multiple data-live-search="true" data-selected-text-format="count" title="Select Related Categories" style="min-height: 120px;">
-                            <?php if (!empty($categories)): ?>
-                                <?php foreach ($categories as $category): ?>
-                                    <option value="<?= $category['id'] ?>"><?= esc($category['name']) ?></option>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </select>
+                    <div class="d-flex align-items-center justify-content-between border-bottom-dashed pb-2 mb-3">
+                        <h5 class="fs-16 fw-700 mb-0">Related Categories</h5>
+                        <span class="badge badge-inline bg-soft-primary text-primary font-weight-bold px-2 py-1 fs-11" id="selectedCatCountCreate">0 selected</span>
+                    </div>
+
+                    <div class="mb-2">
+                        <input type="text" id="categorySearchCreate" class="form-control form-control-sm rounded-pill px-3 bg-light border-gray-300 fs-12" placeholder="Search categories...">
+                    </div>
+
+                    <div class="category-scroll-box p-2 border border-gray-200 rounded bg-light" style="max-height: 200px; overflow-y: auto; scrollbar-width: thin;">
+                        <?php if (!empty($categories)): ?>
+                            <?php foreach ($categories as $category): ?>
+                                <div class="category-item-row-create align-items-center justify-content-between p-2 rounded mb-1 bg-white border border-light hov-bg-soft-primary" style="display: flex; transition: all 0.15s ease;">
+                                    <label class="aiz-checkbox mb-0 d-flex align-items-center w-100 cursor-pointer">
+                                        <input type="checkbox" name="category_ids[]" value="<?= $category['id'] ?>" class="category-checkbox-create">
+                                        <span class="aiz-square-check mr-2"></span>
+                                        <span class="fs-13 font-weight-500 text-dark category-name-create"><?= esc($category['name']) ?></span>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="text-muted fs-12 text-center py-3">No categories found</div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -675,6 +689,31 @@ function handleProductGalleryPcUpload(input) {
         }
     }
 }
+$(document).ready(function() {
+    function filterCategoriesCreate() {
+        var q = $('#categorySearchCreate').val() ? $('#categorySearchCreate').val().toLowerCase().trim() : '';
+        $('.category-item-row-create').each(function() {
+            var name = $(this).find('.category-name-create').text().toLowerCase();
+            if (q === '' || name.indexOf(q) !== -1) {
+                $(this).attr('style', 'display: flex !important; transition: all 0.15s ease;');
+            } else {
+                $(this).attr('style', 'display: none !important; transition: all 0.15s ease;');
+            }
+        });
+    }
+
+    $(document).on('keyup input search', '#categorySearchCreate', function() {
+        filterCategoriesCreate();
+    });
+
+    $(document).on('change', '.category-checkbox-create', function() {
+        var count = $('.category-checkbox-create:checked').length;
+        $('#selectedCatCountCreate').text(count + ' selected');
+    });
+
+    var initialCount = $('.category-checkbox-create:checked').length;
+    $('#selectedCatCountCreate').text(initialCount + ' selected');
+});
 </script>
 
 <?= $this->include('admin/layouts/footer') ?>

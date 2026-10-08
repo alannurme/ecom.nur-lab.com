@@ -9,7 +9,7 @@
             <p class="text-muted small mb-0">Manage measurement units (e.g. Pc, KG, Litre) for your store catalog.</p>
         </div>
         <div>
-            <button class="btn btn-primary d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 shadow-sm fw-medium" data-bs-toggle="modal" data-bs-target="#addUnitModal">
+            <button class="btn btn-primary d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 shadow-sm fw-medium" data-toggle="modal" data-target="#addUnitModal">
                 <i class="bi bi-plus-lg fs-6"></i>
                 <span>Add New Unit</span>
             </button>
@@ -21,7 +21,7 @@
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
             <i class="bi bi-check-circle-fill fs-5 text-success"></i>
             <div><?= session()->getFlashdata('success') ?></div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
     <?php endif; ?>
 
@@ -29,7 +29,7 @@
         <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
             <i class="bi bi-exclamation-triangle-fill fs-5 text-danger"></i>
             <div><?= session()->getFlashdata('error') ?></div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
     <?php endif; ?>
 
@@ -155,7 +155,7 @@
                                     <i class="bi bi-rulers fs-1 text-muted opacity-50 d-block mb-2"></i>
                                     <h6 class="text-secondary fw-semibold">No Units Found</h6>
                                     <p class="text-muted small mb-3">Create your first measurement unit (e.g. Kg, Pc, Litre) to assign to products.</p>
-                                    <button class="btn btn-sm btn-primary rounded-3 px-3" data-bs-toggle="modal" data-bs-target="#addUnitModal">
+                                    <button class="btn btn-sm btn-primary rounded-3 px-3" data-toggle="modal" data-target="#addUnitModal">
                                         Add Unit
                                     </button>
                                 </div>
@@ -174,7 +174,7 @@
         <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-0 pb-0 px-4 pt-4">
                 <h5 class="modal-title fw-bold text-dark">Add New Measurement Unit</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <form action="<?= base_url('admin/units/store') ?>" method="POST">
                 <?= csrf_field() ?>
@@ -193,7 +193,7 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 px-4 pb-4 pt-0">
-                    <button type="button" class="btn btn-light rounded-3 px-4 fw-medium" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-light rounded-3 px-4 fw-medium" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary rounded-3 px-4 fw-medium">Save Unit</button>
                 </div>
             </form>
@@ -207,7 +207,7 @@
         <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header border-0 pb-0 px-4 pt-4">
                 <h5 class="modal-title fw-bold text-dark">Edit Measurement Unit</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <form action="<?= base_url('admin/units/update') ?>" method="POST">
                 <?= csrf_field() ?>
@@ -227,7 +227,7 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 px-4 pb-4 pt-0">
-                    <button type="button" class="btn btn-light rounded-3 px-4 fw-medium" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-light rounded-3 px-4 fw-medium" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary rounded-3 px-4 fw-medium">Update Unit</button>
                 </div>
             </form>

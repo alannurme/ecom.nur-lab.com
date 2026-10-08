@@ -8,10 +8,21 @@ class SettingModel extends Model
 {
     protected $table = 'business_settings';
 
+    protected $allowedFields = ['type', 'value', 'created_at', 'updated_at'];
+
     public function getSetting(string $type, $default = null)
     {
         $setting = $this->where('type', $type)->first();
         return $setting ? $setting['value'] : $default;
+    }
+
+    public function saveSetting(string $type, $value)
+    {
+        $existing = $this->where('type', $type)->first();
+        if ($existing) {
+            return $this->where('type', $type)->set(['value' => $value])->update();
+        }
+        return $this->insert(['type' => $type, 'value' => $value]);
     }
 
     public function getSliders(): array

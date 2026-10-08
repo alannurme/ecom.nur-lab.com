@@ -214,19 +214,32 @@ $headerSiteFavicon = $settingModel->getSetting('site_favicon', 'assets/img/logo.
 
                     <!-- User Profile Dropdown -->
                     <div class="d-flex align-items-center justify-content-end col-auto pr-0 pl-3">
+                        <?php
+                        $session = session();
+                        $userSession = $session->get('user');
+                        $isLoggedIn = !empty($userSession) || $session->get('logged_in') || $session->get('user_id') || $session->get('admin_logged_in');
+                        $userName = !empty($userSession['name']) ? $userSession['name'] : ($session->get('user_name') ?? $session->get('name') ?? ($isLoggedIn ? 'Account' : 'Login'));
+                        ?>
                         <div class="dropdown">
                             <a href="javascript:void(0);" class="d-flex align-items-center text-decoration-none text-dark" data-toggle="dropdown">
                                 <span class="size-38px rounded-circle bg-light text-secondary d-flex align-items-center justify-content-center mr-2 border">
                                     <i class="las la-user fs-22 text-secondary"></i>
                                 </span>
-                                <span class="fw-700 fs-14 text-dark">Alannur</span>
+                                <span class="fw-700 fs-14 text-dark"><?= esc($userName) ?></span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 rounded-2 py-2 mt-2">
-                                <a href="<?= base_url('user/dashboard') ?>" class="dropdown-item py-2"><i class="las la-user mr-2 text-primary"></i> My Account</a>
-                                <a href="<?= base_url('admin') ?>" class="dropdown-item py-2"><i class="las la-cog mr-2 text-warning"></i> Admin Panel</a>
-                                <a href="<?= base_url('seller/login') ?>" class="dropdown-item py-2"><i class="las la-store mr-2 text-success"></i> Seller Panel</a>
-                                <div class="dropdown-divider"></div>
-                                <a href="<?= base_url('user/login') ?>" class="dropdown-item py-2 text-danger"><i class="las la-sign-out-alt mr-2"></i> Login / Logout</a>
+                                <?php if ($isLoggedIn): ?>
+                                    <a href="<?= base_url('user/dashboard') ?>" class="dropdown-item py-2"><i class="las la-user mr-2 text-primary"></i> My Account</a>
+                                    <?php if ($session->get('user_type') === 'admin' || $session->get('admin_logged_in')): ?>
+                                        <a href="<?= base_url('admin') ?>" class="dropdown-item py-2"><i class="las la-cog mr-2 text-warning"></i> Admin Panel</a>
+                                    <?php endif; ?>
+                                    <a href="<?= base_url('seller/login') ?>" class="dropdown-item py-2"><i class="las la-store mr-2 text-success"></i> Seller Panel</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="<?= base_url('logout') ?>" class="dropdown-item py-2 text-danger"><i class="las la-sign-out-alt mr-2"></i> Logout</a>
+                                <?php else: ?>
+                                    <a href="<?= base_url('user/login') ?>" class="dropdown-item py-2 text-primary"><i class="las la-sign-in-alt mr-2"></i> Login</a>
+                                    <a href="<?= base_url('user/register') ?>" class="dropdown-item py-2 text-success"><i class="las la-user-plus mr-2"></i> Registration</a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -301,7 +314,7 @@ $headerSiteFavicon = $settingModel->getSetting('site_favicon', 'assets/img/logo.
                                 <i class="las la-shopping-cart text-primary fs-22 mr-2"></i>
                                 <h6 class="fw-800 fs-15 text-dark mb-0" style="color: #0f172a !important;">My Shopping Cart</h6>
                             </div>
-                            <span class="badge badge-primary badge-pill fs-12 fw-700 px-3 py-1.5" style="background-color: #2d6aff; color: #fff;"><span class="cart-count"><?= $headerCartCount ?></span> Items</span>
+                            <span class="badge badge-inline bg-soft-primary text-primary fs-12 fw-700 px-3 py-1-5 border" style="font-size: 12px; font-weight: 700; white-space: nowrap; border-radius: 20px;"><span class="cart-count mr-1"><?= $headerCartCount ?></span> Items</span>
                         </div>
 
                         <!-- Item List -->

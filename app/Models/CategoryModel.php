@@ -45,4 +45,38 @@ class CategoryModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function getHomeShowcaseCategories(int $limit = 6): array
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('categories c');
+        $builder->select('c.*, u.file_name as banner_img, u2.file_name as icon_img, u3.file_name as cover_img');
+        $builder->join('uploads u', 'c.banner = u.id', 'left');
+        $builder->join('uploads u2', 'c.icon = u2.id', 'left');
+        $builder->join('uploads u3', 'c.cover_image = u3.id', 'left');
+        $builder->where('c.home_showcase', 1);
+        $builder->limit($limit);
+
+        $categories = $builder->get()->getResultArray();
+
+        foreach ($categories as &$cat) {
+            // Get subcategory IDs
+            $subCatIds = $db->table('categories')->select('id')->where('parent_id', $cat['id'])->get()->getResultArray();
+            $catIds = [$cat['id']];
+            if (!empty($subCatIds)) {
+                $catIds = array_merge($catIds, array_column($subCatIds, 'id'));
+            }
+
+            $prodBuilder = $db->table('products p');
+            $prodBuilder->select('p.*, u.file_name as thumbnail_img');
+            $prodBuilder->join('uploads u', 'p.thumbnail_img = u.id', 'left');
+            $prodBuilder->where('p.published', 1);
+            $prodBuilder->whereIn('p.category_id', $catIds);
+            $prodBuilder->orderBy('RAND()');
+            $prodBuilder->limit(10);
+            $cat['products'] = $prodBuilder->get()->getResultArray();
+        }
+
+        return $categories;
+    }
 }
