@@ -152,9 +152,9 @@
                             </button>
                         </div>
                         <div class="col-6">
-                            <button type="button" class="btn btn-block btn-outline-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 16px;" onclick="runPipraPayTest();">
+                            <a href="<?= base_url('admin/setup/payment-methods/test-piprapay') ?>" target="_blank" class="btn btn-block btn-outline-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 16px;">
                                 <i class="las la-vial mr-1"></i> Test (10 ৳)
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -205,7 +205,12 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-right-0"><i class="las la-shield-alt"></i></span>
                             </div>
-                            <input type="password" name="piprapay_api_key" class="form-control border-left-0 pl-0" value="<?= esc($payment_methods['piprapay_api_key'] ?? '') ?>" placeholder="Enter your secret API Key">
+                            <input type="text" id="piprapayApiKeyInput" name="piprapay_api_key" class="form-control border-left-0 border-right-0 pl-0" value="<?= esc($payment_methods['piprapay_api_key'] ?? '') ?>" placeholder="Enter your secret API Key">
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-light border border-left-0" onclick="toggleApiKeyVisibility();">
+                                    <i id="apiKeyEyeIcon" class="las la-eye"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end mt-5">
@@ -262,6 +267,17 @@ function runPipraPayTest() {
             alert('Failed to connect to PipraPay test endpoint.');
         }
     });
+}
+function toggleApiKeyVisibility() {
+    var input = document.getElementById('piprapayApiKeyInput');
+    var icon = document.getElementById('apiKeyEyeIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'las la-eye';
+    } else {
+        input.type = 'password';
+        icon.className = 'las la-eye-slash';
+    }
 }
 </script>
 

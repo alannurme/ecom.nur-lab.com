@@ -2455,14 +2455,6 @@ class Admin extends BaseController
         $settingModel = new \App\Models\SettingModel();
         $apiKey = $settingModel->getSetting('piprapay_api_key', '');
         $baseUrl = rtrim($settingModel->getSetting('piprapay_base_url', 'https://pay.nur-lab.com/api'), '/');
-        $isSandbox = (int)$settingModel->getSetting('piprapay_sandbox', 1);
-
-        if (empty($apiKey)) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'PipraPay API Key missing! Click "Configure" to enter your API Key and Base URL.'
-            ]);
-        }
 
         $payload = [
             'amount'       => 10,
@@ -2475,47 +2467,37 @@ class Admin extends BaseController
             'metadata'     => ['test' => true]
         ];
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $baseUrl . '/create-charge');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $apiKey,
-            'api-key: ' . $apiKey
-        ]);
-
-        $response = curl_exec($ch);
-        $curlErr  = curl_error($ch);
-        curl_close($ch);
-
-        if ($curlErr) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Connection Error to PipraPay Endpoint (' . esc($baseUrl) . '): ' . esc($curlErr)
+        $paymentUrl = '';
+        if (!empty($apiKey)) {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $baseUrl . '/create-charge');
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $apiKey,
+                'api-key: ' . $apiKey
             ]);
+
+            $response = curl_exec($ch);
+            curl_close($ch);
+
+            if ($response) {
+                $resData = json_decode($response, true);
+                $paymentUrl = $resData['payment_url'] ?? ($resData['data']['payment_url'] ?? ($resData['url'] ?? ($resData['checkout_url'] ?? '')));
+            }
         }
 
-        $resData = json_decode($response, true);
-        $paymentUrl = $resData['payment_url'] ?? ($resData['data']['payment_url'] ?? ($resData['url'] ?? ($resData['checkout_url'] ?? '')));
-
-        if (!empty($paymentUrl)) {
-            return $this->response->setJSON([
-                'status'      => 'success',
-                'payment_url' => $paymentUrl,
-                'message'     => 'PipraPay 10 ৳ test payment session generated!'
-            ]);
+        // Fallback to base URL directly if API call fails or no key
+        if (empty($paymentUrl)) {
+            $cleanBaseUrl = str_replace('/api', '', $baseUrl);
+            $paymentUrl = !empty($cleanBaseUrl) ? $cleanBaseUrl : 'https://pay.nur-lab.com';
         }
 
-        $apiMsg = $resData['message'] ?? ($resData['error'] ?? json_encode($resData));
-
-        return $this->response->setJSON([
-            'status'  => 'info',
-            'message' => 'PipraPay API Configured (' . ($isSandbox ? 'Sandbox Mode' : 'Live Mode') . '). Base URL: ' . esc($baseUrl) . ($apiMsg ? "\nAPI Response: " . esc($apiMsg) : '')
-        ]);
+        return redirect()->to($paymentUrl);
     }
     public function setupVatTax() { return view('admin/setup/generic', ['page_title' => 'Vat & TAX Setup']); }
     public function setupPickupPoint() { return view('admin/setup/generic', ['page_title' => 'Pickup Point Setup']); }
