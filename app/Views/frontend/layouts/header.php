@@ -137,6 +137,21 @@ $headerSiteFavicon = $settingModel->getSetting('site_favicon', 'assets/img/logo.
             opacity: 0.85;
             text-decoration: none;
         }
+        /* Subcategory Flyout Styling */
+        .category-menu-item .sub-category-flyout {
+            display: none;
+            min-width: 240px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+            border-left: 2px solid #ee1c25 !important;
+            z-index: 1050;
+        }
+        .category-menu-item:hover .sub-category-flyout {
+            display: block;
+        }
+        .category-menu-item:hover > .dropdown-item {
+            background-color: #f8fafc;
+            color: #ee1c25 !important;
+        }
     </style>
 </head>
 <body>
@@ -266,18 +281,35 @@ $headerSiteFavicon = $settingModel->getSetting('site_favicon', 'assets/img/logo.
                             <span class="fs-11 text-white-50 ml-2 font-weight-normal">(See All)</span>
                             <i class="las la-angle-down ml-3 fs-14"></i>
                         </button>
-                        <div class="dropdown-menu border-0 shadow-lg mt-0 py-2" style="min-width: 260px;">
+                        <div class="dropdown-menu border-0 shadow-lg mt-0 py-2 p-0" style="min-width: 260px;">
                             <?php if (!empty($categories)): ?>
                                 <?php foreach ($categories as $cat): ?>
-                                    <a class="dropdown-item py-2 px-3 fw-600 text-dark d-flex align-items-center justify-content-between" href="<?= base_url('category/' . esc($cat['slug'])) ?>">
-                                        <span>
-                                            <?php if (!empty($cat['icon_img'])): ?>
-                                                <img src="<?= base_url($cat['icon_img']) ?>" alt="" width="20" height="20" class="mr-2" onerror="this.style.display='none'">
+                                    <div class="category-menu-item position-relative">
+                                        <a class="dropdown-item py-2 px-3 fw-600 text-dark d-flex align-items-center justify-content-between" href="<?= base_url('category/' . esc($cat['slug'])) ?>">
+                                            <span>
+                                                <?php if (!empty($cat['icon_img'])): ?>
+                                                    <img src="<?= base_url($cat['icon_img']) ?>" alt="" width="20" height="20" class="mr-2" onerror="this.style.display='none'">
+                                                <?php endif; ?>
+                                                <?= esc($cat['name']) ?>
+                                            </span>
+                                            <?php if (!empty($cat['subcategories'])): ?>
+                                                <i class="las la-angle-right fs-12 text-muted"></i>
                                             <?php endif; ?>
-                                            <?= esc($cat['name']) ?>
-                                        </span>
-                                        <i class="las la-angle-right fs-12 text-muted"></i>
-                                    </a>
+                                        </a>
+
+                                        <?php if (!empty($cat['subcategories'])): ?>
+                                            <div class="sub-category-flyout border-0 shadow-lg py-2 rounded-right bg-white position-absolute left-100 top-0">
+                                                <?php foreach ($cat['subcategories'] as $subCat): ?>
+                                                    <a class="dropdown-item py-2 px-3 fw-500 text-dark fs-13 d-flex align-items-center" href="<?= base_url('category/' . esc($subCat['slug'])) ?>">
+                                                        <?php if (!empty($subCat['icon_img'])): ?>
+                                                            <img src="<?= base_url($subCat['icon_img']) ?>" alt="" width="16" height="16" class="mr-2" onerror="this.style.display='none'">
+                                                        <?php endif; ?>
+                                                        <?= esc($subCat['name']) ?>
+                                                    </a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <a class="dropdown-item py-2 px-3 text-muted" href="<?= base_url('categories') ?>">All Categories</a>

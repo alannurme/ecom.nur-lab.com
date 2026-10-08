@@ -358,60 +358,74 @@
         color: #ffffff !important;
     }
 
-    /* Featured Categories Grid */
+    /* Featured Categories Grid - Large Full Card Image & Title Below Box */
     .category-card-modern {
-        position: relative;
-        border-radius: 18px;
-        overflow: hidden;
-        height: 220px;
-        display: block;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        text-decoration: none !important;
         transition: all 0.35s ease;
     }
 
-    .category-card-modern img {
+    .category-card-img-wrap {
+        width: 100%;
+        height: 190px;
+        border-radius: 18px;
+        overflow: hidden;
+        position: relative;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+        transition: all 0.35s ease;
+    }
+
+    .category-card-img-wrap img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         transition: transform 0.5s ease;
     }
 
-    .category-card-modern:hover img {
-        transform: scale(1.1);
+    .category-card-modern:hover .category-card-img-wrap {
+        transform: translateY(-5px);
+        border-color: #ee1c25;
+        box-shadow: 0 12px 25px -5px rgba(238, 28, 37, 0.25);
     }
 
-    .category-card-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.85) 100%);
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        padding: 1.25rem;
-        color: #ffffff;
-        transition: background 0.3s ease;
+    .category-card-modern:hover .category-card-img-wrap img {
+        transform: scale(1.08);
     }
 
-    .category-card-modern:hover .category-card-overlay {
-        background: linear-gradient(180deg, rgba(37, 99, 235, 0.2) 0%, rgba(15, 23, 42, 0.9) 100%);
-    }
-
-    .category-title-text {
-        font-size: 1.1rem;
+    .category-title-below {
+        font-size: 0.875rem;
         font-weight: 800;
-        margin: 0;
+        color: #1e293b;
+        margin-top: 0.65rem;
+        margin-bottom: 0;
+        line-height: 1.3;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
+        gap: 0.3rem;
+        transition: color 0.25s ease;
+        width: 100%;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
     }
 
-    .category-title-text i {
-        font-size: 1.2rem;
-        transform: translateX(-4px);
-        transition: transform 0.3s ease;
+    .category-title-below i {
+        font-size: 0.8rem;
+        color: #ee1c25;
+        transition: transform 0.25s ease;
     }
 
-    .category-card-modern:hover .category-title-text i {
+    .category-card-modern:hover .category-title-below {
+        color: #ee1c25;
+    }
+
+    .category-card-modern:hover .category-title-below i {
         transform: translateX(4px);
     }
 
@@ -769,8 +783,8 @@
 
         <!-- 4. Featured Categories Section -->
         <?php if (!empty($featured_categories)): ?>
-            <div class="mb-5">
-                <div class="section-title-wrap">
+            <div class="mb-5 bg-white p-4 rounded-4 border shadow-sm" style="border-radius: 20px; border-color: #e2e8f0 !important; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.06) !important;">
+                <div class="section-title-wrap mb-4" style="border-bottom: 1px solid #f1f5f9; padding-bottom: 0.85rem;">
                     <div class="section-title-main">
                         <span class="p-2 rounded-circle text-primary bg-blue-soft d-inline-flex align-items-center justify-content-center" style="background:#eff6ff; width:36px; height:36px;">
                             <i class="las la-th-large fs-20"></i>
@@ -780,20 +794,20 @@
                 </div>
 
                 <div class="aiz-carousel arrow-inactive-none arrow-x-0" 
-                     data-items="6" data-xxl-items="6" data-xl-items="5" data-lg-items="4" data-md-items="3" data-sm-items="2" data-xs-items="2"
+                     data-items="7" data-xxl-items="7" data-xl-items="6" data-lg-items="5" data-md-items="4" data-sm-items="3" data-xs-items="2"
                      data-arrows="true" data-dots="false" data-autoplay="true" data-infinite="true">
                     <?php foreach ($featured_categories as $category): ?>
-                        <div class="carousel-box px-2">
+                        <div class="carousel-box px-1-5">
                             <a href="<?= base_url('category/' . esc($category['slug'])) ?>" class="category-card-modern">
-                                <img src="<?= !empty($category['banner_img']) ? base_url($category['banner_img']) : base_url('assets/img/placeholder.jpg') ?>"
-                                     alt="<?= esc($category['name']) ?>"
-                                     onerror="this.onerror=null;this.src='<?= base_url('assets/img/placeholder.jpg') ?>';">
-                                <div class="category-card-overlay">
-                                    <h5 class="category-title-text">
-                                        <?= esc($category['name']) ?>
-                                        <i class="las la-arrow-right"></i>
-                                    </h5>
+                                <div class="category-card-img-wrap">
+                                    <img src="<?= !empty($category['banner_img']) ? base_url($category['banner_img']) : base_url('assets/img/placeholder.jpg') ?>"
+                                         alt="<?= esc($category['name']) ?>"
+                                         onerror="this.onerror=null;this.src='<?= base_url('assets/img/placeholder.jpg') ?>';">
                                 </div>
+                                <h5 class="category-title-below">
+                                    <?= esc($category['name']) ?>
+                                    <i class="las la-arrow-right"></i>
+                                </h5>
                             </a>
                         </div>
                     <?php endforeach; ?>

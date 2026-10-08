@@ -8,17 +8,65 @@ class CategoryModel extends Model
 {
     protected $table = 'categories';
 
-    public function getMainCategories(int $limit = 12): array
+    public function getAllDescendantIds(int $categoryId): array
+    {
+        $db = \Config\Database::connect();
+        $ids = [];
+        $children = $db->table('categories')->select('id')->where('parent_id', $categoryId)->get()->getResultArray();
+        foreach ($children as $child) {
+            $ids[] = (int)$child['id'];
+            $ids = array_merge($ids, $this->getAllDescendantIds((int)$child['id']));
+        }
+        return $ids;
+    }
+
+    public function getAllSubcategoriesRecursive(int $categoryId): array
     {
         $db = \Config\Database::connect();
         $builder = $db->table('categories c');
         $builder->select('c.*, u.file_name as icon_img');
         $builder->join('uploads u', 'c.icon = u.id', 'left');
+        $builder->where('c.parent_id', $categoryId);
+        $builder->orderBy('c.order_level', 'DESC');
+        $children = $builder->get()->getResultArray();
+
+        $allSubs = [];
+        foreach ($children as $child) {
+            $allSubs[] = $child;
+            $grandChildren = $this->getAllSubcategoriesRecursive((int)$child['id']);
+            if (!empty($grandChildren)) {
+                $allSubs = array_merge($allSubs, $grandChildren);
+            }
+        }
+        return $allSubs;
+    }
+
+    public function getMainCategories(int $limit = 50): array
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('categories c');
+        $builder->select('c.*, u.file_name as icon_img, ub.file_name as banner_img');
+        $builder->join('uploads u', 'c.icon = u.id', 'left');
+        $builder->join('uploads ub', 'c.banner = ub.id', 'left');
         $builder->where('c.parent_id', 0);
         $builder->orderBy('c.order_level', 'DESC');
         $builder->limit($limit);
         
-        return $builder->get()->getResultArray();
+        $categories = $builder->get()->getResultArray();
+
+        foreach ($categories as &$cat) {
+            $cat['subcategories'] = $this->getAllSubcategoriesRecursive((int)$cat['id']);
+
+            $descendantIds = $this->getAllDescendantIds((int)$cat['id']);
+            $catIds = array_merge([(int)$cat['id']], $descendantIds);
+
+            $cat['product_count'] = $db->table('products')
+                                       ->whereIn('category_id', $catIds)
+                                       ->where('published', 1)
+                                       ->countAllResults();
+        }
+
+        return $categories;
     }
 
     public function getFeaturedCategories(int $limit = 8): array

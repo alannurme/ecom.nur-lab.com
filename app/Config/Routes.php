@@ -10,6 +10,7 @@ $routes->get('product/(:segment)', 'Product::detail/$1');
 $routes->get('products', 'Product::list');
 $routes->get('search', 'Product::list');
 $routes->get('categories', 'Category::index');
+$routes->get('category/(:segment)', 'Category::show/$1');
 $routes->get('brands', 'Brand::index');
 
 // Shopping Cart & Checkout
