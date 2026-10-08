@@ -2463,6 +2463,9 @@ class Admin extends BaseController
             'currency'       => 'BDT',
             'customer_name'  => 'Test Admin',
             'customer_email' => 'admin@nur-lab.com',
+            'customer_phone' => '01700000000',
+            'mobile'         => '01700000000',
+            'phone'          => '01700000000',
             'redirect_url'   => base_url('admin/setup/payment-methods')
         ];
 
@@ -2474,6 +2477,8 @@ class Admin extends BaseController
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
+            'x-api-key: ' . $apiKey,
+            'api-key: ' . $apiKey,
             'Authorization: Bearer ' . $apiKey
         ]);
 
@@ -2482,12 +2487,12 @@ class Admin extends BaseController
 
         if ($response) {
             $resData = json_decode($response, true);
-            $paymentUrl = $resData['data']['payment_url'] ?? ($resData['payment_url'] ?? ($resData['url'] ?? ''));
+            $paymentUrl = $resData['pp_url'] ?? ($resData['data']['payment_url'] ?? ($resData['payment_url'] ?? ($resData['url'] ?? '')));
             if (!empty($paymentUrl)) {
                 return redirect()->to($paymentUrl);
             } else {
-                $err = $resData['message'] ?? ($resData['error']['message'] ?? json_encode($resData));
-                echo "<script>alert('PipraPay API Gateway Error:\\n" . addslashes($err) . "'); window.history.back();</script>";
+                $err = $resData['message'] ?? ($resData['error']['message'] ?? ($resData['error'] ?? json_encode($resData)));
+                echo "<script>alert('PipraPay API Gateway Error:\\n" . addslashes(is_array($err) ? json_encode($err) : $err) . "'); window.history.back();</script>";
                 exit;
             }
         }
