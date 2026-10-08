@@ -2500,7 +2500,7 @@ class Admin extends BaseController
         }
 
         $resData = json_decode($response, true);
-        $paymentUrl = $resData['payment_url'] ?? ($resData['data']['payment_url'] ?? ($resData['url'] ?? ''));
+        $paymentUrl = $resData['payment_url'] ?? ($resData['data']['payment_url'] ?? ($resData['url'] ?? ($resData['checkout_url'] ?? '')));
 
         if (!empty($paymentUrl)) {
             return $this->response->setJSON([
@@ -2510,9 +2510,11 @@ class Admin extends BaseController
             ]);
         }
 
+        $apiMsg = $resData['message'] ?? ($resData['error'] ?? json_encode($resData));
+
         return $this->response->setJSON([
             'status'  => 'info',
-            'message' => 'PipraPay API Configured (' . ($isSandbox ? 'Sandbox Mode' : 'Live Mode') . '). Base URL: ' . esc($baseUrl)
+            'message' => 'PipraPay API Configured (' . ($isSandbox ? 'Sandbox Mode' : 'Live Mode') . '). Base URL: ' . esc($baseUrl) . ($apiMsg ? "\nAPI Response: " . esc($apiMsg) : '')
         ]);
     }
     public function setupVatTax() { return view('admin/setup/generic', ['page_title' => 'Vat & TAX Setup']); }
