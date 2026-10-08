@@ -8,6 +8,39 @@ class CategoryModel extends Model
 {
     protected $table = 'categories';
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->ensureSchemaIntegrity();
+    }
+
+    public function ensureSchemaIntegrity(): void
+    {
+        static $done = false;
+        if ($done) return;
+        $done = true;
+
+        try {
+            $db = \Config\Database::connect();
+            if (!$db->tableExists('categories')) return;
+
+            $requiredColumns = [
+                'home_showcase' => "TINYINT(1) DEFAULT 0",
+                'hot_category'  => "VARCHAR(10) DEFAULT '0'",
+                'featured'      => "INT(11) DEFAULT 0",
+                'cover_image'   => "VARCHAR(100) NULL DEFAULT NULL"
+            ];
+
+            foreach ($requiredColumns as $column => $definition) {
+                if (!$db->fieldExists($column, 'categories')) {
+                    $db->query("ALTER TABLE `categories` ADD COLUMN `{$column}` {$definition}");
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'CategoryModel schema auto-repair notice: ' . $e->getMessage());
+        }
+    }
+
     public function getAllDescendantIds(int $categoryId): array
     {
         $db = \Config\Database::connect();
@@ -71,60 +104,95 @@ class CategoryModel extends Model
 
     public function getFeaturedCategories(int $limit = 8): array
     {
-        $db = \Config\Database::connect();
-        $builder = $db->table('categories c');
-        $builder->select('c.*, u.file_name as banner_img');
-        $builder->join('uploads u', 'c.banner = u.id', 'left');
-        $builder->where('c.featured', 1);
-        $builder->limit($limit);
+        $this->ensureSchemaIntegrity();
+        try {
+            $db = \Config\Database::connect();
+            $builder = $db->table('categories c');
+            $builder->select('c.*, u.file_name as banner_img');
+            $builder->join('uploads u', 'c.banner = u.id', 'left');
+            $builder->where('c.featured', 1);
+            $builder->limit($limit);
 
-        return $builder->get()->getResultArray();
+            return $builder->get()->getResultArray();
+        } catch (\Throwable $e) {
+            return $this->getMainCategories($limit);
+        }
     }
 
     public function getHotCategories(int $limit = 8): array
     {
-        $db = \Config\Database::connect();
-        $builder = $db->table('categories c');
-        $builder->select('c.*, u.file_name as banner_img, u2.file_name as icon_img');
-        $builder->join('uploads u', 'c.banner = u.id', 'left');
-        $builder->join('uploads u2', 'c.icon = u2.id', 'left');
-        $builder->where('c.hot_category', '1');
-        $builder->limit($limit);
+        $this->ensureSchemaIntegrity();
+        try {
+            $db = \Config\Database::connect();
+            $builder = $db->table('categories c');
+            $builder->select('c.*, u.file_name as banner_img, u2.file_name as icon_img');
+            $builder->join('uploads u', 'c.banner = u.id', 'left');
+            $builder->join('uploads u2', 'c.icon = u2.id', 'left');
+            $builder->where('c.hot_category', '1');
+            $builder->limit($limit);
 
-        return $builder->get()->getResultArray();
+            return $builder->get()->getResultArray();
+        } catch (\Throwable $e) {
+            return $this->getMainCategories($limit);
+        }
     }
 
     public function getHomeShowcaseCategories(int $limit = 6): array
     {
-        $db = \Config\Database::connect();
-        $builder = $db->table('categories c');
-        $builder->select('c.*, u.file_name as banner_img, u2.file_name as icon_img, u3.file_name as cover_img');
-        $builder->join('uploads u', 'c.banner = u.id', 'left');
-        $builder->join('uploads u2', 'c.icon = u2.id', 'left');
-        $builder->join('uploads u3', 'c.cover_image = u3.id', 'left');
-        $builder->where('c.home_showcase', 1);
-        $builder->limit($limit);
+        $this->ensureSchemaIntegrity();
+        try {
+            $db = \Config\Database::connect();
+            $builder = $db->table('categories c');
+            $builder->select('c.*, u.file_name as banner_img, u2.file_name as icon_img, u3.file_name as cover_img');
+            $builder->join('uploads u', 'c.banner = u.id', 'left');
+            $builder->join('uploads u2', 'c.icon = u2.id', 'left');
+            $builder->join('uploads u3', 'c.cover_image = u3.id', 'left');
+            $builder->where('c.home_showcase', 1);
+            $builder->limit($limit);
 
-        $categories = $builder->get()->getResultArray();
+            $categories = $builder->get()->getResultArray();
 
-        foreach ($categories as &$cat) {
-            // Get subcategory IDs
-            $subCatIds = $db->table('categories')->select('id')->where('parent_id', $cat['id'])->get()->getResultArray();
-            $catIds = [$cat['id']];
-            if (!empty($subCatIds)) {
-                $catIds = array_merge($catIds, array_column($subCatIds, 'id'));
+            if (empty($categories)) {
+                $categories = $this->getMainCategories($limit);
             }
 
-            $prodBuilder = $db->table('products p');
-            $prodBuilder->select('p.*, u.file_name as thumbnail_img');
-            $prodBuilder->join('uploads u', 'p.thumbnail_img = u.id', 'left');
-            $prodBuilder->where('p.published', 1);
-            $prodBuilder->whereIn('p.category_id', $catIds);
-            $prodBuilder->orderBy('RAND()');
-            $prodBuilder->limit(10);
-            $cat['products'] = $prodBuilder->get()->getResultArray();
-        }
+            foreach ($categories as &$cat) {
+                // Get subcategory IDs
+                $subCatIds = $db->table('categories')->select('id')->where('parent_id', $cat['id'])->get()->getResultArray();
+                $catIds = [$cat['id']];
+                if (!empty($subCatIds)) {
+                    $catIds = array_merge($catIds, array_column($subCatIds, 'id'));
+                }
 
-        return $categories;
+                $prodBuilder = $db->table('products p');
+                $prodBuilder->select('p.*, u.file_name as thumbnail_img');
+                $prodBuilder->join('uploads u', 'p.thumbnail_img = u.id', 'left');
+                $prodBuilder->where('p.published', 1);
+                $prodBuilder->whereIn('p.category_id', $catIds);
+                $prodBuilder->orderBy('RAND()');
+                $prodBuilder->limit(10);
+                $cat['products'] = $prodBuilder->get()->getResultArray();
+            }
+
+            return $categories;
+        } catch (\Throwable $e) {
+            log_message('error', 'getHomeShowcaseCategories error: ' . $e->getMessage());
+            $categories = $this->getMainCategories($limit);
+            foreach ($categories as &$cat) {
+                $subCatIds = $db->table('categories')->select('id')->where('parent_id', $cat['id'])->get()->getResultArray();
+                $catIds = [$cat['id']];
+                if (!empty($subCatIds)) {
+                    $catIds = array_merge($catIds, array_column($subCatIds, 'id'));
+                }
+                $prodBuilder = $db->table('products p');
+                $prodBuilder->select('p.*, u.file_name as thumbnail_img');
+                $prodBuilder->join('uploads u', 'p.thumbnail_img = u.id', 'left');
+                $prodBuilder->where('p.published', 1);
+                $prodBuilder->whereIn('p.category_id', $catIds);
+                $prodBuilder->limit(10);
+                $cat['products'] = $prodBuilder->get()->getResultArray();
+            }
+            return $categories;
+        }
     }
 }
