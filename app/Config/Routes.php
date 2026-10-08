@@ -176,6 +176,7 @@ $routes->group('admin', static function ($routes) {
     $routes->get('setup/currencies', 'Admin::setupCurrencies');
     $routes->get('setup/payment-methods', 'Admin::setupPaymentMethods');
     $routes->post('setup/payment-methods/update', 'Admin::updatePaymentMethods');
+    $routes->get('setup/payment-methods/test-piprapay', 'Admin::testPipraPay');
     $routes->get('setup/vat-tax', 'Admin::setupVatTax');
     $routes->get('setup/pickup-point', 'Admin::setupPickupPoint');
     $routes->get('setup/smtp', 'Admin::setupSmtp');

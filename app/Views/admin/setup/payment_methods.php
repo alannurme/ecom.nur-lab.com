@@ -152,8 +152,7 @@
                             </button>
                         </div>
                         <div class="col-6">
-                            <?php $isSandbox = !empty($payment_methods['piprapay_sandbox']); ?>
-                            <button type="button" class="btn btn-block btn-outline-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 16px;" onclick="alert('PipraPay is currently in <?= $isSandbox ? 'Sandbox (Test) Mode' : 'Live Mode' ?>.');">
+                            <button type="button" class="btn btn-block btn-outline-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 16px;" onclick="runPipraPayTest();">
                                 <i class="las la-vial mr-1"></i> Test (10 ৳)
                             </button>
                         </div>
@@ -240,6 +239,27 @@ function togglePaymentMethod(key, status) {
             if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
                 AIZ.plugins.notify('danger', 'Error updating payment method status');
             }
+        }
+    });
+}
+function runPipraPayTest() {
+    $.ajax({
+        url: '<?= base_url('admin/setup/payment-methods/test-piprapay') ?>',
+        type: 'GET',
+        dataType: 'json',
+        success: function(res) {
+            if (res.status === 'success' && res.payment_url) {
+                if (confirm(res.message + "\nClick OK to open PipraPay gateway payment page.")) {
+                    window.open(res.payment_url, '_blank');
+                }
+            } else if (res.status === 'error') {
+                alert('PipraPay Config Notice:\n' + res.message);
+            } else {
+                alert('PipraPay Configuration:\n' + res.message);
+            }
+        },
+        error: function(err) {
+            alert('Failed to connect to PipraPay test endpoint.');
         }
     });
 }

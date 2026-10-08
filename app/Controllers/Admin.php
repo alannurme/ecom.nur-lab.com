@@ -2450,6 +2450,71 @@ class Admin extends BaseController
         }
         return redirect()->to(base_url('admin/setup/payment-methods'))->with('success', 'Payment method settings updated successfully.');
     }
+
+    public function testPipraPay() {
+        $settingModel = new \App\Models\SettingModel();
+        $apiKey = $settingModel->getSetting('piprapay_api_key', '');
+        $baseUrl = rtrim($settingModel->getSetting('piprapay_base_url', 'https://pay.nur-lab.com/api'), '/');
+        $isSandbox = (int)$settingModel->getSetting('piprapay_sandbox', 1);
+
+        if (empty($apiKey)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'PipraPay API Key missing! Click "Configure" to enter your API Key and Base URL.'
+            ]);
+        }
+
+        $payload = [
+            'amount'       => 10,
+            'currency'     => 'BDT',
+            'full_name'    => 'PipraPay Test Admin',
+            'email'        => 'admin@nur-lab.com',
+            'mobile'       => '01700000000',
+            'redirect_url' => base_url('admin/setup/payment-methods'),
+            'cancel_url'   => base_url('admin/setup/payment-methods'),
+            'metadata'     => ['test' => true]
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $baseUrl . '/create-charge');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apiKey,
+            'api-key: ' . $apiKey
+        ]);
+
+        $response = curl_exec($ch);
+        $curlErr  = curl_error($ch);
+        curl_close($ch);
+
+        if ($curlErr) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Connection Error to PipraPay Endpoint (' . esc($baseUrl) . '): ' . esc($curlErr)
+            ]);
+        }
+
+        $resData = json_decode($response, true);
+        $paymentUrl = $resData['payment_url'] ?? ($resData['data']['payment_url'] ?? ($resData['url'] ?? ''));
+
+        if (!empty($paymentUrl)) {
+            return $this->response->setJSON([
+                'status'      => 'success',
+                'payment_url' => $paymentUrl,
+                'message'     => 'PipraPay 10 ৳ test payment session generated!'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'info',
+            'message' => 'PipraPay API Configured (' . ($isSandbox ? 'Sandbox Mode' : 'Live Mode') . '). Base URL: ' . esc($baseUrl)
+        ]);
+    }
     public function setupVatTax() { return view('admin/setup/generic', ['page_title' => 'Vat & TAX Setup']); }
     public function setupPickupPoint() { return view('admin/setup/generic', ['page_title' => 'Pickup Point Setup']); }
     public function setupSmtp() { return view('admin/setup/generic', ['page_title' => 'SMTP Settings']); }
