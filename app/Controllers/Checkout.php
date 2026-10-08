@@ -52,7 +52,7 @@ class Checkout extends BaseController
         $email = $this->request->getPost('email');
         $phone = $this->request->getPost('phone');
         $address = $this->request->getPost('address');
-        $paymentMethod = $this->request->getPost('payment_option', 'cash_on_delivery');
+        $paymentMethod = $this->request->getPost('payment_option') ?? 'cash_on_delivery';
 
         $subtotal = 0;
         foreach ($cart as $item) {

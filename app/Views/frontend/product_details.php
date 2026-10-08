@@ -11,6 +11,13 @@
         background-color: #f8fafc;
         color: #0f172a;
     }
+
+    @media (min-width: 992px) {
+        .col-lg-1-5 {
+            flex: 0 0 20%;
+            max-width: 20%;
+        }
+    }
     
     /* Modern Glass Card */
     .product-details-card {
@@ -23,28 +30,26 @@
     /* Main Image Gallery Container */
     .main-img-box {
         position: relative;
-        height: 440px;
         width: 100%;
-        border-radius: 20px;
+        aspect-ratio: 1 / 1;
+        border-radius: 16px;
         overflow: hidden;
-        background: radial-gradient(circle, #ffffff 0%, #f1f5f9 100%);
+        background: #ffffff;
         display: flex;
         align-items: center;
         justify-content: center;
         border: 1px solid #e2e8f0;
-        box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
     }
 
     .main-img-box img {
-        max-height: 90%;
-        max-width: 90%;
-        object-fit: contain;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        filter: drop-shadow(0 10px 15px rgba(0,0,0,0.06));
     }
 
     .main-img-box:hover img {
-        transform: scale(1.12);
+        transform: scale(1.08);
     }
 
     /* Floating Image Zoom Indicator */
@@ -145,16 +150,20 @@
     }
 
     .current-price-val {
-        font-size: 2.4rem;
+        font-size: 2.2rem;
         font-weight: 800;
         color: #2563eb;
         letter-spacing: -0.03em;
+        display: inline-block;
+        white-space: nowrap;
     }
 
     .old-price-val {
         font-size: 1.25rem;
         color: #94a3b8;
         text-decoration: line-through;
+        display: inline-block;
+        white-space: nowrap;
     }
 
     /* Quantity Control Pill */
@@ -501,16 +510,16 @@
                     <div class="price-box-card mb-4">
                         <?php if (!empty($product['auction_product'])): ?>
                             <span class="fs-12 fw-700 text-uppercase text-muted d-block mb-1">Starting Bid Price</span>
-                            <div class="d-flex align-items-baseline gap-3">
+                            <div class="d-flex align-items-center flex-wrap" style="gap: 15px;">
                                 <span class="current-price-val text-warning" style="color:#d97706 !important;">৳<?= number_format((float)$product['unit_price'], 2) ?></span>
                             </div>
                         <?php else: ?>
                             <span class="fs-12 fw-700 text-uppercase text-muted d-block mb-1">Price</span>
-                            <div class="d-flex align-items-baseline gap-3">
+                            <div class="d-flex align-items-center flex-wrap" style="gap: 15px;">
                                 <span class="current-price-val">৳<?= number_format($final_price, 2) ?></span>
                                 <?php if ($final_price < (float)$product['unit_price']): ?>
                                     <span class="old-price-val">৳<?= number_format($product['unit_price'], 2) ?></span>
-                                    <span class="badge badge-danger px-2 py-1 fs-12 fw-800 rounded-pill">
+                                    <span class="badge badge-danger px-3 py-1 fs-12 fw-800 rounded-pill">
                                         <?= $product['discount_type'] === 'percent' ? '-' . (int)$product['discount'] . '%' : 'SAVE BIG' ?>
                                     </span>
                                 <?php endif; ?>
@@ -566,10 +575,10 @@
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <button class="btn-buy-now px-4" onclick="alert('Proceeding to checkout...')">
+                                <button type="button" class="btn-buy-now px-4" onclick="handleAddToCart(<?= $product['id'] ?>, true)">
                                     <i class="las la-bolt fs-18"></i> Buy Now
                                 </button>
-                                <button class="btn-add-cart-outline px-4" onclick="alert('Added to Cart!')">
+                                <button type="button" class="btn-add-cart-outline px-4" onclick="handleAddToCart(<?= $product['id'] ?>, false)">
                                     <i class="las la-shopping-bag fs-18"></i> Add to Cart
                                 </button>
                             </div>
@@ -729,6 +738,43 @@ function updateQty(delta) {
     current += delta;
     if (current < min) current = min;
     qtyInput.value = current;
+}
+
+function handleAddToCart(productId, isBuyNow) {
+    const qtyInput = document.getElementById('productQtyInput');
+    const quantity = qtyInput ? (parseInt(qtyInput.value) || 1) : 1;
+
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('quantity', quantity);
+
+    fetch('<?= base_url('cart/add') ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            if (isBuyNow) {
+                window.location.href = '<?= base_url('checkout') ?>';
+            } else {
+                if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
+                    AIZ.plugins.notify('success', data.message);
+                } else {
+                    alert(data.message);
+                }
+                if (document.querySelector('.cart-count')) {
+                    document.querySelector('.cart-count').innerText = data.cart_count;
+                }
+            }
+        } else {
+            alert(data.message || 'Error adding product to cart.');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Cart action failed. Please try again.');
+    });
 }
 </script>
 

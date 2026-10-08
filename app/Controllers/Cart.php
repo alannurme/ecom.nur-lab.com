@@ -39,7 +39,7 @@ class Cart extends BaseController
     public function add()
     {
         $productId = $this->request->getPost('product_id');
-        $qty = (int)$this->request->getPost('quantity', 1);
+        $qty = (int)($this->request->getPost('quantity') ?? 1);
 
         if (!$productId) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid product']);
