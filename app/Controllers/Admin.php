@@ -2453,51 +2453,43 @@ class Admin extends BaseController
 
     public function testPipraPay() {
         $settingModel = new \App\Models\SettingModel();
-        $apiKey = $settingModel->getSetting('piprapay_api_key', '');
+        $apiKey = $settingModel->getSetting('piprapay_api_key', '01c19a05145aef64b6a4b3361dc7f7c1965f41048672de5c3a');
         $baseUrl = rtrim($settingModel->getSetting('piprapay_base_url', 'https://pay.nur-lab.com/api'), '/');
 
+        $endpoint = (strpos($baseUrl, '/api') !== false ? $baseUrl : $baseUrl . '/api') . '/checkout/redirect';
+
         $payload = [
-            'amount'       => 10,
-            'currency'     => 'BDT',
-            'full_name'    => 'PipraPay Test Admin',
-            'email'        => 'admin@nur-lab.com',
-            'mobile'       => '01700000000',
-            'redirect_url' => base_url('admin/setup/payment-methods'),
-            'cancel_url'   => base_url('admin/setup/payment-methods'),
-            'metadata'     => ['test' => true]
+            'amount'         => 10.00,
+            'currency'       => 'BDT',
+            'customer_name'  => 'Test Admin',
+            'customer_email' => 'admin@nur-lab.com',
+            'redirect_url'   => base_url('admin/setup/payment-methods')
         ];
 
-        $paymentUrl = '';
-        if (!empty($apiKey)) {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $baseUrl . '/create-charge');
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $apiKey,
-                'api-key: ' . $apiKey
-            ]);
+        $ch = curl_init($endpoint);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apiKey
+        ]);
 
-            $response = curl_exec($ch);
-            curl_close($ch);
+        $response = curl_exec($ch);
+        curl_close($ch);
 
-            if ($response) {
-                $resData = json_decode($response, true);
-                $paymentUrl = $resData['payment_url'] ?? ($resData['data']['payment_url'] ?? ($resData['url'] ?? ($resData['checkout_url'] ?? '')));
+        if ($response) {
+            $resData = json_decode($response, true);
+            $paymentUrl = $resData['data']['payment_url'] ?? ($resData['payment_url'] ?? ($resData['url'] ?? ''));
+            if (!empty($paymentUrl)) {
+                return redirect()->to($paymentUrl);
             }
         }
 
-        // Fallback to base URL directly if API call fails or no key
-        if (empty($paymentUrl)) {
-            $cleanBaseUrl = str_replace('/api', '', $baseUrl);
-            $paymentUrl = !empty($cleanBaseUrl) ? $cleanBaseUrl : 'https://pay.nur-lab.com';
-        }
-
-        return redirect()->to($paymentUrl);
+        $cleanBaseUrl = str_replace('/api', '', $baseUrl);
+        return redirect()->to(!empty($cleanBaseUrl) ? $cleanBaseUrl : 'https://pay.nur-lab.com');
     }
     public function setupVatTax() { return view('admin/setup/generic', ['page_title' => 'Vat & TAX Setup']); }
     public function setupPickupPoint() { return view('admin/setup/generic', ['page_title' => 'Pickup Point Setup']); }
