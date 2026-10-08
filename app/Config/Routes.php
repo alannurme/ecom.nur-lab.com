@@ -15,6 +15,8 @@ $routes->get('brands', 'Brand::index');
 // Shopping Cart & Checkout
 $routes->get('cart', 'Cart::index');
 $routes->post('cart/add', 'Cart::add');
+$routes->post('cart/update', 'Cart::updateQuantity');
+$routes->post('cart/remove-ajax', 'Cart::removeAjax');
 $routes->get('cart/remove/(:num)', 'Cart::remove/$1');
 $routes->get('checkout', 'Checkout::index');
 $routes->post('checkout/process', 'Checkout::process');

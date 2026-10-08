@@ -50,10 +50,10 @@
 
                         <?php if (!empty($piprapay_active) && $piprapay_active == 1): $hasPaymentMethod = true; ?>
                             <div class="custom-control custom-radio p-3 border rounded mb-3">
-                                <input type="radio" id="bkash" name="payment_option" value="bkash" class="custom-control-input" <?= $firstChecked ? 'checked' : '' ?>>
-                                <label class="custom-control-label fw-700 text-dark cursor-pointer" for="bkash">
-                                    bKash / Online Payment
-                                    <small class="text-secondary d-block font-weight-normal">Pay instantly via bKash or Mobile Banking.</small>
+                                <input type="radio" id="online_payment" name="payment_option" value="online_payment" class="custom-control-input" <?= $firstChecked ? 'checked' : '' ?>>
+                                <label class="custom-control-label fw-700 text-dark cursor-pointer" for="online_payment">
+                                    <?= esc($piprapay_title ?? 'PipraPay / Online Payment') ?>
+                                    <small class="text-secondary d-block font-weight-normal">Pay instantly via Mobile Banking, bKash, Nagad or Cards.</small>
                                 </label>
                             </div>
                             <?php $firstChecked = false; ?>
@@ -78,9 +78,19 @@
                                         <img src="<?= !empty($item['thumbnail']) ? base_url($item['thumbnail']) : base_url('assets/img/placeholder.jpg') ?>" 
                                              alt="" width="36" height="36" class="rounded border mr-2" style="object-fit: cover;"
                                              onerror="this.src='<?= base_url('assets/img/placeholder.jpg') ?>'">
-                                        <div>
-                                            <span class="fw-700 text-dark fs-13 d-block"><?= esc($item['name']) ?></span>
-                                            <small class="text-muted">Qty: <?= $item['qty'] ?></small>
+                                        <div class="d-flex align-items-center">
+                                            <span class="fw-700 text-dark fs-13 d-block text-truncate max-w-180px" title="<?= esc($item['name']) ?>"><?= esc($item['name']) ?></span>
+                                            <div class="d-flex align-items-center mt-1">
+                                                <div class="input-group input-group-sm rounded border align-items-center bg-light" style="width: 80px;">
+                                                    <div class="input-group-prepend">
+                                                        <button type="button" class="btn btn-xs text-dark px-1 border-0" onclick="updateCartQtyDirect('<?= $item['id'] ?>', 'decrease', event)"><i class="las la-minus fs-10"></i></button>
+                                                    </div>
+                                                    <span class="form-control form-control-sm text-center border-0 px-0 bg-transparent fw-700 fs-11" style="height: auto; padding: 1px 0;"><?= $item['qty'] ?></span>
+                                                    <div class="input-group-append">
+                                                        <button type="button" class="btn btn-xs text-dark px-1 border-0" onclick="updateCartQtyDirect('<?= $item['id'] ?>', 'increase', event)"><i class="las la-plus fs-10"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <span class="fw-700 text-primary">৳<?= number_format($item['price'] * $item['qty'], 2) ?></span>

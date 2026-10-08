@@ -42,7 +42,15 @@
                                             </td>
                                             <td class="fw-700 text-dark">৳<?= number_format($item['price'], 2) ?></td>
                                             <td>
-                                                <span class="badge badge-light border px-3 py-2 fs-13 fw-700"><?= $item['qty'] ?></span>
+                                                <div class="input-group input-group-sm rounded border align-items-center bg-light" style="width: 105px;">
+                                                    <div class="input-group-prepend">
+                                                        <button class="btn btn-sm text-dark px-2 border-0" onclick="updateCartQtyDirect('<?= $item['id'] ?>', 'decrease', event)"><i class="las la-minus fs-12"></i></button>
+                                                    </div>
+                                                    <span class="form-control form-control-sm text-center border-0 px-0 bg-transparent fw-700 fs-13" style="height: auto; padding: 4px 0;"><?= $item['qty'] ?></span>
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-sm text-dark px-2 border-0" onclick="updateCartQtyDirect('<?= $item['id'] ?>', 'increase', event)"><i class="las la-plus fs-12"></i></button>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td class="fw-800 text-primary">৳<?= number_format($item['price'] * $item['qty'], 2) ?></td>
                                             <td class="text-right">

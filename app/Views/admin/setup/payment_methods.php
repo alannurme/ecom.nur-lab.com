@@ -180,6 +180,16 @@
                 <form action="<?= base_url('admin/setup/payment-methods/update') ?>" method="POST">
                     <?= csrf_field() ?>
                     <div class="form-group mb-4">
+                        <label class="form-label fw-600 text-dark">Payment Method Title</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-light border-right-0"><i class="las la-pen"></i></span>
+                            </div>
+                            <input type="text" name="piprapay_display_title" class="form-control border-left-0 pl-0" value="<?= esc($payment_methods['piprapay_display_title'] ?? 'PipraPay / Online Payment') ?>" placeholder="e.g. bKash / Nagad / Online Payment">
+                        </div>
+                        <small class="form-text text-muted mt-1"><i class="las la-info-circle"></i> This title will be shown on the checkout page.</small>
+                    </div>
+                    <div class="form-group mb-4">
                         <label class="form-label fw-600 text-dark">Base URL</label>
                         <div class="input-group">
                             <div class="input-group-prepend">

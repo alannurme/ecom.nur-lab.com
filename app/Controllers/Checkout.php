@@ -37,7 +37,8 @@ class Checkout extends BaseController
             'cart'            => $cart,
             'total'           => $total,
             'cod_active'      => (int)$settingModel->getSetting('cash_on_delivery', 1),
-            'piprapay_active' => (int)$settingModel->getSetting('piprapay', 1)
+            'piprapay_active' => (int)$settingModel->getSetting('piprapay', 1),
+            'piprapay_title'  => $settingModel->getSetting('piprapay_display_title', 'PipraPay / Online Payment')
         ];
 
         return view('frontend/checkout', $data);

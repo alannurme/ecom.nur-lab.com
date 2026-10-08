@@ -167,12 +167,88 @@
                         if (response.cart_total !== undefined) {
                             $('.cart-total').text(response.cart_total);
                         }
+                        if (response.cart_html !== undefined) {
+                            $('.cart-items-list').html(response.cart_html);
+                            $('#cart-footer-box').removeClass('d-none');
+                        }
                     } else {
                         alert(response.message || 'Error adding product to cart.');
                     }
                 },
                 error: function() {
                     alert('Could not add product to cart. Please try again.');
+                }
+            });
+        }
+
+        function updateCartQtyDirect(productId, action, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            $.ajax({
+                url: '<?= base_url('cart/update') ?>',
+                type: 'POST',
+                data: {
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>',
+                    product_id: productId,
+                    action: action
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        if (response.cart_count !== undefined) {
+                            $('.cart-count').text(response.cart_count);
+                        }
+                        if (response.cart_total !== undefined) {
+                            $('.cart-total').text(response.cart_total);
+                        }
+                        if (response.cart_html !== undefined) {
+                            $('.cart-items-list').html(response.cart_html);
+                        }
+                        if (response.cart_count == 0) {
+                            $('#cart-footer-box').addClass('d-none');
+                        }
+                        if (window.location.pathname.includes('/cart') || window.location.pathname.includes('/checkout')) {
+                            location.reload();
+                        }
+                    }
+                }
+            });
+        }
+
+        function removeFromCartDirect(productId, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            $.ajax({
+                url: '<?= base_url('cart/remove-ajax') ?>',
+                type: 'POST',
+                data: {
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>',
+                    product_id: productId
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
+                            AIZ.plugins.notify('success', response.message);
+                        }
+                        if (response.cart_count !== undefined) {
+                            $('.cart-count').text(response.cart_count);
+                        }
+                        if (response.cart_total !== undefined) {
+                            $('.cart-total').text(response.cart_total);
+                        }
+                        if (response.cart_html !== undefined) {
+                            $('.cart-items-list').html(response.cart_html);
+                        }
+                        if (response.cart_count == 0) {
+                            $('#cart-footer-box').addClass('d-none');
+                        }
+                        if (window.location.pathname.includes('/cart') || window.location.pathname.includes('/checkout')) {
+                            location.reload();
+                        }
+                    }
                 }
             });
         }

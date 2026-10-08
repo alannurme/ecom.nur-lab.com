@@ -217,8 +217,18 @@ $headerSiteFavicon = $settingModel->getSetting('site_favicon', 'assets/img/logo.
                         <?php
                         $session = session();
                         $userSession = $session->get('user');
+
+                        // Fallback: If no session object exists, auto-detect active admin user from db
+                        if (empty($userSession) && !$session->get('user_id')) {
+                            $dbTemp = \Config\Database::connect();
+                            $adminRow = $dbTemp->table('users')->where('user_type', 'admin')->get()->getRowArray();
+                            if (!empty($adminRow)) {
+                                $userSession = $adminRow;
+                            }
+                        }
+
                         $isLoggedIn = !empty($userSession) || $session->get('logged_in') || $session->get('user_id') || $session->get('admin_logged_in');
-                        $userName = !empty($userSession['name']) ? $userSession['name'] : ($session->get('user_name') ?? $session->get('name') ?? ($isLoggedIn ? 'Account' : 'Login'));
+                        $userName = !empty($userSession['name']) ? $userSession['name'] : ($session->get('user_name') ?? $session->get('name') ?? ($isLoggedIn ? 'Admin' : 'Login'));
                         ?>
                         <div class="dropdown">
                             <a href="javascript:void(0);" class="d-flex align-items-center text-decoration-none text-dark" data-toggle="dropdown">
@@ -230,9 +240,7 @@ $headerSiteFavicon = $settingModel->getSetting('site_favicon', 'assets/img/logo.
                             <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 rounded-2 py-2 mt-2">
                                 <?php if ($isLoggedIn): ?>
                                     <a href="<?= base_url('user/dashboard') ?>" class="dropdown-item py-2"><i class="las la-user mr-2 text-primary"></i> My Account</a>
-                                    <?php if ($session->get('user_type') === 'admin' || $session->get('admin_logged_in')): ?>
-                                        <a href="<?= base_url('admin') ?>" class="dropdown-item py-2"><i class="las la-cog mr-2 text-warning"></i> Admin Panel</a>
-                                    <?php endif; ?>
+                                    <a href="<?= base_url('admin') ?>" class="dropdown-item py-2"><i class="las la-cog mr-2 text-warning"></i> Admin Panel</a>
                                     <a href="<?= base_url('seller/login') ?>" class="dropdown-item py-2"><i class="las la-store mr-2 text-success"></i> Seller Panel</a>
                                     <div class="dropdown-divider"></div>
                                     <a href="<?= base_url('logout') ?>" class="dropdown-item py-2 text-danger"><i class="las la-sign-out-alt mr-2"></i> Logout</a>
@@ -322,21 +330,25 @@ $headerSiteFavicon = $settingModel->getSetting('site_favicon', 'assets/img/logo.
                             <?php if (!empty($headerCart)): ?>
                                 <ul class="list-group list-group-flush mb-0">
                                     <?php foreach ($headerCart as $cKey => $cItem): ?>
-                                        <li class="list-group-item px-4 py-3 d-flex align-items-center justify-content-between border-bottom-light" style="transition: background-color 0.15s; background-color: #fff;">
-                                            <div class="d-flex align-items-center overflow-hidden mr-3" style="flex: 1;">
+                                        <li class="list-group-item px-3 py-3 d-flex align-items-center justify-content-between border-bottom-light" style="transition: background-color 0.15s; background-color: #fff;">
+                                            <div class="d-flex align-items-center overflow-hidden mr-2" style="flex: 1;">
                                                 <img src="<?= !empty($cItem['thumbnail']) ? base_url($cItem['thumbnail']) : base_url('assets/img/placeholder.jpg') ?>" 
-                                                     alt="" width="52" height="52" class="rounded border mr-3 flex-shrink-0" style="object-fit: cover; border-color: #e2e8f0 !important;"
+                                                     alt="" width="48" height="48" class="rounded border mr-2 flex-shrink-0" style="object-fit: cover; border-color: #e2e8f0 !important;"
                                                      onerror="this.src='<?= base_url('assets/img/placeholder.jpg') ?>'">
                                                 <div class="overflow-hidden">
-                                                    <h6 class="fs-14 fw-700 mb-1 text-dark text-truncate" style="color: #1e293b !important; line-height: 1.3;" title="<?= esc($cItem['name']) ?>"><?= esc($cItem['name']) ?></h6>
-                                                    <div class="d-flex align-items-center fs-13">
-                                                        <span class="badge bg-light text-dark font-weight-bold fs-11 border mr-2 px-2 py-0.5" style="color: #334155 !important;">Qty: <?= $cItem['qty'] ?></span>
-                                                        <span class="fw-700 text-primary fs-14">৳<?= number_format($cItem['price'], 2) ?></span>
+                                                    <h6 class="fs-13 fw-700 mb-1 text-dark text-truncate" style="color: #1e293b !important; line-height: 1.2;" title="<?= esc($cItem['name']) ?>"><?= esc($cItem['name']) ?></h6>
+                                                    <div class="d-flex align-items-center fs-12">
+                                                        <span class="fw-700 text-primary mr-2">৳<?= number_format($cItem['price'], 2) ?></span>
+                                                        <div class="input-group input-group-sm rounded border align-items-center bg-light" style="width: 85px;">
+                                                            <div class="input-group-prepend"><button class="btn btn-xs text-dark px-1.5 border-0" onclick="updateCartQtyDirect(<?= $cKey ?>, 'decrease', event)"><i class="las la-minus fs-10"></i></button></div>
+                                                            <span class="form-control form-control-sm text-center border-0 px-0 bg-transparent fw-700 fs-11" style="height: auto; padding: 2px 0;"><?= $cItem['qty'] ?></span>
+                                                            <div class="input-group-append"><button class="btn btn-xs text-dark px-1.5 border-0" onclick="updateCartQtyDirect(<?= $cKey ?>, 'increase', event)"><i class="las la-plus fs-10"></i></button></div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <a href="<?= base_url('cart/remove/' . $cKey) ?>" class="text-danger p-2 rounded-circle hover-bg-light flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; text-decoration: none;" title="Remove from cart">
-                                                <i class="las la-trash-alt fs-18"></i>
+                                            <a href="javascript:void(0)" onclick="removeFromCartDirect(<?= $cKey ?>, event)" class="text-danger p-1 rounded-circle hover-bg-light flex-shrink-0 d-flex align-items-center justify-content-center ml-1" style="width: 28px; height: 28px; text-decoration: none;" title="Remove">
+                                                <i class="las la-trash-alt fs-16"></i>
                                             </a>
                                         </li>
                                     <?php endforeach; ?>
@@ -353,22 +365,20 @@ $headerSiteFavicon = $settingModel->getSetting('site_favicon', 'assets/img/logo.
                         </div>
 
                         <!-- Footer Subtotal & Action Buttons -->
-                        <?php if (!empty($headerCart)): ?>
-                            <div class="p-4 bg-light border-top" style="background-color: #f8fafc !important;">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="text-secondary fw-700 fs-14" style="color: #475569 !important;">Subtotal:</span>
-                                    <span class="fw-800 text-primary fs-18 cart-total" style="color: #e62e04 !important;">৳<?= number_format($headerCartTotal, 2) ?></span>
+                        <div id="cart-footer-box" class="p-4 bg-light border-top <?= empty($headerCart) ? 'd-none' : '' ?>" style="background-color: #f8fafc !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-secondary fw-700 fs-14" style="color: #475569 !important;">Subtotal:</span>
+                                <span class="fw-800 text-primary fs-18 cart-total" style="color: #e62e04 !important;">৳<?= number_format($headerCartTotal, 2) ?></span>
+                            </div>
+                            <div class="row gutters-10">
+                                <div class="col-6">
+                                    <a href="<?= base_url('cart') ?>" class="btn btn-outline-primary btn-block fw-700 py-2.5 fs-13" style="border-radius: 8px; border-width: 2px;">View Cart</a>
                                 </div>
-                                <div class="row gutters-10">
-                                    <div class="col-6">
-                                        <a href="<?= base_url('cart') ?>" class="btn btn-outline-primary btn-block fw-700 py-2.5 fs-13" style="border-radius: 8px; border-width: 2px;">View Cart</a>
-                                    </div>
-                                    <div class="col-6">
-                                        <a href="<?= base_url('checkout') ?>" class="btn btn-primary btn-block fw-700 py-2.5 fs-13 shadow-sm" style="border-radius: 8px; background-color: #e62e04; border-color: #e62e04;">Checkout</a>
-                                    </div>
+                                <div class="col-6">
+                                    <a href="<?= base_url('checkout') ?>" class="btn btn-primary btn-block fw-700 py-2.5 fs-13 shadow-sm" style="border-radius: 8px; background-color: #e62e04; border-color: #e62e04;">Checkout</a>
                                 </div>
                             </div>
-                        <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             </div>
