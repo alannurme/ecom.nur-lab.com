@@ -115,7 +115,7 @@ class CategoryModel extends Model
 
             return $builder->get()->getResultArray();
         } catch (\Throwable $e) {
-            return $this->getMainCategories($limit);
+            return [];
         }
     }
 
@@ -133,7 +133,7 @@ class CategoryModel extends Model
 
             return $builder->get()->getResultArray();
         } catch (\Throwable $e) {
-            return $this->getMainCategories($limit);
+            return [];
         }
     }
 
@@ -153,46 +153,33 @@ class CategoryModel extends Model
             $categories = $builder->get()->getResultArray();
 
             if (empty($categories)) {
-                $categories = $this->getMainCategories($limit);
+                return [];
             }
 
-            foreach ($categories as &$cat) {
-                // Get subcategory IDs
-                $subCatIds = $db->table('categories')->select('id')->where('parent_id', $cat['id'])->get()->getResultArray();
-                $catIds = [$cat['id']];
-                if (!empty($subCatIds)) {
-                    $catIds = array_merge($catIds, array_column($subCatIds, 'id'));
-                }
+            $result = [];
+            foreach ($categories as $cat) {
+                $descendantIds = $this->getAllDescendantIds((int)$cat['id']);
+                $catIds = array_merge([(int)$cat['id']], $descendantIds);
 
                 $prodBuilder = $db->table('products p');
-                $prodBuilder->select('p.*, u.file_name as thumbnail_img');
+                $prodBuilder->select('p.*, COALESCE(u.file_name, p.thumbnail_img) as thumbnail_img');
                 $prodBuilder->join('uploads u', 'p.thumbnail_img = u.id', 'left');
                 $prodBuilder->where('p.published', 1);
                 $prodBuilder->whereIn('p.category_id', $catIds);
-                $prodBuilder->orderBy('RAND()');
+                $prodBuilder->orderBy('p.id', 'DESC');
                 $prodBuilder->limit(10);
                 $cat['products'] = $prodBuilder->get()->getResultArray();
+
+                // Only include if category has at least 1 product
+                if (!empty($cat['products'])) {
+                    $result[] = $cat;
+                }
             }
 
-            return $categories;
+            return $result;
         } catch (\Throwable $e) {
             log_message('error', 'getHomeShowcaseCategories error: ' . $e->getMessage());
-            $categories = $this->getMainCategories($limit);
-            foreach ($categories as &$cat) {
-                $subCatIds = $db->table('categories')->select('id')->where('parent_id', $cat['id'])->get()->getResultArray();
-                $catIds = [$cat['id']];
-                if (!empty($subCatIds)) {
-                    $catIds = array_merge($catIds, array_column($subCatIds, 'id'));
-                }
-                $prodBuilder = $db->table('products p');
-                $prodBuilder->select('p.*, u.file_name as thumbnail_img');
-                $prodBuilder->join('uploads u', 'p.thumbnail_img = u.id', 'left');
-                $prodBuilder->where('p.published', 1);
-                $prodBuilder->whereIn('p.category_id', $catIds);
-                $prodBuilder->limit(10);
-                $cat['products'] = $prodBuilder->get()->getResultArray();
-            }
-            return $categories;
+            return [];
         }
     }
 }

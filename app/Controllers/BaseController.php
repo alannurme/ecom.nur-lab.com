@@ -39,7 +39,44 @@ abstract class BaseController extends Controller
         // Caution: Do not edit this line.
         parent::initController($request, $response, $logger);
 
-        // Preload any models, libraries, etc, here.
-        // $this->session = service('session');
+        // Auto-install database tables silently if uploading to live server for the first time
+        $this->autoInstallDatabaseIfMissing();
+    }
+
+    protected function autoInstallDatabaseIfMissing(): void
+    {
+        static $checked = false;
+        if ($checked) return;
+        $checked = true;
+
+        try {
+            $db = \Config\Database::connect();
+            if (!$db->tableExists('categories') || !$db->tableExists('products')) {
+                $schemaPath = defined('ROOTPATH') ? ROOTPATH . 'schema.sql' : __DIR__ . '/../../schema.sql';
+                if (!file_exists($schemaPath)) {
+                    $schemaPath = defined('ROOTPATH') ? ROOTPATH . 'database.sql' : __DIR__ . '/../../database.sql';
+                }
+
+                if (file_exists($schemaPath)) {
+                    $sql = file_get_contents($schemaPath);
+                    $db->disableForeignKeyChecks();
+                    
+                    $queries = preg_split("/;\s*[\r\n]+/", $sql);
+                    foreach ($queries as $q) {
+                        $q = trim($q);
+                        if (!empty($q) && strpos($q, '--') !== 0) {
+                            try {
+                                $db->query($q);
+                            } catch (\Throwable $e) {
+                                // Continue importing queries
+                            }
+                        }
+                    }
+                    $db->enableForeignKeyChecks();
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Auto DB install notice: ' . $e->getMessage());
+        }
     }
 }

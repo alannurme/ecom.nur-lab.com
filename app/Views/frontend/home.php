@@ -956,7 +956,10 @@
                                                     </div>
                                                 <?php endif; ?>
                                                 <div class="img-wrap" style="aspect-ratio: 1 / 1; height: auto;">
-                                                    <img src="<?= !empty($product['thumbnail_img']) ? base_url($product['thumbnail_img']) : base_url('assets/img/placeholder.jpg') ?>"
+                                                    <?php 
+                                                        $pThumb = !empty($product['thumbnail_img']) ? base_url($product['thumbnail_img']) : (!empty($product['thumbnail_path']) ? base_url($product['thumbnail_path']) : base_url('assets/img/placeholder.jpg'));
+                                                    ?>
+                                                    <img src="<?= $pThumb ?>"
                                                          alt="<?= esc($product['name']) ?>"
                                                          onerror="this.onerror=null;this.src='<?= base_url('assets/img/placeholder.jpg') ?>';">
                                                 </div>
