@@ -23,14 +23,21 @@
     </section>
 
     <!-- Main Footer -->
+    <?php
+    $footerSettingModel = new \App\Models\SettingModel();
+    $footerSystemLogo = $footerSettingModel->getSetting('system_logo', 'assets/img/logo.png');
+    ?>
     <footer class="bg-dark text-white pt-5 pb-4">
         <div class="container">
             <div class="row align-items-end">
                 <div class="col-xl-6 col-lg-7 mb-4">
                     <div class="mb-3">
-                        <span class="fs-24 fw-800 text-primary">
-                            <i class="las la-shopping-bag"></i> <?= esc($site_name ?? 'NUR-LAB ECOM') ?>
-                        </span>
+                        <a href="<?= base_url() ?>" class="d-inline-block text-decoration-none">
+                            <img src="<?= base_url($footerSystemLogo) ?>" class="mh-50px h-50px max-w-240px" alt="<?= esc($site_name ?? 'Logo') ?>" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                            <span class="fs-24 fw-800 text-primary" style="display:none;">
+                                <i class="las la-shopping-bag"></i> <?= esc($site_name ?? 'NUR-LAB ECOM') ?>
+                            </span>
+                        </a>
                     </div>
                     <p class="text-secondary fs-13 text-justify pr-xl-5">
                         Your trusted e-commerce platform for top quality networking equipment, Routers, Smart Watches, Gadgets, and Electronics in Bangladesh. Fast shipping and 100% authentic product warranty.

@@ -22,7 +22,7 @@
 
             <!--Right Side- Add New Button -->
             <div class="mb-3 mb-md-0">
-                <a href="#" class="position-relative overflow-hidden add-new-btn">
+                <a href="<?= base_url('admin/brands/create') ?>" class="position-relative overflow-hidden add-new-btn">
                     <span class="position-relative z-2 pr-15px fs-14 fw-500 text-blue label-text">Add New Brand</span>
                     <span class="position-absolute top-0 right-0 h-100 w-40px bg-blue d-flex align-items-center justify-content-end z-1 plus-icon-container m-0 p-0 rounded-pill">
                         <svg id="plus-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12">
@@ -131,10 +131,10 @@
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
                                             <div class="table-options">
-                                                <a href="#" class="d-flex align-items-center px-20px py-10px hov-bg-light hov-text-blue">
+                                                <a href="<?= base_url('admin/brands/edit/' . $brand['id']) ?>" class="d-flex align-items-center px-20px py-10px hov-bg-light hov-text-blue">
                                                     <span class="fs-14 text-secondary fw-500">Edit</span>
                                                 </a>
-                                                <a href="javascript:void(0)" class="d-flex align-items-center px-20px py-10px hov-bg-light hov-text-blue">
+                                                <a href="<?= base_url('admin/brands/delete/' . $brand['id']) ?>" onclick="return confirm('Are you sure you want to delete this brand?')" class="d-flex align-items-center px-20px py-10px hov-bg-light hov-text-blue">
                                                     <span class="fs-14 text-danger fw-500">Delete</span>
                                                 </a>
                                             </div>

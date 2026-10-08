@@ -32,14 +32,22 @@
             }
         });
 
-        // Auto highlight active menu item (only first match) & expand parent dropdowns based on URL
+        // Auto highlight active menu item (supports exact & sub-route matching) & expand parent dropdowns based on URL
         var currentUrl = window.location.href.split(/[?#]/)[0].replace(/\/$/, "");
         var $matchedLink = null;
+        var bestMatchLen = 0;
+
         $('#main-menu a').each(function() {
             var href = (this.href || '').split(/[?#]/)[0].replace(/\/$/, "");
-            if (href && href !== '#' && href.indexOf('javascript:') === -1 && href === currentUrl) {
-                if (!$matchedLink) {
+            if (href && href !== '#' && href.indexOf('javascript:') === -1) {
+                if (href === currentUrl) {
                     $matchedLink = $(this);
+                    bestMatchLen = href.length + 10000; // Highest priority for exact match
+                } else if (currentUrl.indexOf(href + '/') === 0 || currentUrl === href) {
+                    if (href.length > bestMatchLen && href !== '<?= base_url("admin") ?>' && href !== '<?= base_url() ?>') {
+                        $matchedLink = $(this);
+                        bestMatchLen = href.length;
+                    }
                 }
             }
         });
@@ -74,6 +82,16 @@
                 $('.dropdown.show').removeClass('show').find('.dropdown-menu').removeClass('show');
             }
         });
+
+        // Initialize Rich Text Editor (Summernote)
+        if (typeof AIZ !== 'undefined' && AIZ.plugins && typeof AIZ.plugins.textEditor === 'function') {
+            AIZ.plugins.textEditor();
+        } else if ($('.aiz-text-editor').length > 0 && $.fn.summernote) {
+            $('.aiz-text-editor').summernote({
+                height: 250,
+                placeholder: 'Type description...'
+            });
+        }
     });
 
     // Menu search function

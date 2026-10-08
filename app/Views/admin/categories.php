@@ -9,6 +9,15 @@
         </div>
     </div>
 
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+            <?= session()->getFlashdata('success') ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
     <div class="card">
         <!--Nav Tab -->
         <div class="d-flex align-items-center justify-content-between flex-wrap border-bottom border-light px-25px table-nav-tabs pb-3 pb-xl-0">
@@ -34,7 +43,7 @@
 
             <!--Right Side- Add New Button -->
             <div class="mb-3 mb-md-0">
-                <a href="#" class="btn btn-primary btn-sm">
+                <a href="<?= base_url('admin/categories/create') ?>" class="btn btn-primary btn-sm font-weight-bold">
                     <i class="las la-plus"></i> Add New Category
                 </a>
             </div>
@@ -125,13 +134,13 @@
                                 <td><?= esc($category['level'] ?? 0) ?></td>
                                 <td>
                                     <label class="aiz-switch aiz-switch-success mb-0">
-                                        <input type="checkbox" <?= (!empty($category['featured']) && $category['featured'] == 1) ? 'checked' : '' ?>>
+                                        <input type="checkbox" onchange="updateCategoryStatus(<?= $category['id'] ?>, 'featured', this.checked)" <?= (!empty($category['featured']) && $category['featured'] == 1) ? 'checked' : '' ?>>
                                         <span class="slider round"></span>
                                     </label>
                                 </td>
                                 <td>
                                     <label class="aiz-switch aiz-switch-success mb-0">
-                                        <input type="checkbox" <?= (!empty($category['hot_category']) && $category['hot_category'] == 1) ? 'checked' : '' ?>>
+                                        <input type="checkbox" onchange="updateCategoryStatus(<?= $category['id'] ?>, 'hot_category', this.checked)" <?= (!empty($category['hot_category']) && $category['hot_category'] == 1) ? 'checked' : '' ?>>
                                         <span class="slider round"></span>
                                     </label>
                                 </td>
@@ -141,8 +150,8 @@
                                             <i class="las la-ellipsis-v"></i>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
-                                            <a class="dropdown-item text-secondary fs-14" href="#"><i class="las la-edit text-primary mr-2"></i> Edit</a>
-                                            <a class="dropdown-item text-danger fs-14" href="#"><i class="las la-trash text-danger mr-2"></i> Delete</a>
+                                            <a class="dropdown-item text-secondary fs-14" href="<?= base_url('admin/categories/edit/' . $category['id']) ?>"><i class="las la-edit text-primary mr-2"></i> Edit</a>
+                                            <a class="dropdown-item text-danger fs-14" onclick="return confirm('Are you sure you want to delete this category?')" href="<?= base_url('admin/categories/delete/' . $category['id']) ?>"><i class="las la-trash text-danger mr-2"></i> Delete</a>
                                         </div>
                                     </div>
                                 </td>
@@ -155,13 +164,40 @@
                     <?php endif; ?>
                 </tbody>
             </table>
-            <?php if (isset($pager)): ?>
+            <?php if (!empty($pager_links)): ?>
                 <div class="aiz-pagination mt-3">
-                    <?= $pager->links('default', 'aiz_pagination') ?>
+                    <?= $pager_links ?>
                 </div>
             <?php endif; ?>
         </div>
     </div>
 </div>
+
+<script>
+function updateCategoryStatus(id, field, status) {
+    $.ajax({
+        url: '<?= base_url('admin/categories/update-status') ?>',
+        type: 'POST',
+        data: {
+            <?= csrf_token() ?>: '<?= csrf_hash() ?>',
+            id: id,
+            field: field,
+            status: status ? 1 : 0
+        },
+        success: function(response) {
+            if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
+                AIZ.plugins.notify(response.status ? 'success' : 'danger', response.message);
+            } else {
+                console.log(response.message);
+            }
+        },
+        error: function() {
+            if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
+                AIZ.plugins.notify('danger', 'Something went wrong while updating category status.');
+            }
+        }
+    });
+}
+</script>
 
 <?= $this->include('admin/layouts/footer') ?>

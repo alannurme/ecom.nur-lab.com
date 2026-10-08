@@ -5,6 +5,15 @@
 </div>
 
 <div class="px-3 px-md-2rem mb-4">
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+            <?= session()->getFlashdata('success') ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
     <div class="row">
         <div class="col-lg-9 mx-auto">
             <div class="card shadow-sm border-0 rounded-2">
@@ -19,9 +28,14 @@
                         <div class="form-group row align-items-center mb-4">
                             <label class="col-md-3 col-form-label fs-14 fw-500">Header Logo</label>
                             <div class="col-md-9">
+                                <?php if (!empty($header_logo)): ?>
+                                    <div class="mb-2 p-2 border rounded bg-light d-inline-block">
+                                        <img src="<?= base_url($header_logo) ?>" alt="Current Header Logo" class="h-40px mw-100" onerror="this.onerror=null;this.src='<?= base_url('assets/img/logo.png') ?>';">
+                                    </div>
+                                <?php endif; ?>
                                 <div class="custom-file">
-                                    <input type="file" name="header_logo" class="custom-file-input" id="header_logo">
-                                    <label class="custom-file-label" for="header_logo">Choose Header Logo Image</label>
+                                    <input type="file" name="header_logo" class="custom-file-input" id="header_logo" onchange="document.getElementById('header_logo_label').innerText = this.files[0] ? this.files[0].name : 'Choose Header Logo Image';">
+                                    <label class="custom-file-label" id="header_logo_label" for="header_logo">Choose Header Logo Image</label>
                                 </div>
                                 <small class="text-muted d-block mt-1">Recommended dimensions: 244px width X 40px height.</small>
                             </div>
@@ -32,7 +46,8 @@
                             <label class="col-md-3 col-form-label fs-14 fw-500">Enable Sticky Header</label>
                             <div class="col-md-9">
                                 <label class="aiz-switch aiz-switch-success mb-0">
-                                    <input type="checkbox" name="sticky_header" value="1" checked>
+                                    <input type="hidden" name="sticky_header" value="0">
+                                    <input type="checkbox" name="sticky_header" value="1" <?= (isset($sticky_header) && $sticky_header == '1') ? 'checked' : '' ?>>
                                     <span class="slider round"></span>
                                 </label>
                             </div>
@@ -43,7 +58,8 @@
                             <label class="col-md-3 col-form-label fs-14 fw-500">Show Full Width Header</label>
                             <div class="col-md-9">
                                 <label class="aiz-switch aiz-switch-success mb-0">
-                                    <input type="checkbox" name="show_full_width_header" value="1" checked>
+                                    <input type="hidden" name="show_full_width_header" value="0">
+                                    <input type="checkbox" name="show_full_width_header" value="1" <?= (isset($show_full_width_header) && $show_full_width_header == '1') ? 'checked' : '' ?>>
                                     <span class="slider round"></span>
                                 </label>
                             </div>
@@ -54,7 +70,8 @@
                             <label class="col-md-3 col-form-label fs-14 fw-500">Show Language Switcher</label>
                             <div class="col-md-9">
                                 <label class="aiz-switch aiz-switch-success mb-0">
-                                    <input type="checkbox" name="show_language_switcher" value="1" checked>
+                                    <input type="hidden" name="show_language_switcher" value="0">
+                                    <input type="checkbox" name="show_language_switcher" value="1" <?= (isset($show_language_switcher) && $show_language_switcher == '1') ? 'checked' : '' ?>>
                                     <span class="slider round"></span>
                                 </label>
                             </div>
@@ -65,7 +82,8 @@
                             <label class="col-md-3 col-form-label fs-14 fw-500">Show Currency Switcher</label>
                             <div class="col-md-9">
                                 <label class="aiz-switch aiz-switch-success mb-0">
-                                    <input type="checkbox" name="show_currency_switcher" value="1" checked>
+                                    <input type="hidden" name="show_currency_switcher" value="0">
+                                    <input type="checkbox" name="show_currency_switcher" value="1" <?= (isset($show_currency_switcher) && $show_currency_switcher == '1') ? 'checked' : '' ?>>
                                     <span class="slider round"></span>
                                 </label>
                             </div>
@@ -75,7 +93,8 @@
                         <div class="form-group row mb-4">
                             <label class="col-md-3 col-form-label fs-14 fw-500">Header Top Nav Items</label>
                             <div class="col-md-9">
-                                <input type="text" class="form-control aiz-tag-input" name="header_nav_menu" value="Home, All Products, Flash Sale, Track Order, Help" placeholder="Type menu label and hit enter">
+                                <input type="text" class="form-control" name="header_nav_menu" value="<?= esc($header_nav_menu ?? 'Home, All Products, Flash Sale, Track Order, Help') ?>" placeholder="Comma separated navigation menu names">
+                                <small class="text-muted d-block mt-1">Write menu names separated by commas.</small>
                             </div>
                         </div>
 

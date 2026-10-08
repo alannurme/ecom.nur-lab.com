@@ -34,12 +34,51 @@ class Product extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Product not found.');
         }
 
+        // Fetch gallery photos
+        $photosArray = [];
+        if (!empty($product['photos'])) {
+            $photoIds = explode(',', $product['photos']);
+            $photoIds = array_filter(array_map('trim', $photoIds));
+            if (!empty($photoIds)) {
+                $uploads = $this->db->table('uploads')->whereIn('id', $photoIds)->get()->getResultArray();
+                foreach ($uploads as $up) {
+                    $photosArray[] = $up['file_name'];
+                }
+            }
+        }
+        if (empty($photosArray) && !empty($product['thumbnail_path'])) {
+            $photosArray[] = $product['thumbnail_path'];
+        }
+
+        // Fetch Brand Name
+        $brandName = '';
+        if (!empty($product['brand_id'])) {
+            $brand = $this->db->table('brands')->where('id', $product['brand_id'])->get()->getRowArray();
+            if ($brand) {
+                $brandName = $brand['name'];
+            }
+        }
+
+        // Fetch Wholesale prices if applicable
+        $wholesalePrices = [];
+        if (!empty($product['wholesale_product'])) {
+            $wsRes = $this->db->table('wholesale_prices wp')
+                ->join('product_stocks ps', 'wp.product_stock_id = ps.id', 'inner')
+                ->where('ps.product_id', $product['id'])
+                ->get()
+                ->getResultArray();
+            $wholesalePrices = $wsRes;
+        }
+
         $relatedProducts = $productModel->getLatestProducts(6);
 
         $data = [
             'site_name' => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
             'categories' => $categoryModel->getMainCategories(12),
             'product' => $product,
+            'photos' => $photosArray,
+            'brand_name' => $brandName,
+            'wholesale_prices' => $wholesalePrices,
             'final_price' => $productModel->calculateFinalPrice($product),
             'related_products' => $relatedProducts,
             'productModel' => $productModel

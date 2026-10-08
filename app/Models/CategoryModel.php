@@ -32,4 +32,17 @@ class CategoryModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function getHotCategories(int $limit = 8): array
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('categories c');
+        $builder->select('c.*, u.file_name as banner_img, u2.file_name as icon_img');
+        $builder->join('uploads u', 'c.banner = u.id', 'left');
+        $builder->join('uploads u2', 'c.icon = u2.id', 'left');
+        $builder->where('c.hot_category', '1');
+        $builder->limit($limit);
+
+        return $builder->get()->getResultArray();
+    }
 }

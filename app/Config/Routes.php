@@ -50,7 +50,18 @@ $routes->group('admin', static function ($routes) {
     $routes->get('products/bulk-demo-download', 'Admin::bulkDemoDownload');
     $routes->get('products/(:segment)', 'Admin::products/$1');
     $routes->get('categories', 'Admin::categories');
+    $routes->get('categories/create', 'Admin::createCategory');
+    $routes->post('categories/store', 'Admin::storeCategory');
+    $routes->get('categories/edit/(:num)', 'Admin::editCategory/$1');
+    $routes->post('categories/update/(:num)', 'Admin::updateCategory/$1');
+    $routes->get('categories/delete/(:num)', 'Admin::deleteCategory/$1');
+    $routes->post('categories/update-status', 'Admin::updateCategoryStatus');
     $routes->get('brands', 'Admin::brands');
+    $routes->get('brands/create', 'Admin::createBrand');
+    $routes->post('brands/store', 'Admin::storeBrand');
+    $routes->get('brands/edit/(:num)', 'Admin::editBrand/$1');
+    $routes->post('brands/update/(:num)', 'Admin::updateBrand/$1');
+    $routes->get('brands/delete/(:num)', 'Admin::deleteBrand/$1');
     $routes->get('attributes', 'Admin::attributes');
     $routes->get('colors', 'Admin::colors');
     $routes->get('product-reviews', 'Admin::productReviews');
@@ -138,6 +149,7 @@ $routes->group('admin', static function ($routes) {
     $routes->get('website/pages', 'Admin::websitePages');
     $routes->get('website/appearance', 'Admin::websiteAppearance');
     $routes->get('setup/features', 'Admin::setupFeatures');
+    $routes->post('setup/features/update', 'Admin::updateFeatureStatus');
     $routes->get('setup/languages', 'Admin::setupLanguages');
     $routes->get('setup/currencies', 'Admin::setupCurrencies');
     $routes->get('setup/payment-methods', 'Admin::setupPaymentMethods');
@@ -176,3 +188,8 @@ $routes->group('admin', static function ($routes) {
     $routes->post('profile/update', 'Admin::updateProfile');
     $routes->get('clear-cache', 'Admin::clearCache');
 });
+
+// AIZ Media Uploader Routes
+$routes->match(['get', 'post'], 'aiz-uploader', 'AizUploader::index');
+$routes->match(['get', 'post'], 'aiz-uploader/get-uploaded-files', 'AizUploader::getUploadedFiles');
+$routes->match(['get', 'post'], 'aiz-uploader/get_file_by_ids', 'AizUploader::getFileByIds');

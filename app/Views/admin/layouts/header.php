@@ -35,6 +35,33 @@ $headerSiteFavicon = $settingModel->getSetting('site_favicon', 'assets/img/logo.
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
 
+    <script>
+        var AIZ = AIZ || {};
+        AIZ.data = {
+            csrf: '<?= csrf_hash() ?>',
+            appUrl: '<?= base_url() ?>',
+            fileBaseUrl: '<?= base_url() ?>'
+        };
+        AIZ.local = AIZ.local || {
+            choose_file: 'Choose File...',
+            file_selected: 'File Selected',
+            files_selected: 'Files Selected',
+            add_more_files: 'Add More Files',
+            adding_more_files: 'Adding More Files',
+            drop_files_here_paste_or: 'Drop files here, paste or',
+            browse: 'Browse',
+            upload_complete: 'Upload Complete',
+            upload_paused: 'Upload Paused',
+            resume_upload: 'Resume Upload',
+            pause_upload: 'Pause Upload',
+            retry_upload: 'Retry Upload',
+            cancel_upload: 'Cancel Upload',
+            uploading: 'Uploading',
+            processing: 'Processing',
+            complete: 'Complete'
+        };
+    </script>
+
     <style>
         :root {
             --blue: #3390f3;

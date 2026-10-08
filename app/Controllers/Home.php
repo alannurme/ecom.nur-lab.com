@@ -43,14 +43,39 @@ class Home extends BaseController
             ->get()
             ->getResultArray();
 
+        // Fetch auction products
+        $auction_products = $db->table('products p')
+            ->select('p.*, u.file_name as thumbnail_path')
+            ->join('uploads u', 'p.thumbnail_img = u.id', 'left')
+            ->where('p.auction_product', 1)
+            ->where('p.published', 1)
+            ->where('p.approved', 1)
+            ->limit(8)
+            ->get()
+            ->getResultArray();
+
+        // Fetch wholesale products
+        $wholesale_products = $db->table('products p')
+            ->select('p.*, u.file_name as thumbnail_path')
+            ->join('uploads u', 'p.thumbnail_img = u.id', 'left')
+            ->where('p.wholesale_product', 1)
+            ->where('p.published', 1)
+            ->where('p.approved', 1)
+            ->limit(8)
+            ->get()
+            ->getResultArray();
+
         $data = [
             'site_name'             => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
             'sliders'               => $settingModel->getSliders(),
             'categories'            => $categoryModel->getMainCategories(12),
             'featured_categories'   => $categoryModel->getFeaturedCategories(8),
+            'hot_categories'        => $categoryModel->getHotCategories(12),
             'featured_products'     => $productModel->getFeaturedProducts(10),
             'todays_deals'          => $productModel->getTodaysDeals(10),
             'latest_products'       => $productModel->getLatestProducts(16),
+            'auction_products'      => $auction_products,
+            'wholesale_products'    => $wholesale_products,
             'category_wise_products'=> $categoryWiseProducts,
             'shops'                 => $shops,
             'brands'                => $brands,

@@ -159,9 +159,65 @@ class Admin extends BaseController
         $purchasePrice = $this->request->getPost('purchase_price') ?? 0;
         $currentStock = $this->request->getPost('current_stock') ?? 10;
 
-        $slug = preg_replace('/[^A-Za-z0-9-]+/', '-', strtolower($name ?? 'product')) . '-' . rand(1000, 9999);
+        $thumbnailImg = $this->request->getPost('thumbnail_img_id');
+        $file = $this->request->getFile('thumbnail_img');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = 'thumb_' . time() . '_' . rand(100, 999) . '.' . $file->getExtension();
+            $targetDir = FCPATH . 'uploads/all';
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0777, true);
+            }
+            $file->move($targetDir, $newName);
+            $filePath = 'uploads/all/' . $newName;
 
+            $this->db->table('uploads')->insert([
+                'file_original_name' => $file->getClientName(),
+                'file_name'          => $filePath,
+                'file_size'          => $file->getSize(),
+                'extension'          => $file->getExtension(),
+                'type'               => 'image',
+                'created_at'         => date('Y-m-d H:i:s'),
+                'updated_at'         => date('Y-m-d H:i:s')
+            ]);
+            $thumbnailImg = $this->db->insertID();
+        }
+
+        $slug = preg_replace('/[^A-Za-z0-9-]+/', '-', strtolower($name ?? 'product')) . '-' . rand(1000, 9999);
         $isWholesale = $this->request->getPost('is_wholesale') ?? 0;
+
+        // Process Gallery Images (from Modal & PC upload)
+        $photosIds = $this->request->getPost('photos_ids');
+        $galleryPhotoIds = [];
+        if (!empty($photosIds)) {
+            $galleryPhotoIds = array_filter(array_map('trim', explode(',', $photosIds)));
+        }
+
+        $galleryFiles = $this->request->getFiles();
+        if (isset($galleryFiles['photos']) && is_array($galleryFiles['photos'])) {
+            foreach ($galleryFiles['photos'] as $gFile) {
+                if ($gFile && $gFile->isValid() && !$gFile->hasMoved()) {
+                    $gNewName = 'gallery_' . time() . '_' . rand(100, 999) . '.' . $gFile->getExtension();
+                    $targetDir = FCPATH . 'uploads/all';
+                    if (!is_dir($targetDir)) {
+                        @mkdir($targetDir, 0777, true);
+                    }
+                    $gFile->move($targetDir, $gNewName);
+                    $gFilePath = 'uploads/all/' . $gNewName;
+
+                    $this->db->table('uploads')->insert([
+                        'file_original_name' => $gFile->getClientName(),
+                        'file_name'          => $gFilePath,
+                        'file_size'          => $gFile->getSize(),
+                        'extension'          => $gFile->getExtension(),
+                        'type'               => 'image',
+                        'created_at'         => date('Y-m-d H:i:s'),
+                        'updated_at'         => date('Y-m-d H:i:s')
+                    ]);
+                    $galleryPhotoIds[] = $this->db->insertID();
+                }
+            }
+        }
+        $photosString = implode(',', array_unique($galleryPhotoIds));
 
         $productData = [
             'name'              => $name ?? 'New Product',
@@ -169,6 +225,8 @@ class Admin extends BaseController
             'user_id'           => 1,
             'category_id'       => $categoryId ?? 1,
             'brand_id'          => $brandId ?? 1,
+            'photos'            => $photosString,
+            'thumbnail_img'     => $thumbnailImg,
             'video_provider'    => 'youtube',
             'unit_price'        => $unitPrice,
             'purchase_price'    => $purchasePrice,
@@ -201,6 +259,44 @@ class Admin extends BaseController
             return redirect()->to(base_url('admin/products'));
         }
 
+        $thumbnailPath = '';
+        if (!empty($product['thumbnail_img'])) {
+            if (is_numeric($product['thumbnail_img'])) {
+                $uploadRecord = $this->db->table('uploads')->where('id', $product['thumbnail_img'])->get()->getRowArray();
+                if ($uploadRecord) {
+                    $thumbnailPath = $uploadRecord['file_name'];
+                }
+            } else {
+                $thumbnailPath = $product['thumbnail_img'];
+            }
+        }
+        $product['thumbnail_path'] = $thumbnailPath;
+
+        // Resolve Gallery Images
+        $galleryImages = [];
+        if (!empty($product['photos'])) {
+            $photoIds = explode(',', $product['photos']);
+            foreach ($photoIds as $pId) {
+                $pId = trim($pId);
+                if (empty($pId)) continue;
+                if (is_numeric($pId)) {
+                    $uploadRecord = $this->db->table('uploads')->where('id', $pId)->get()->getRowArray();
+                    if ($uploadRecord) {
+                        $galleryImages[] = [
+                            'id'  => $uploadRecord['id'],
+                            'url' => base_url($uploadRecord['file_name'])
+                        ];
+                    }
+                } else {
+                    $galleryImages[] = [
+                        'id'  => $pId,
+                        'url' => base_url($pId)
+                    ];
+                }
+            }
+        }
+        $product['gallery_images'] = $galleryImages;
+
         $categories = $categoryModel->findAll();
         $brands = $this->db->table('brands')->get()->getResultArray();
 
@@ -224,6 +320,62 @@ class Admin extends BaseController
         $purchasePrice = $this->request->getPost('purchase_price');
         $currentStock = $this->request->getPost('current_stock');
 
+        $thumbnailImg = $this->request->getPost('thumbnail_img_id');
+        $file = $this->request->getFile('thumbnail_img');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = 'thumb_' . time() . '_' . rand(100, 999) . '.' . $file->getExtension();
+            $targetDir = FCPATH . 'uploads/all';
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0777, true);
+            }
+            $file->move($targetDir, $newName);
+            $filePath = 'uploads/all/' . $newName;
+
+            $this->db->table('uploads')->insert([
+                'file_original_name' => $file->getClientName(),
+                'file_name'          => $filePath,
+                'file_size'          => $file->getSize(),
+                'extension'          => $file->getExtension(),
+                'type'               => 'image',
+                'created_at'         => date('Y-m-d H:i:s'),
+                'updated_at'         => date('Y-m-d H:i:s')
+            ]);
+            $thumbnailImg = $this->db->insertID();
+        }
+
+        // Process Gallery Images (from Modal & PC upload)
+        $photosIds = $this->request->getPost('photos_ids');
+        $galleryPhotoIds = [];
+        if (!empty($photosIds)) {
+            $galleryPhotoIds = array_filter(array_map('trim', explode(',', $photosIds)));
+        }
+
+        $galleryFiles = $this->request->getFiles();
+        if (isset($galleryFiles['photos']) && is_array($galleryFiles['photos'])) {
+            foreach ($galleryFiles['photos'] as $gFile) {
+                if ($gFile && $gFile->isValid() && !$gFile->hasMoved()) {
+                    $gNewName = 'gallery_' . time() . '_' . rand(100, 999) . '.' . $gFile->getExtension();
+                    $targetDir = FCPATH . 'uploads/all';
+                    if (!is_dir($targetDir)) {
+                        @mkdir($targetDir, 0777, true);
+                    }
+                    $gFile->move($targetDir, $gNewName);
+                    $gFilePath = 'uploads/all/' . $gNewName;
+
+                    $this->db->table('uploads')->insert([
+                        'file_original_name' => $gFile->getClientName(),
+                        'file_name'          => $gFilePath,
+                        'file_size'          => $gFile->getSize(),
+                        'extension'          => $gFile->getExtension(),
+                        'type'               => 'image',
+                        'created_at'         => date('Y-m-d H:i:s'),
+                        'updated_at'         => date('Y-m-d H:i:s')
+                    ]);
+                    $galleryPhotoIds[] = $this->db->insertID();
+                }
+            }
+        }
+
         $updateData = [
             'name'           => $name,
             'category_id'    => $categoryId,
@@ -231,8 +383,13 @@ class Admin extends BaseController
             'unit_price'     => $unitPrice,
             'purchase_price' => $purchasePrice,
             'current_stock'  => $currentStock,
+            'photos'         => implode(',', array_unique($galleryPhotoIds)),
             'updated_at'     => date('Y-m-d H:i:s')
         ];
+
+        if ($thumbnailImg !== null && $thumbnailImg !== '') {
+            $updateData['thumbnail_img'] = $thumbnailImg;
+        }
 
         $this->db->table('products')->where('id', $id)->update($updateData);
 
@@ -308,6 +465,7 @@ class Admin extends BaseController
     public function categories()
     {
         $settingModel = new SettingModel();
+
         $search = $this->request->getGet('search');
         $tab = $this->request->getGet('tab') ?? 'all';
 
@@ -327,17 +485,199 @@ class Admin extends BaseController
         }
 
         $builder->orderBy('c.order_level', 'DESC');
-        $categories = $builder->get()->getResultArray();
+
+        // Number of items per page
+        $perPage = 15;
+        $page = (int)($this->request->getGet('page') ?? 1);
+        if ($page < 1) $page = 1;
+
+        $total = $builder->countAllResults(false);
+        $categories = $builder->limit($perPage, ($page - 1) * $perPage)->get()->getResultArray();
+
+        $pager = \Config\Services::pager();
+        $pagerLinks = $pager->makeLinks($page, $perPage, $total, 'aiz_pagination');
 
         $data = [
-            'page_title' => 'All Categories',
-            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
-            'categories' => $categories,
-            'search'     => $search,
-            'tab'        => $tab
+            'page_title'  => 'All Categories',
+            'site_name'   => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
+            'categories'  => $categories,
+            'search'      => $search,
+            'tab'         => $tab,
+            'pager_links' => $pagerLinks
         ];
 
         return view('admin/categories', $data);
+    }
+
+    public function updateCategoryStatus()
+    {
+        $id = $this->request->getPost('id');
+        $field = $this->request->getPost('field');
+        $status = $this->request->getPost('status');
+
+        if (!empty($id) && in_array($field, ['featured', 'hot_category'])) {
+            $val = ($field === 'hot_category') ? (string)($status ? 1 : 0) : ($status ? 1 : 0);
+            $this->db->table('categories')->where('id', $id)->update([$field => $val]);
+            return $this->response->setJSON(['status' => 1, 'message' => 'Category updated successfully']);
+        }
+        return $this->response->setJSON(['status' => 0, 'message' => 'Invalid parameters']);
+    }
+
+    public function createCategory()
+    {
+        $settingModel = new SettingModel();
+        $categoryModel = new \App\Models\CategoryModel();
+
+        $categories = $categoryModel->findAll();
+        $data = [
+            'page_title' => 'Add New Category',
+            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
+            'categories' => $categories
+        ];
+        return view('admin/categories/form', $data);
+    }
+
+    public function storeCategory()
+    {
+        $name = $this->request->getPost('name');
+        $slug = mb_url_title($name, '-', true);
+        $parentId = $this->request->getPost('parent_id') ?: 0;
+        $digital = $this->request->getPost('digital') ? 1 : 0;
+        $orderLevel = (int)($this->request->getPost('order_level') ?? 0);
+        
+        $bannerImg = $this->request->getPost('banner');
+        if (empty($bannerImg)) {
+            $bannerImg = $this->request->getPost('banner_img') ?? '';
+        }
+
+        $file = $this->request->getFile('banner_file');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = 'banner_' . time() . '_' . rand(100, 999) . '.' . $file->getExtension();
+            $targetDir = FCPATH . 'uploads/all';
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0777, true);
+            }
+            $file->move($targetDir, $newName);
+            $filePath = 'uploads/all/' . $newName;
+
+            $this->db->table('uploads')->insert([
+                'file_original_name' => $file->getClientName(),
+                'file_name'          => $filePath,
+                'file_size'          => $file->getSize(),
+                'extension'          => $file->getExtension(),
+                'type'               => 'image',
+                'created_at'         => date('Y-m-d H:i:s'),
+                'updated_at'         => date('Y-m-d H:i:s')
+            ]);
+            $bannerImg = $this->db->insertID();
+        }
+
+        $insertData = [
+            'name'        => $name,
+            'slug'        => $slug,
+            'parent_id'   => $parentId,
+            'digital'     => $digital,
+            'order_level' => $orderLevel,
+            'banner'      => $bannerImg,
+            'created_at'  => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->table('categories')->insert($insertData);
+
+        return redirect()->to(base_url('admin/categories'))->with('success', 'Category created successfully');
+    }
+
+    public function editCategory($id)
+    {
+        $settingModel = new SettingModel();
+        $categoryModel = new \App\Models\CategoryModel();
+
+        $category = $categoryModel->find($id);
+        if (!$category) {
+            return redirect()->to(base_url('admin/categories'))->with('error', 'Category not found');
+        }
+
+        // Resolve banner image path for preview
+        $bannerImg = '';
+        if (!empty($category['banner'])) {
+            if (is_numeric($category['banner'])) {
+                $uploadRecord = $this->db->table('uploads')->where('id', $category['banner'])->get()->getRowArray();
+                if ($uploadRecord) {
+                    $bannerImg = $uploadRecord['file_name'];
+                }
+            } else {
+                $bannerImg = $category['banner'];
+            }
+        }
+        $category['banner_img'] = $bannerImg;
+
+        $allCategories = $categoryModel->where('id !=', $id)->findAll();
+        $data = [
+            'page_title'     => 'Edit Category',
+            'site_name'      => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
+            'category'       => $category,
+            'all_categories' => $allCategories
+        ];
+        return view('admin/categories/form', $data);
+    }
+
+    public function updateCategory($id)
+    {
+        $name = $this->request->getPost('name');
+        $slug = mb_url_title($name, '-', true);
+        $parentId = $this->request->getPost('parent_id') ?: 0;
+        $digital = $this->request->getPost('digital') ? 1 : 0;
+        $orderLevel = (int)($this->request->getPost('order_level') ?? 0);
+
+        $bannerImg = $this->request->getPost('banner');
+        if ($bannerImg === null || $bannerImg === '') {
+            $bannerImg = $this->request->getPost('banner_img');
+        }
+
+        $file = $this->request->getFile('banner_file');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = 'banner_' . time() . '_' . rand(100, 999) . '.' . $file->getExtension();
+            $targetDir = FCPATH . 'uploads/all';
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0777, true);
+            }
+            $file->move($targetDir, $newName);
+            $filePath = 'uploads/all/' . $newName;
+
+            $this->db->table('uploads')->insert([
+                'file_original_name' => $file->getClientName(),
+                'file_name'          => $filePath,
+                'file_size'          => $file->getSize(),
+                'extension'          => $file->getExtension(),
+                'type'               => 'image',
+                'created_at'         => date('Y-m-d H:i:s'),
+                'updated_at'         => date('Y-m-d H:i:s')
+            ]);
+            $bannerImg = $this->db->insertID();
+        }
+
+        $updateData = [
+            'name'        => $name,
+            'slug'        => $slug,
+            'parent_id'   => $parentId,
+            'digital'     => $digital,
+            'order_level' => $orderLevel,
+            'updated_at'  => date('Y-m-d H:i:s')
+        ];
+
+        if ($bannerImg !== null && $bannerImg !== '') {
+            $updateData['banner'] = $bannerImg;
+        }
+
+        $this->db->table('categories')->where('id', $id)->update($updateData);
+
+        return redirect()->to(base_url('admin/categories'))->with('success', 'Category updated successfully');
+    }
+
+    public function deleteCategory($id)
+    {
+        $this->db->table('categories')->where('id', $id)->delete();
+        return redirect()->to(base_url('admin/categories'))->with('success', 'Category deleted successfully');
     }
 
     public function brands()
@@ -364,6 +704,148 @@ class Admin extends BaseController
         ];
 
         return view('admin/brands', $data);
+    }
+
+    public function createBrand()
+    {
+        $settingModel = new SettingModel();
+        $data = [
+            'page_title' => 'Add New Brand',
+            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
+        ];
+        return view('admin/brands/form', $data);
+    }
+
+    public function storeBrand()
+    {
+        $name = $this->request->getPost('name');
+        $slug = mb_url_title($name, '-', true);
+        $metaTitle = $this->request->getPost('meta_title');
+        $metaDesc = $this->request->getPost('meta_description');
+        $metaKeywords = $this->request->getPost('meta_keywords');
+
+        $logoImg = $this->request->getPost('logo');
+
+        $file = $this->request->getFile('logo_file');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = 'brand_' . time() . '_' . rand(100, 999) . '.' . $file->getExtension();
+            $targetDir = FCPATH . 'uploads/all';
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0777, true);
+            }
+            $file->move($targetDir, $newName);
+            $filePath = 'uploads/all/' . $newName;
+
+            $this->db->table('uploads')->insert([
+                'file_original_name' => $file->getClientName(),
+                'file_name'          => $filePath,
+                'file_size'          => $file->getSize(),
+                'extension'          => $file->getExtension(),
+                'type'               => 'image',
+                'created_at'         => date('Y-m-d H:i:s'),
+                'updated_at'         => date('Y-m-d H:i:s')
+            ]);
+            $logoImg = $this->db->insertID();
+        }
+
+        $insertData = [
+            'name'             => $name,
+            'slug'             => $slug,
+            'logo'             => $logoImg,
+            'meta_title'       => $metaTitle,
+            'meta_description' => $metaDesc,
+            'meta_keywords'    => $metaKeywords,
+            'created_at'       => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->table('brands')->insert($insertData);
+
+        return redirect()->to(base_url('admin/brands'))->with('success', 'Brand created successfully');
+    }
+
+    public function editBrand($id)
+    {
+        $settingModel = new SettingModel();
+        $brand = $this->db->table('brands')->where('id', $id)->get()->getRowArray();
+        if (!$brand) {
+            return redirect()->to(base_url('admin/brands'))->with('error', 'Brand not found');
+        }
+
+        $logoImg = '';
+        if (!empty($brand['logo'])) {
+            if (is_numeric($brand['logo'])) {
+                $uploadRecord = $this->db->table('uploads')->where('id', $brand['logo'])->get()->getRowArray();
+                if ($uploadRecord) {
+                    $logoImg = $uploadRecord['file_name'];
+                }
+            } else {
+                $logoImg = $brand['logo'];
+            }
+        }
+        $brand['logo_img'] = $logoImg;
+
+        $data = [
+            'page_title' => 'Edit Brand',
+            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
+            'brand'      => $brand
+        ];
+        return view('admin/brands/form', $data);
+    }
+
+    public function updateBrand($id)
+    {
+        $name = $this->request->getPost('name');
+        $slug = mb_url_title($name, '-', true);
+        $metaTitle = $this->request->getPost('meta_title');
+        $metaDesc = $this->request->getPost('meta_description');
+        $metaKeywords = $this->request->getPost('meta_keywords');
+
+        $logoImg = $this->request->getPost('logo');
+
+        $file = $this->request->getFile('logo_file');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = 'brand_' . time() . '_' . rand(100, 999) . '.' . $file->getExtension();
+            $targetDir = FCPATH . 'uploads/all';
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0777, true);
+            }
+            $file->move($targetDir, $newName);
+            $filePath = 'uploads/all/' . $newName;
+
+            $this->db->table('uploads')->insert([
+                'file_original_name' => $file->getClientName(),
+                'file_name'          => $filePath,
+                'file_size'          => $file->getSize(),
+                'extension'          => $file->getExtension(),
+                'type'               => 'image',
+                'created_at'         => date('Y-m-d H:i:s'),
+                'updated_at'         => date('Y-m-d H:i:s')
+            ]);
+            $logoImg = $this->db->insertID();
+        }
+
+        $updateData = [
+            'name'             => $name,
+            'slug'             => $slug,
+            'meta_title'       => $metaTitle,
+            'meta_description' => $metaDesc,
+            'meta_keywords'    => $metaKeywords,
+            'updated_at'       => date('Y-m-d H:i:s')
+        ];
+
+        if ($logoImg !== null && $logoImg !== '') {
+            $updateData['logo'] = $logoImg;
+        }
+
+        $this->db->table('brands')->where('id', $id)->update($updateData);
+
+        return redirect()->to(base_url('admin/brands'))->with('success', 'Brand updated successfully');
+    }
+
+    public function deleteBrand($id)
+    {
+        $this->db->table('brands')->where('id', $id)->delete();
+        return redirect()->to(base_url('admin/brands'))->with('success', 'Brand deleted successfully');
     }
 
     public function attributes()
@@ -648,7 +1130,11 @@ class Admin extends BaseController
     {
         $settingModel = new SettingModel();
 
-        $fields = ['website_name', 'site_motto', 'contact_email', 'contact_phone', 'contact_address', 'timezone', 'system_default_currency', 'currency_symbol_format'];
+        $fields = [
+            'website_name', 'site_motto', 'contact_email', 'contact_phone', 'contact_address', 
+            'timezone', 'system_default_currency', 'currency_symbol_format',
+            'sticky_header', 'show_full_width_header', 'show_language_switcher', 'show_currency_switcher', 'header_nav_menu'
+        ];
         foreach ($fields as $field) {
             $val = $this->request->getPost($field);
             if ($val !== null) {
@@ -662,11 +1148,11 @@ class Admin extends BaseController
         }
 
         // File uploads & media manager handling for logos/favicon
-        $imageFields = ['system_logo', 'admin_logo', 'site_favicon'];
+        $imageFields = ['system_logo', 'admin_logo', 'site_favicon', 'header_logo'];
         foreach ($imageFields as $imgField) {
             $filePath = null;
 
-            // 1. Check if selected via Media Manager hidden input
+            // 1. Check if selected via Media Manager hidden input or direct file
             $mediaValue = $this->request->getPost($imgField);
             if (!empty($mediaValue)) {
                 if (is_numeric($mediaValue)) {
@@ -679,8 +1165,11 @@ class Admin extends BaseController
                 }
             }
 
-            // 2. Check if uploaded directly from computer
+            // 2. Check direct file upload
             $file = $this->request->getFile($imgField . '_file');
+            if (!$file) {
+                $file = $this->request->getFile($imgField);
+            }
             if ($file && $file->isValid() && !$file->hasMoved()) {
                 $newName = $imgField . '_' . time() . '.' . $file->getExtension();
                 $targetDir = FCPATH . 'assets/img';
@@ -690,8 +1179,11 @@ class Admin extends BaseController
                 $file->move($targetDir, $newName);
                 $filePath = 'assets/img/' . $newName;
 
-                if ($imgField === 'admin_logo' || $imgField === 'system_logo') {
+                if ($imgField === 'admin_logo' || $imgField === 'system_logo' || $imgField === 'header_logo') {
                     @copy($targetDir . '/' . $newName, $targetDir . '/logo.png');
+                    if ($imgField === 'header_logo') {
+                        $this->db->table('business_settings')->where('type', 'system_logo')->update(['value' => $filePath]);
+                    }
                 }
             }
 
@@ -705,7 +1197,12 @@ class Admin extends BaseController
             }
         }
 
-        return redirect()->to(base_url('admin/settings'))->with('success', 'Settings and logos updated successfully.');
+        $referrer = $this->request->getServer('HTTP_REFERER');
+        if (!empty($referrer)) {
+            return redirect()->to($referrer)->with('success', 'Header/Settings updated successfully.');
+        }
+
+        return redirect()->to(base_url('admin/settings'))->with('success', 'Settings updated successfully.');
     }
 
     public function pos()
@@ -1225,12 +1722,55 @@ class Admin extends BaseController
     public function supportTickets() { return view('admin/support/tickets'); }
     public function supportQueries() { return view('admin/support/queries'); }
 
-    public function websiteHeader() { return view('admin/website/header'); }
+    public function websiteHeader() 
+    { 
+        $settingModel = new \App\Models\SettingModel();
+        $data = [
+            'header_logo'            => $settingModel->getSetting('header_logo', $settingModel->getSetting('system_logo', '')),
+            'sticky_header'          => $settingModel->getSetting('sticky_header', '1'),
+            'show_full_width_header' => $settingModel->getSetting('show_full_width_header', '1'),
+            'show_language_switcher' => $settingModel->getSetting('show_language_switcher', '1'),
+            'show_currency_switcher' => $settingModel->getSetting('show_currency_switcher', '1'),
+            'header_nav_menu'        => $settingModel->getSetting('header_nav_menu', 'Home, All Products, Flash Sale, Track Order, Help')
+        ];
+        return view('admin/website/header', $data); 
+    }
     public function websiteFooter() { return view('admin/website/footer'); }
     public function websitePages() { return view('admin/website/pages'); }
     public function websiteAppearance() { return view('admin/website/appearance'); }
 
-    public function setupFeatures() { return view('admin/setup/features'); }
+    public function setupFeatures() 
+    { 
+        $settingModel = new \App\Models\SettingModel();
+        $keys = [
+            'force_https', 'maintenance_mode', 'disable_image_optimization',
+            'vendor_system_activation', 'classified_product', 'auction_product',
+            'wholesale_product', 'pos_system', 'coupon_system'
+        ];
+        $features = [];
+        foreach ($keys as $key) {
+            $features[$key] = (int)$settingModel->getSetting($key, in_array($key, ['force_https', 'vendor_system_activation', 'classified_product', 'auction_product', 'wholesale_product', 'pos_system', 'coupon_system']) ? 1 : 0);
+        }
+        return view('admin/setup/features', ['features' => $features]); 
+    }
+
+    public function updateFeatureStatus()
+    {
+        $key = $this->request->getPost('key');
+        $status = $this->request->getPost('status');
+
+        if (!empty($key)) {
+            $val = $status ? '1' : '0';
+            $exists = $this->db->table('business_settings')->where('type', $key)->get()->getRow();
+            if ($exists) {
+                $this->db->table('business_settings')->where('type', $key)->update(['value' => $val]);
+            } else {
+                $this->db->table('business_settings')->insert(['type' => $key, 'value' => $val]);
+            }
+            return $this->response->setJSON(['status' => 1, 'message' => 'Feature status updated successfully']);
+        }
+        return $this->response->setJSON(['status' => 0, 'message' => 'Invalid feature key']);
+    }
     public function setupLanguages() { return view('admin/setup/languages'); }
     public function setupCurrencies() { return view('admin/setup/currencies'); }
     public function setupPaymentMethods() { return view('admin/setup/payment_methods'); }
