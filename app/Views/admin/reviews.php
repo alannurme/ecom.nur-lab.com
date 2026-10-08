@@ -1,159 +1,265 @@
-<?= view('admin/layouts/header', ['page_title' => $page_title, 'site_name' => $site_name]) ?>
+<?= $this->extend('admin/layouts/app') ?>
 
-<div class="row">
-    <div class="col-10 col-sm-10 col-lg-10 mx-auto">
-        <div class="aiz-titlebar text-left pb-5px">
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    <h1 class="h3 fw-bold">All Rating & Reviews</h1>
+<?= $this->section('content') ?>
+<div class="container-fluid py-4">
+    <!-- Header & Action Bar -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1 text-dark" style="letter-spacing: -0.5px;">Product Ratings & Reviews</h3>
+            <p class="text-muted small mb-0">Manage customer feedback, testimonials, and add custom product reviews.</p>
+        </div>
+        <div>
+            <button class="btn btn-primary d-inline-flex align-items-center gap-2 px-3 py-2 rounded-3 shadow-sm fw-medium" data-bs-toggle="modal" data-bs-target="#addReviewModal">
+                <i class="bi bi-plus-lg fs-6"></i>
+                <span>Add New Custom Review</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+            <div><?= session()->getFlashdata('success') ?></div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5 text-danger"></i>
+            <div><?= session()->getFlashdata('error') ?></div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <!-- Overview Stats -->
+    <?php 
+        $totalReviews = count($reviews ?? []);
+        $totalStars = 0;
+        $fiveStarCount = 0;
+        $customCount = 0;
+
+        foreach ($reviews ?? [] as $r) {
+            $ratingVal = (int)($r['rating'] ?? 5);
+            $totalStars += $ratingVal;
+            if ($ratingVal == 5) $fiveStarCount++;
+            if (($r['user_id'] ?? 0) == 0) $customCount++;
+        }
+        $avgRating = $totalReviews > 0 ? number_format($totalStars / $totalReviews, 1) : '5.0';
+    ?>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 p-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <i class="bi bi-chat-square-quote fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Total Reviews</div>
+                        <div class="fs-4 fw-bold text-dark mb-0"><?= $totalReviews ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 p-3 bg-warning-subtle text-warning d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <i class="bi bi-star-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Average Rating</div>
+                        <div class="fs-4 fw-bold text-dark mb-0"><?= $avgRating ?> <span class="fs-6 text-muted font-normal">/ 5</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 p-3 bg-success-subtle text-success d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <i class="bi bi-hand-thumbs-up-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">5-Star Reviews</div>
+                        <div class="fs-4 fw-bold text-dark mb-0"><?= $fiveStarCount ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 p-3 bg-info-subtle text-info d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <i class="bi bi-person-badge fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium">Custom Reviews</div>
+                        <div class="fs-4 fw-bold text-dark mb-0"><?= $customCount ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table Card -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+        <div class="card-header bg-white border-0 py-3 px-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <h5 class="fw-bold text-dark mb-0">Reviews List</h5>
+            <div class="d-flex align-items-center gap-2">
+                <div class="position-relative" style="max-width: 260px; width: 100%;">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" id="reviewSearch" class="form-control ps-5 rounded-pill bg-light border-0 py-2 fs-6" placeholder="Search product or reviewer...">
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="d-flex align-items-center justify-content-between flex-wrap border-bottom border-light px-25px">
-                <div class="table-tabs-container">
-                    <ul class="nav nav-tabs border-0" id="myTab" role="tablist">
-                        <li class="nav-item">
-                            <button class="nav-link px-0 pb-15px fs-14 fw-500 active">All Reviews</button>
-                        </li>
-                    </ul>
-                </div>
-
-                <div>
-                    <a href="javascript:void(0);" class="position-relative overflow-hidden add-new-btn">
-                        <span class="position-relative z-2 pr-15px fs-14 fw-500 text-blue label-text">Add New Custom Review</span>
-                        <span class="position-absolute top-0 right-0 h-100 w-40px bg-blue d-flex align-items-center justify-content-end z-1 plus-icon-container m-0 p-0 rounded-pill">
-                            <svg id="plus-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12">
-                                <path id="Path_45216" data-name="Path 45216" d="M141.874-812.13a.706.706,0,0,1-.515-.21.7.7,0,0,1-.212-.514V-817.4h-4.553a.7.7,0,0,1-.514-.209.694.694,0,0,1-.21-.511.706.706,0,0,1,.21-.515.7.7,0,0,1,.514-.212h4.549v-4.557a.7.7,0,0,1,.209-.514.694.694,0,0,1,.511-.21.7.7,0,0,1,.515.21.7.7,0,0,1,.212.514v4.553h4.557a.7.7,0,0,1,.514.208.694.694,0,0,1,.21.511.706.706,0,0,1-.21.515.7.7,0,0,1-.514.212h-4.553v4.553a.7.7,0,0,1-.209.514A.694.694,0,0,1,141.874-812.13Z" transform="translate(-135.87 824.13)" fill="#fff" />
-                            </svg>
-                        </span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="tab-filter-bar">
-                <form id="sort_reviews" action="" method="GET">
-                    <div class="card-header row border-0 pb-0 mt-2">
-                        <div class="col pl-0 pl-md-3">
-                            <div class="input-group mb-0 border border-light px-3 bg-light rounded-1">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text border-0 bg-transparent px-0" id="search">
-                                        <svg id="Group_38844" data-name="Group 38844" xmlns="http://www.w3.org/2000/svg" width="16.001" height="16" viewBox="0 0 16.001 16">
-                                            <path id="Path_3090" data-name="Path 3090" d="M8.248,14.642a6.394,6.394,0,1,1,6.394-6.394A6.4,6.4,0,0,1,8.248,14.642Zm0-11.509a5.115,5.115,0,1,0,5.115,5.115A5.121,5.121,0,0,0,8.248,3.133Z" transform="translate(-1.854 -1.854)" fill="#a5a5b8" />
-                                            <path id="Path_3091" data-name="Path 3091" d="M23.011,23.651a.637.637,0,0,1-.452-.187l-4.92-4.92a.639.639,0,0,1,.9-.9l4.92,4.92a.639.639,0,0,1-.452,1.091Z" transform="translate(-7.651 -7.651)" fill="#a5a5b8" />
-                                        </svg>
-                                    </span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm border-0 px-2 bg-transparent" id="search_input" name="search" value="<?= esc($search ?? '') ?>" placeholder="Search Reviews ...">
-                            </div>
-                        </div>
-
-                        <div class="col-md-2 ml-auto mb-1 mb-md-0 px-0 px-md-1">
-                            <div class="dropdown w-100">
-                                <button class="btn border border-light px-3 w-100 d-flex justify-content-between align-items-center dropdown-toggle" type="button" data-toggle="dropdown">
-                                    <span class="text-secondary fs-14 fw-400">Filter By Seller</span>
-                                </button>
-                                <div class="dropdown-menu py-3 w-100">
-                                    <div class="form-check hover-bg-light py-2 d-flex align-items-center px-3">
-                                        <input class="input-check" type="checkbox" id="seller_all" checked>
-                                        <label class="form-check-label fs-14 px-2 mb-0" for="seller_all">All</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-2 ml-auto pr-0 pr-md-3 pl-0 inner-select">
-                            <select class="form-control aiz-selectpicker mb-2 mb-md-0 bg-light" name="type">
-                                <option value="">Sort by Rating</option>
-                                <option value="rating,desc">Rating (High to Low)</option>
-                                <option value="rating,asc">Rating (Low to High)</option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <div class="card-body">
-                <table class="table mb-0" id="aiz-data-table">
-                    <thead>
-                        <tr>
-                            <th class="">#</th>
-                            <th class="text-uppercase fs-10 fs-md-12 fw-700 text-secondary">Product</th>
-                            <th class="hide-xs text-uppercase fs-10 fs-md-12 fw-700 text-secondary">Owner</th>
-                            <th class="hide-xs text-uppercase fs-10 fs-md-12 fw-700 text-secondary">Rating</th>
-                            <th class="hide-xs text-uppercase fs-10 fs-md-12 fw-700 text-secondary">Reviews</th>
-                            <th class="hide-sm text-uppercase fs-10 fs-md-12 fw-700 text-secondary">Custom Reviews</th>
-                            <th class="hide-xs text-right text-uppercase fs-10 fs-md-12 fw-700 text-secondary">Options</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (!empty($reviews)): ?>
-                            <?php foreach ($reviews as $key => $review): ?>
-                                <tr class="data-row">
-                                    <td class="align-middle h-40">
-                                        <div class="form-group d-inline-block mb-0 pr-3">
-                                            <?= $key + 1 ?>
-                                        </div>
-                                    </td>
-                                    <td class="align-middle w-500px w-md-500px mw-500 pr-5" data-label="Product Name">
-                                        <div class="row gutters-5">
-                                            <div class="col">
-                                                <span class="fs-14 fw-400 text-dark"><?= esc($review['product_name'] ?? '—') ?></span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="align-middle hide-xs" data-label="Owner">
-                                        <span class="fs-14 fw-400 text-dark"><?= esc($review['user_name'] ?? 'In House') ?></span>
-                                    </td>
-                                    <td class="align-middle hide-xs" data-label="Rating">
-                                        <span class="fs-14 fw-400 text-dark"><?= esc($review['rating'] ?? 5) ?></span>
-                                    </td>
-                                    <td class="align-middle hide-xs" data-label="Reviews">
-                                        <span class="fs-14 fw-400 text-dark">1</span>
-                                    </td>
-                                    <td class="hide-sm align-middle" data-label="Custom Reviews">
-                                        <span class="fs-14 fw-400 text-dark">0</span>
-                                    </td>
-                                    <td class="align-middle hide-xs text-right" data-label="Options">
-                                        <div class="d-flex align-items-center justify-content-end">
-                                            <div class="dropdown float-right">
-                                                <button class="btn btn-light w-35px h-35px action-toggle d-flex align-items-center justify-content-center p-0" type="button" data-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="3" height="16" viewBox="0 0 3 16">
-                                                        <g id="Group_38888" data-name="Group 38888" transform="translate(-1653 -342)">
-                                                            <circle id="Ellipse_1018" data-name="Ellipse 1018" cx="1.5" cy="1.5" r="1.5" transform="translate(1653 348.5)" />
-                                                            <circle id="Ellipse_1019" data-name="Ellipse 1019" cx="1.5" cy="1.5" r="1.5" transform="translate(1653 342)" />
-                                                            <circle id="Ellipse_1020" data-name="Ellipse 1020" cx="1.5" cy="1.5" r="1.5" transform="translate(1653 355)" />
-                                                        </g>
-                                                    </svg>
-                                                </button>
-                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-xs">
-                                                    <div class="table-options">
-                                                        <a href="javascript:void(0)" class="d-flex align-items-center px-20px py-10px hov-bg-light hov-text-blue">
-                                                            <span class="fs-14 text-danger fw-500">Delete</span>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="reviewsTable">
+                <thead class="bg-light border-top border-bottom text-secondary">
+                    <tr>
+                        <th class="ps-4 py-3 text-uppercase fs-7 fw-semibold" style="width: 60px;">#</th>
+                        <th class="py-3 text-uppercase fs-7 fw-semibold" style="min-width: 220px;">Product Name</th>
+                        <th class="py-3 text-uppercase fs-7 fw-semibold">Reviewer</th>
+                        <th class="py-3 text-uppercase fs-7 fw-semibold text-center" style="width: 140px;">Rating</th>
+                        <th class="py-3 text-uppercase fs-7 fw-semibold" style="min-width: 250px;">Review Comment</th>
+                        <th class="py-3 text-uppercase fs-7 fw-semibold text-center" style="width: 110px;">Type</th>
+                        <th class="pe-4 py-3 text-uppercase fs-7 fw-semibold text-end" style="width: 90px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    <?php if (!empty($reviews)): ?>
+                        <?php foreach ($reviews as $index => $item): ?>
                             <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">No reviews found.</td>
+                                <td class="ps-4 fw-medium text-muted"><?= $index + 1 ?></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-2 bg-primary-subtle text-primary p-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+                                            <i class="bi bi-box-seam"></i>
+                                        </div>
+                                        <span class="fw-semibold text-dark"><?= esc($item['product_name'] ?? 'General Store Review') ?></span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-medium text-dark"><?= esc(!empty($item['user_name']) ? $item['user_name'] : 'Customer Reviewer') ?></span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-inline-flex align-items-center gap-1 text-warning">
+                                        <?php $rCount = (int)($item['rating'] ?? 5); ?>
+                                        <?php for ($s = 1; $s <= 5; $s++): ?>
+                                            <i class="bi bi-star-<?= $s <= $rCount ? 'fill' : 'star' ?> fs-6"></i>
+                                        <?php endfor; ?>
+                                        <span class="ms-1 fw-bold text-dark small">(<?= $rCount ?>)</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-muted small mb-0 text-truncate" style="max-width: 320px;" title="<?= esc($item['comment'] ?? '') ?>">
+                                        <?= !empty($item['comment']) ? esc($item['comment']) : '<em class="opacity-50">No text comment provided</em>' ?>
+                                    </p>
+                                </td>
+                                <td class="text-center">
+                                    <?php if (($item['user_id'] ?? 0) == 0): ?>
+                                        <span class="badge rounded-pill bg-info-subtle text-info px-3 py-1 fw-medium">Custom</span>
+                                    <?php else: ?>
+                                        <span class="badge rounded-pill bg-success-subtle text-success px-3 py-1 fw-medium">Verified User</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <a href="<?= base_url('admin/product-reviews/delete/' . $item['id']) ?>" 
+                                       class="btn btn-sm btn-icon btn-light rounded-circle"
+                                       onclick="return confirm('Are you sure you want to delete this product review?');"
+                                       title="Delete Review">
+                                        <i class="bi bi-trash text-danger"></i>
+                                    </a>
+                                </td>
                             </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-                <?php if (isset($pager)): ?>
-                    <div class="aiz-pagination mt-3">
-                        <?= $pager->links('default', 'aiz_pagination') ?>
-                    </div>
-                <?php endif; ?>
-            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="py-4">
+                                    <i class="bi bi-chat-square-star fs-1 text-muted opacity-50 d-block mb-2"></i>
+                                    <h6 class="text-secondary fw-semibold">No Product Reviews Found</h6>
+                                    <p class="text-muted small mb-3">Add your first custom review or wait for customers to post feedback.</p>
+                                    <button class="btn btn-sm btn-primary rounded-3 px-3" data-bs-toggle="modal" data-bs-target="#addReviewModal">
+                                        Add Custom Review
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-<?= view('admin/layouts/footer') ?>
+<!-- Add New Custom Review Modal -->
+<div class="modal fade" id="addReviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold text-dark">Add New Custom Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="<?= base_url('admin/product-reviews/store') ?>" method="POST">
+                <?= csrf_field() ?>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Select Product <span class="text-danger">*</span></label>
+                        <select name="product_id" class="form-select rounded-3 py-2" required>
+                            <option value="">-- Choose Target Product --</option>
+                            <?php if (!empty($products)): ?>
+                                <?php foreach ($products as $prod): ?>
+                                    <option value="<?= $prod['id'] ?>"><?= esc($prod['name']) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Reviewer Name</label>
+                        <input type="text" name="reviewer_name" class="form-control rounded-3 py-2" placeholder="e.g. Tanvir Ahmed (Optional)">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Rating Star <span class="text-danger">*</span></label>
+                        <select name="rating" class="form-select rounded-3 py-2" required>
+                            <option value="5" selected>⭐⭐⭐⭐⭐ (5 / 5 - Excellent)</option>
+                            <option value="4">⭐⭐⭐⭐ (4 / 5 - Very Good)</option>
+                            <option value="3">⭐⭐⭐ (3 / 5 - Average)</option>
+                            <option value="2">⭐⭐ (2 / 5 - Below Average)</option>
+                            <option value="1">⭐ (1 / 5 - Poor)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark">Review Comment / Feedback</label>
+                        <textarea name="comment" class="form-control rounded-3" rows="3" placeholder="Write customer feedback or review comment..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-3 px-4 fw-medium" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-3 px-4 fw-medium">Publish Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Live Search
+    const searchInput = document.getElementById('reviewSearch');
+    const tableRows = document.querySelectorAll('#reviewsTable tbody tr');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
+    }
+});
+</script>
+<?= $this->endSection() ?>

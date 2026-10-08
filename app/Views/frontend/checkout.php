@@ -33,20 +33,37 @@
                     <!-- Payment Options -->
                     <div class="bg-white rounded-lg border shadow-sm p-4">
                         <h5 class="fs-16 fw-800 text-dark border-bottom pb-3 mb-3">2. Payment Method</h5>
-                        <div class="custom-control custom-radio mb-3 p-3 border rounded">
-                            <input type="radio" id="cod" name="payment_option" value="cash_on_delivery" class="custom-control-input" checked>
-                            <label class="custom-control-label fw-700 text-dark cursor-pointer" for="cod">
-                                Cash on Delivery (COD)
-                                <small class="text-secondary d-block font-weight-normal">Pay with cash upon receiving your parcel.</small>
-                            </label>
-                        </div>
-                        <div class="custom-control custom-radio p-3 border rounded">
-                            <input type="radio" id="bkash" name="payment_option" value="bkash" class="custom-control-input">
-                            <label class="custom-control-label fw-700 text-dark cursor-pointer" for="bkash">
-                                bKash / Online Payment
-                                <small class="text-secondary d-block font-weight-normal">Pay instantly via bKash or Mobile Banking.</small>
-                            </label>
-                        </div>
+                        <?php 
+                        $firstChecked = true;
+                        $hasPaymentMethod = false;
+                        ?>
+                        <?php if (!empty($cod_active) && $cod_active == 1): $hasPaymentMethod = true; ?>
+                            <div class="custom-control custom-radio mb-3 p-3 border rounded">
+                                <input type="radio" id="cod" name="payment_option" value="cash_on_delivery" class="custom-control-input" <?= $firstChecked ? 'checked' : '' ?>>
+                                <label class="custom-control-label fw-700 text-dark cursor-pointer" for="cod">
+                                    Cash on Delivery (COD)
+                                    <small class="text-secondary d-block font-weight-normal">Pay with cash upon receiving your parcel.</small>
+                                </label>
+                            </div>
+                            <?php $firstChecked = false; ?>
+                        <?php endif; ?>
+
+                        <?php if (!empty($piprapay_active) && $piprapay_active == 1): $hasPaymentMethod = true; ?>
+                            <div class="custom-control custom-radio p-3 border rounded mb-3">
+                                <input type="radio" id="bkash" name="payment_option" value="bkash" class="custom-control-input" <?= $firstChecked ? 'checked' : '' ?>>
+                                <label class="custom-control-label fw-700 text-dark cursor-pointer" for="bkash">
+                                    bKash / Online Payment
+                                    <small class="text-secondary d-block font-weight-normal">Pay instantly via bKash or Mobile Banking.</small>
+                                </label>
+                            </div>
+                            <?php $firstChecked = false; ?>
+                        <?php endif; ?>
+
+                        <?php if (!$hasPaymentMethod): ?>
+                            <div class="alert alert-warning mb-0">
+                                <i class="las la-exclamation-triangle mr-1"></i> No payment methods are currently available. Please contact store support.
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 

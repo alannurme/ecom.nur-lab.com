@@ -161,8 +161,8 @@
 
     .modern-product-card:hover {
         transform: translateY(-8px) scale(1.04);
-        box-shadow: 0 20px 35px -10px rgba(37, 99, 235, 0.22);
-        border-color: #3b82f6;
+        box-shadow: 0 20px 35px -10px rgba(239, 68, 68, 0.2);
+        border-color: #f87171;
         z-index: 10;
     }
 
@@ -210,7 +210,7 @@
     }
 
     .action-btn-circle:hover {
-        background: #2563eb;
+        background: #e62e04;
         color: #ffffff;
         transform: scale(1.15);
     }
@@ -274,7 +274,7 @@
     }
 
     .modern-product-card:hover .product-title-modern {
-        color: #2563eb;
+        color: #e62e04;
     }
 
     /* Price Section */
@@ -295,7 +295,7 @@
     .price-current {
         font-size: 1.2rem;
         font-weight: 800;
-        color: #2563eb;
+        color: #e62e04;
         line-height: 1.2;
     }
 
@@ -309,25 +309,42 @@
 
     /* Quick Add Cart Button */
     .btn-quick-cart {
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        background: #eff6ff;
-        color: #2563eb;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        border: none;
-        transition: all 0.25s ease;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 12px !important;
+        background: #fee2e2 !important;
+        color: #dc2626 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.25rem !important;
+        border: 1px solid #fca5a5 !important;
+        transition: all 0.25s ease !important;
         text-decoration: none !important;
-        flex-shrink: 0;
+        flex-shrink: 0 !important;
+        cursor: pointer !important;
+        padding: 0 !important;
     }
 
-    .modern-product-card:hover .btn-quick-cart {
-        background: #2563eb;
-        color: #ffffff;
-        box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+    .btn-quick-cart i,
+    .btn-quick-cart svg {
+        color: #dc2626 !important;
+        transition: color 0.25s ease !important;
+    }
+
+    .modern-product-card:hover .btn-quick-cart,
+    .btn-quick-cart:hover {
+        background: #dc2626 !important;
+        color: #ffffff !important;
+        border-color: #dc2626 !important;
+        box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4) !important;
+    }
+
+    .modern-product-card:hover .btn-quick-cart i,
+    .modern-product-card:hover .btn-quick-cart svg,
+    .btn-quick-cart:hover i,
+    .btn-quick-cart:hover svg {
+        color: #ffffff !important;
     }
 
     /* Featured Categories Grid */
@@ -598,39 +615,41 @@
                             $unitPrice = (float)$product['unit_price'];
                         ?>
                         <div class="col-xxl-2 col-xl-2 col-lg-3 col-md-4 col-6 mb-2">
-                            <a href="<?= base_url('product/' . esc($product['slug'])) ?>" class="text-reset d-block h-100 text-decoration-none">
-                                <div class="modern-product-card">
-                                    <?php if ($product['discount'] > 0): ?>
-                                        <div class="discount-badge-modern">
-                                            <?= $product['discount_type'] === 'percent' ? '-' . (int)$product['discount'] . '%' : 'SALE' ?>
-                                        </div>
-                                    <?php endif; ?>
-                                    <div class="hot-badge-modern">
-                                        <i class="las la-fire"></i>
+                            <div class="modern-product-card">
+                                <?php if ($product['discount'] > 0): ?>
+                                    <div class="discount-badge-modern">
+                                        <?= $product['discount_type'] === 'percent' ? '-' . (int)$product['discount'] . '%' : 'SALE' ?>
                                     </div>
-                                    <div class="img-wrap">
+                                <?php endif; ?>
+                                <div class="hot-badge-modern">
+                                    <i class="las la-fire"></i>
+                                </div>
+                                <div class="img-wrap">
+                                    <a href="<?= base_url('product/' . esc($product['slug'])) ?>">
                                         <img src="<?= !empty($product['thumbnail_path']) ? base_url($product['thumbnail_path']) : base_url('assets/img/placeholder.jpg') ?>"
                                              alt="<?= esc($product['name']) ?>"
                                              onerror="this.onerror=null;this.src='<?= base_url('assets/img/placeholder.jpg') ?>';">
-                                    </div>
-                                    <div class="product-content-modern">
-                                        <h4 class="product-title-modern">
+                                    </a>
+                                </div>
+                                <div class="product-content-modern">
+                                    <h4 class="product-title-modern">
+                                        <a href="<?= base_url('product/' . esc($product['slug'])) ?>" class="text-reset">
                                             <?= esc($product['name']) ?>
-                                        </h4>
-                                        <div class="product-footer-row">
-                                            <div class="product-price-wrap">
-                                                <span class="price-current">৳<?= number_format($finalPrice, 0) ?></span>
-                                                <?php if ($finalPrice < $unitPrice): ?>
-                                                    <span class="price-old">৳<?= number_format($unitPrice, 0) ?></span>
-                                                <?php endif; ?>
-                                            </div>
-                                            <span class="btn-quick-cart" title="Buy Now">
-                                                <i class="las la-shopping-cart"></i>
-                                            </span>
+                                        </a>
+                                    </h4>
+                                    <div class="product-footer-row">
+                                        <div class="product-price-wrap">
+                                            <span class="price-current">৳<?= number_format($finalPrice, 0) ?></span>
+                                            <?php if ($finalPrice < $unitPrice): ?>
+                                                <span class="price-old">৳<?= number_format($unitPrice, 0) ?></span>
+                                            <?php endif; ?>
                                         </div>
+                                        <button type="button" onclick="addToCartDirect(<?= $product['id'] ?>, event)" class="btn-quick-cart" title="Add to Cart" style="cursor: pointer;">
+                                            <i class="las la-shopping-cart"></i>
+                                        </button>
                                     </div>
                                 </div>
-                            </a>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -822,9 +841,9 @@
                                                 <span class="price-old">৳<?= number_format($unitPrice, 0) ?></span>
                                             <?php endif; ?>
                                         </div>
-                                        <a href="<?= base_url('product/' . esc($product['slug'])) ?>" class="btn-quick-cart" title="Buy Now">
+                                        <button type="button" onclick="addToCartDirect(<?= $product['id'] ?>, event)" class="btn-quick-cart" title="Add to Cart" style="cursor: pointer;">
                                             <i class="las la-shopping-cart"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -907,9 +926,9 @@
                                                 <span class="price-old">৳<?= number_format($unitPrice, 0) ?></span>
                                             <?php endif; ?>
                                         </div>
-                                        <a href="<?= base_url('product/' . esc($product['slug'])) ?>" class="btn-quick-cart" title="Buy Now">
+                                        <button type="button" onclick="addToCartDirect(<?= $product['id'] ?>, event)" class="btn-quick-cart" title="Add to Cart" style="cursor: pointer;">
                                             <i class="las la-shopping-cart"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -962,9 +981,9 @@
                                                     <span class="price-old">৳<?= number_format($unitPrice, 0) ?></span>
                                                 <?php endif; ?>
                                             </div>
-                                            <a href="<?= base_url('product/' . esc($product['slug'])) ?>" class="btn-quick-cart" title="Buy Now">
+                                            <button type="button" onclick="addToCartDirect(<?= $product['id'] ?>, event)" class="btn-quick-cart" title="Add to Cart" style="cursor: pointer;">
                                                 <i class="las la-shopping-cart"></i>
-                                            </a>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

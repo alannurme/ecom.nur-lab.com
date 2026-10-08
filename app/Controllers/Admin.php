@@ -913,14 +913,50 @@ class Admin extends BaseController
         $builder->orderBy('r.id', 'DESC');
         $reviews = $builder->get()->getResultArray();
 
+        $productModel = new \App\Models\ProductModel();
+        $products = $productModel->select('id, name')->orderBy('name', 'ASC')->findAll();
+
         $data = [
             'page_title' => 'Product Reviews',
             'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
             'reviews'    => $reviews,
+            'products'   => $products,
             'search'     => $search
         ];
 
         return view('admin/reviews', $data);
+    }
+
+    public function storeReview()
+    {
+        $productId = (int)$this->request->getPost('product_id');
+        $reviewerName = trim($this->request->getPost('reviewer_name') ?? 'Admin Custom Review');
+        $rating = (int)($this->request->getPost('rating') ?? 5);
+        $comment = trim($this->request->getPost('comment') ?? '');
+
+        if ($productId > 0) {
+            $data = [
+                'product_id' => $productId,
+                'user_id'    => 0,
+                'rating'     => $rating,
+                'comment'    => $comment,
+                'status'     => 1,
+                'viewed'     => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $this->db->table('reviews')->insert($data);
+            return redirect()->to(base_url('admin/product-reviews'))->with('success', 'Custom review added successfully!');
+        }
+
+        return redirect()->to(base_url('admin/product-reviews'))->with('error', 'Please select a valid product.');
+    }
+
+    public function deleteReview($id)
+    {
+        $this->db->table('reviews')->where('id', (int)$id)->delete();
+        return redirect()->to(base_url('admin/product-reviews'))->with('success', 'Review deleted successfully!');
     }
 
     public function auctionCreate()
@@ -1314,76 +1350,95 @@ class Admin extends BaseController
     public function units()
     {
         $settingModel = new SettingModel();
+        $raw = $settingModel->getSetting('units');
+        $units = [];
+        if ($raw) {
+            $units = json_decode($raw, true) ?? [];
+        } else {
+            // Default seed
+            $units = [
+                ['id' => 1, 'name' => 'Pc', 'code' => 'pc', 'status' => 1],
+                ['id' => 2, 'name' => 'KG', 'code' => 'kg', 'status' => 1],
+                ['id' => 3, 'name' => 'Litre', 'code' => 'ltr', 'status' => 1],
+                ['id' => 4, 'name' => 'Gram', 'code' => 'g', 'status' => 1],
+                ['id' => 5, 'name' => 'Meter', 'code' => 'm', 'status' => 1],
+                ['id' => 6, 'name' => 'Box', 'code' => 'box', 'status' => 1],
+            ];
+            $settingModel->saveSetting('units', json_encode($units));
+        }
+
         $data = [
             'page_title' => 'Units',
-            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM')
+            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
+            'units'      => $units
         ];
         return view('admin/units', $data);
     }
 
-    public function warranties()
+    public function storeUnit()
     {
         $settingModel = new SettingModel();
-        $data = [
-            'page_title' => 'Warranties',
-            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM')
-        ];
-        return view('admin/warranties', $data);
+        $raw = $settingModel->getSetting('units');
+        $units = $raw ? (json_decode($raw, true) ?? []) : [];
+
+        $name = trim($this->request->getPost('name') ?? '');
+        $code = trim($this->request->getPost('code') ?? strtolower($name));
+        $status = $this->request->getPost('status') ? 1 : 0;
+
+        if (!empty($name)) {
+            $maxId = 0;
+            foreach ($units as $u) {
+                if (($u['id'] ?? 0) > $maxId) $maxId = $u['id'];
+            }
+            $units[] = [
+                'id' => $maxId + 1,
+                'name' => $name,
+                'code' => $code,
+                'status' => $status
+            ];
+            $settingModel->saveSetting('units', json_encode(array_values($units)));
+            return redirect()->to(base_url('admin/units'))->with('success', 'Unit added successfully!');
+        }
+        return redirect()->to(base_url('admin/units'))->with('error', 'Unit name cannot be empty.');
     }
 
-    public function sizeCharts()
+    public function updateUnit()
     {
         $settingModel = new SettingModel();
-        $data = [
-            'page_title' => 'Size Charts',
-            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM')
-        ];
-        return view('admin/size_charts', $data);
+        $raw = $settingModel->getSetting('units');
+        $units = $raw ? (json_decode($raw, true) ?? []) : [];
+
+        $id = (int)$this->request->getPost('id');
+        $name = trim($this->request->getPost('name') ?? '');
+        $code = trim($this->request->getPost('code') ?? strtolower($name));
+        $status = $this->request->getPost('status') ? 1 : 0;
+
+        foreach ($units as &$u) {
+            if (($u['id'] ?? 0) == $id) {
+                $u['name'] = $name;
+                $u['code'] = $code;
+                $u['status'] = $status;
+                break;
+            }
+        }
+        $settingModel->saveSetting('units', json_encode(array_values($units)));
+        return redirect()->to(base_url('admin/units'))->with('success', 'Unit updated successfully!');
     }
 
-    public function measurementPoints()
+    public function deleteUnit($id)
     {
         $settingModel = new SettingModel();
-        $data = [
-            'page_title' => 'Measurement Points',
-            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM')
-        ];
-        return view('admin/measurement_points', $data);
+        $raw = $settingModel->getSetting('units');
+        $units = $raw ? (json_decode($raw, true) ?? []) : [];
+
+        $units = array_filter($units, fn($u) => ($u['id'] ?? 0) != $id);
+        $settingModel->saveSetting('units', json_encode(array_values($units)));
+
+        return redirect()->to(base_url('admin/units'))->with('success', 'Unit deleted successfully!');
     }
 
-    public function customLabels()
-    {
-        $settingModel = new SettingModel();
-        $data = [
-            'page_title' => 'Custom Labels',
-            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM')
-        ];
-        return view('admin/custom_labels', $data);
-    }
 
-    public function categoryWiseDiscount()
-    {
-        $settingModel = new SettingModel();
-        $categoryModel = new CategoryModel();
-        $data = [
-            'page_title' => 'Category Wise Discount',
-            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
-            'categories' => $categoryModel->findAll()
-        ];
-        return view('admin/category_wise_discount', $data);
-    }
 
-    public function categoryWiseRefund()
-    {
-        $settingModel = new SettingModel();
-        $categoryModel = new CategoryModel();
-        $data = [
-            'page_title' => 'Category Wise Refund',
-            'site_name'  => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
-            'categories' => $categoryModel->findAll()
-        ];
-        return view('admin/category_wise_refund', $data);
-    }
 
     // Generic Admin Module Page Renderer
     private function renderModulePage(string $title)
@@ -1771,9 +1826,618 @@ class Admin extends BaseController
         }
         return $this->response->setJSON(['status' => 0, 'message' => 'Invalid feature key']);
     }
+
+    public function warranties()
+    {
+        $settingModel = new \App\Models\SettingModel();
+        $defaultWarranties = [
+            ['id' => 1, 'text' => '1 Year Official Brand Warranty', 'type' => 'Brand Warranty', 'duration' => '1 Year'],
+            ['id' => 2, 'text' => '6 Months Replacement Guarantee', 'type' => 'Replacement', 'duration' => '6 Months'],
+            ['id' => 3, 'text' => '2 Years Free Service Warranty', 'type' => 'Service Warranty', 'duration' => '2 Years']
+        ];
+        $warrantiesJson = $settingModel->getSetting('warranties', null);
+        if ($warrantiesJson === null) {
+            $warranties = $defaultWarranties;
+            $this->db->table('business_settings')->insert(['type' => 'warranties', 'value' => json_encode($warranties)]);
+        } else {
+            $warranties = json_decode($warrantiesJson, true) ?: [];
+        }
+
+        return view('admin/warranties', [
+            'page_title' => 'Warranties',
+            'warranties' => $warranties
+        ]);
+    }
+
+    public function storeWarranty()
+    {
+        $text = trim($this->request->getPost('text') ?? '');
+        $type = trim($this->request->getPost('type') ?? 'Brand Warranty');
+        $duration = trim($this->request->getPost('duration') ?? '1 Year');
+
+        if (!empty($text)) {
+            $settingModel = new \App\Models\SettingModel();
+            $warrantiesJson = $settingModel->getSetting('warranties', '[]');
+            $warranties = json_decode($warrantiesJson, true) ?: [];
+
+            $maxId = 0;
+            foreach ($warranties as $w) {
+                if (isset($w['id']) && $w['id'] > $maxId) {
+                    $maxId = $w['id'];
+                }
+            }
+
+            $warranties[] = [
+                'id' => $maxId + 1,
+                'text' => $text,
+                'type' => $type,
+                'duration' => $duration
+            ];
+
+            $jsonVal = json_encode(array_values($warranties));
+            $exists = $this->db->table('business_settings')->where('type', 'warranties')->get()->getRow();
+            if ($exists) {
+                $this->db->table('business_settings')->where('type', 'warranties')->update(['value' => $jsonVal]);
+            } else {
+                $this->db->table('business_settings')->insert(['type' => 'warranties', 'value' => $jsonVal]);
+            }
+
+            return redirect()->back()->with('success', 'Warranty policy added successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Warranty policy text cannot be empty.');
+    }
+
+    public function updateWarranty()
+    {
+        $id = (int)$this->request->getPost('id');
+        $text = trim($this->request->getPost('text') ?? '');
+        $type = trim($this->request->getPost('type') ?? 'Brand Warranty');
+        $duration = trim($this->request->getPost('duration') ?? '1 Year');
+
+        if ($id > 0 && !empty($text)) {
+            $settingModel = new \App\Models\SettingModel();
+            $warrantiesJson = $settingModel->getSetting('warranties', '[]');
+            $warranties = json_decode($warrantiesJson, true) ?: [];
+
+            foreach ($warranties as &$w) {
+                if (isset($w['id']) && $w['id'] == $id) {
+                    $w['text'] = $text;
+                    $w['type'] = $type;
+                    $w['duration'] = $duration;
+                    break;
+                }
+            }
+
+            $jsonVal = json_encode(array_values($warranties));
+            $this->db->table('business_settings')->where('type', 'warranties')->update(['value' => $jsonVal]);
+
+            return redirect()->back()->with('success', 'Warranty policy updated successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid warranty data.');
+    }
+
+    public function deleteWarranty($id)
+    {
+        $id = (int)$id;
+        if ($id > 0) {
+            $settingModel = new \App\Models\SettingModel();
+            $warrantiesJson = $settingModel->getSetting('warranties', '[]');
+            $warranties = json_decode($warrantiesJson, true) ?: [];
+
+            $newWarranties = [];
+            foreach ($warranties as $w) {
+                if (isset($w['id']) && $w['id'] == $id) {
+                    continue;
+                }
+                $newWarranties[] = $w;
+            }
+
+            $jsonVal = json_encode(array_values($newWarranties));
+            $this->db->table('business_settings')->where('type', 'warranties')->update(['value' => $jsonVal]);
+
+            return redirect()->back()->with('success', 'Warranty policy deleted successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid warranty ID.');
+    }
+
+    public function sizeCharts()
+    {
+        $settingModel = new \App\Models\SettingModel();
+        $builder = $this->db->table('categories');
+        $categories = $builder->get()->getResultArray();
+
+        $defaultCharts = [
+            ['id' => 1, 'name' => 'Men T-Shirt Size Chart', 'category' => 'Men Clothing', 'sizes' => 'S, M, L, XL, XXL'],
+            ['id' => 2, 'name' => 'Women Dress Size Chart', 'category' => 'Women Clothing', 'sizes' => 'XS, S, M, L, XL'],
+            ['id' => 3, 'name' => 'Footwear Size Guide', 'category' => 'Shoes & Footwear', 'sizes' => '39, 40, 41, 42, 43, 44']
+        ];
+        $chartsJson = $settingModel->getSetting('size_charts', null);
+        if ($chartsJson === null) {
+            $charts = $defaultCharts;
+            $this->db->table('business_settings')->insert(['type' => 'size_charts', 'value' => json_encode($charts)]);
+        } else {
+            $charts = json_decode($chartsJson, true) ?: [];
+        }
+
+        return view('admin/size_charts', [
+            'page_title' => 'Size Charts',
+            'charts' => $charts,
+            'categories' => $categories
+        ]);
+    }
+
+    public function storeSizeChart()
+    {
+        $name = trim($this->request->getPost('name') ?? '');
+        $category = trim($this->request->getPost('category') ?? 'General');
+        $sizes = trim($this->request->getPost('sizes') ?? 'S, M, L, XL');
+
+        if (!empty($name)) {
+            $settingModel = new \App\Models\SettingModel();
+            $chartsJson = $settingModel->getSetting('size_charts', '[]');
+            $charts = json_decode($chartsJson, true) ?: [];
+
+            $maxId = 0;
+            foreach ($charts as $c) {
+                if (isset($c['id']) && $c['id'] > $maxId) {
+                    $maxId = $c['id'];
+                }
+            }
+
+            $charts[] = [
+                'id' => $maxId + 1,
+                'name' => $name,
+                'category' => $category,
+                'sizes' => $sizes
+            ];
+
+            $jsonVal = json_encode(array_values($charts));
+            $exists = $this->db->table('business_settings')->where('type', 'size_charts')->get()->getRow();
+            if ($exists) {
+                $this->db->table('business_settings')->where('type', 'size_charts')->update(['value' => $jsonVal]);
+            } else {
+                $this->db->table('business_settings')->insert(['type' => 'size_charts', 'value' => $jsonVal]);
+            }
+
+            return redirect()->back()->with('success', 'Size chart added successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Size chart name cannot be empty.');
+    }
+
+    public function updateSizeChart()
+    {
+        $id = (int)$this->request->getPost('id');
+        $name = trim($this->request->getPost('name') ?? '');
+        $category = trim($this->request->getPost('category') ?? 'General');
+        $sizes = trim($this->request->getPost('sizes') ?? 'S, M, L, XL');
+
+        if ($id > 0 && !empty($name)) {
+            $settingModel = new \App\Models\SettingModel();
+            $chartsJson = $settingModel->getSetting('size_charts', '[]');
+            $charts = json_decode($chartsJson, true) ?: [];
+
+            foreach ($charts as &$c) {
+                if (isset($c['id']) && $c['id'] == $id) {
+                    $c['name'] = $name;
+                    $c['category'] = $category;
+                    $c['sizes'] = $sizes;
+                    break;
+                }
+            }
+
+            $jsonVal = json_encode(array_values($charts));
+            $this->db->table('business_settings')->where('type', 'size_charts')->update(['value' => $jsonVal]);
+
+            return redirect()->back()->with('success', 'Size chart updated successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid size chart data.');
+    }
+
+    public function deleteSizeChart($id)
+    {
+        $id = (int)$id;
+        if ($id > 0) {
+            $settingModel = new \App\Models\SettingModel();
+            $chartsJson = $settingModel->getSetting('size_charts', '[]');
+            $charts = json_decode($chartsJson, true) ?: [];
+
+            $newCharts = [];
+            foreach ($charts as $c) {
+                if (isset($c['id']) && $c['id'] == $id) {
+                    continue;
+                }
+                $newCharts[] = $c;
+            }
+
+            $jsonVal = json_encode(array_values($newCharts));
+            $this->db->table('business_settings')->where('type', 'size_charts')->update(['value' => $jsonVal]);
+
+            return redirect()->back()->with('success', 'Size chart deleted successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid size chart ID.');
+    }
+
+    public function measurementPoints()
+    {
+        $settingModel = new \App\Models\SettingModel();
+        $defaultPoints = [
+            ['id' => 1, 'name' => 'Chest / Bust', 'code' => 'CHEST', 'unit' => 'inches / cm'],
+            ['id' => 2, 'name' => 'Waist', 'code' => 'WAIST', 'unit' => 'inches / cm'],
+            ['id' => 3, 'name' => 'Hips', 'code' => 'HIPS', 'unit' => 'inches / cm'],
+            ['id' => 4, 'name' => 'Shoulder Width', 'code' => 'SHOULDER', 'unit' => 'inches / cm'],
+            ['id' => 5, 'name' => 'Sleeve Length', 'code' => 'SLEEVE', 'unit' => 'inches / cm']
+        ];
+        $pointsJson = $settingModel->getSetting('measurement_points', null);
+        if ($pointsJson === null) {
+            $points = $defaultPoints;
+            $this->db->table('business_settings')->insert(['type' => 'measurement_points', 'value' => json_encode($points)]);
+        } else {
+            $points = json_decode($pointsJson, true) ?: [];
+        }
+
+        return view('admin/measurement_points', [
+            'page_title' => 'Measurement Points',
+            'points' => $points
+        ]);
+    }
+
+    public function storeMeasurementPoint()
+    {
+        $name = trim($this->request->getPost('name') ?? '');
+        $code = trim($this->request->getPost('code') ?? strtoupper(substr($name, 0, 8)));
+        $unit = trim($this->request->getPost('unit') ?? 'inches / cm');
+
+        if (!empty($name)) {
+            $settingModel = new \App\Models\SettingModel();
+            $pointsJson = $settingModel->getSetting('measurement_points', '[]');
+            $points = json_decode($pointsJson, true) ?: [];
+
+            $maxId = 0;
+            foreach ($points as $p) {
+                if (isset($p['id']) && $p['id'] > $maxId) {
+                    $maxId = $p['id'];
+                }
+            }
+
+            $points[] = [
+                'id' => $maxId + 1,
+                'name' => $name,
+                'code' => $code,
+                'unit' => $unit
+            ];
+
+            $jsonVal = json_encode(array_values($points));
+            $exists = $this->db->table('business_settings')->where('type', 'measurement_points')->get()->getRow();
+            if ($exists) {
+                $this->db->table('business_settings')->where('type', 'measurement_points')->update(['value' => $jsonVal]);
+            } else {
+                $this->db->table('business_settings')->insert(['type' => 'measurement_points', 'value' => $jsonVal]);
+            }
+
+            return redirect()->back()->with('success', 'Measurement point added successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Measurement point name cannot be empty.');
+    }
+
+    public function updateMeasurementPoint()
+    {
+        $id = (int)$this->request->getPost('id');
+        $name = trim($this->request->getPost('name') ?? '');
+        $code = trim($this->request->getPost('code') ?? '');
+        $unit = trim($this->request->getPost('unit') ?? 'inches / cm');
+
+        if ($id > 0 && !empty($name)) {
+            $settingModel = new \App\Models\SettingModel();
+            $pointsJson = $settingModel->getSetting('measurement_points', '[]');
+            $points = json_decode($pointsJson, true) ?: [];
+
+            foreach ($points as &$p) {
+                if (isset($p['id']) && $p['id'] == $id) {
+                    $p['name'] = $name;
+                    $p['code'] = $code;
+                    $p['unit'] = $unit;
+                    break;
+                }
+            }
+
+            $jsonVal = json_encode(array_values($points));
+            $this->db->table('business_settings')->where('type', 'measurement_points')->update(['value' => $jsonVal]);
+
+            return redirect()->back()->with('success', 'Measurement point updated successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid measurement point data.');
+    }
+
+    public function deleteMeasurementPoint($id)
+    {
+        $id = (int)$id;
+        if ($id > 0) {
+            $settingModel = new \App\Models\SettingModel();
+            $pointsJson = $settingModel->getSetting('measurement_points', '[]');
+            $points = json_decode($pointsJson, true) ?: [];
+
+            $newPoints = [];
+            foreach ($points as $p) {
+                if (isset($p['id']) && $p['id'] == $id) {
+                    continue;
+                }
+                $newPoints[] = $p;
+            }
+
+            $jsonVal = json_encode(array_values($newPoints));
+            $this->db->table('business_settings')->where('type', 'measurement_points')->update(['value' => $jsonVal]);
+
+            return redirect()->back()->with('success', 'Measurement point deleted successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid measurement point ID.');
+    }
+
+    public function customLabels()
+    {
+        $settingModel = new \App\Models\SettingModel();
+        $defaultLabels = [
+            ['id' => 1, 'title' => 'New Arrival', 'text_color' => '#ffffff', 'bg_color' => '#0099ff'],
+            ['id' => 2, 'title' => 'Hot Sale', 'text_color' => '#ffffff', 'bg_color' => '#ef4444'],
+            ['id' => 3, 'title' => 'Limited Stock', 'text_color' => '#ffffff', 'bg_color' => '#f59e0b']
+        ];
+        $labelsJson = $settingModel->getSetting('custom_labels', null);
+        if ($labelsJson === null) {
+            $labels = $defaultLabels;
+            // Save initial defaults
+            $this->db->table('business_settings')->insert(['type' => 'custom_labels', 'value' => json_encode($labels)]);
+        } else {
+            $labels = json_decode($labelsJson, true) ?: [];
+        }
+
+        return view('admin/custom_labels', [
+            'page_title' => 'Custom Labels',
+            'labels' => $labels
+        ]);
+    }
+
+    public function storeCustomLabel()
+    {
+        $title = trim($this->request->getPost('title') ?? '');
+        $textColor = $this->request->getPost('text_color') ?? '#ffffff';
+        $bgColor = $this->request->getPost('bg_color') ?? '#0099ff';
+
+        if (!empty($title)) {
+            $settingModel = new \App\Models\SettingModel();
+            $labelsJson = $settingModel->getSetting('custom_labels', '[]');
+            $labels = json_decode($labelsJson, true) ?: [];
+
+            $maxId = 0;
+            foreach ($labels as $lbl) {
+                if (isset($lbl['id']) && $lbl['id'] > $maxId) {
+                    $maxId = $lbl['id'];
+                }
+            }
+
+            $labels[] = [
+                'id' => $maxId + 1,
+                'title' => $title,
+                'text_color' => $textColor,
+                'bg_color' => $bgColor
+            ];
+
+            $jsonVal = json_encode(array_values($labels));
+            $exists = $this->db->table('business_settings')->where('type', 'custom_labels')->get()->getRow();
+            if ($exists) {
+                $this->db->table('business_settings')->where('type', 'custom_labels')->update(['value' => $jsonVal]);
+            } else {
+                $this->db->table('business_settings')->insert(['type' => 'custom_labels', 'value' => $jsonVal]);
+            }
+
+            return redirect()->back()->with('success', 'Custom label added successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Label title cannot be empty.');
+    }
+
+    public function updateCustomLabel()
+    {
+        $id = (int)$this->request->getPost('id');
+        $title = trim($this->request->getPost('title') ?? '');
+        $textColor = $this->request->getPost('text_color') ?? '#ffffff';
+        $bgColor = $this->request->getPost('bg_color') ?? '#0099ff';
+
+        if ($id > 0 && !empty($title)) {
+            $settingModel = new \App\Models\SettingModel();
+            $labelsJson = $settingModel->getSetting('custom_labels', '[]');
+            $labels = json_decode($labelsJson, true) ?: [];
+
+            foreach ($labels as &$lbl) {
+                if (isset($lbl['id']) && $lbl['id'] == $id) {
+                    $lbl['title'] = $title;
+                    $lbl['text_color'] = $textColor;
+                    $lbl['bg_color'] = $bgColor;
+                    break;
+                }
+            }
+
+            $jsonVal = json_encode(array_values($labels));
+            $this->db->table('business_settings')->where('type', 'custom_labels')->update(['value' => $jsonVal]);
+
+            return redirect()->back()->with('success', 'Custom label updated successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid label data.');
+    }
+
+    public function deleteCustomLabel($id)
+    {
+        $id = (int)$id;
+        if ($id > 0) {
+            $settingModel = new \App\Models\SettingModel();
+            $labelsJson = $settingModel->getSetting('custom_labels', '[]');
+            $labels = json_decode($labelsJson, true) ?: [];
+
+            $newLabels = [];
+            foreach ($labels as $lbl) {
+                if (isset($lbl['id']) && $lbl['id'] == $id) {
+                    continue;
+                }
+                $newLabels[] = $lbl;
+            }
+
+            $jsonVal = json_encode(array_values($newLabels));
+            $this->db->table('business_settings')->where('type', 'custom_labels')->update(['value' => $jsonVal]);
+
+            return redirect()->back()->with('success', 'Custom label deleted successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid label ID.');
+    }
+
+    public function categoryWiseDiscount()
+    {
+        $settingModel = new \App\Models\SettingModel();
+        $builder = $this->db->table('categories c');
+        $builder->select('c.*, u.file_name as icon_img');
+        $builder->join('uploads u', 'c.icon = u.id', 'left');
+        $categories = $builder->get()->getResultArray();
+
+        $category_discount_rules_json = $settingModel->getSetting('category_discount_rules', '{}');
+        $category_discount_rules = json_decode($category_discount_rules_json, true) ?: [];
+
+        return view('admin/category_wise_discount', [
+            'page_title' => 'Category-Wise Discount Setup',
+            'categories' => $categories,
+            'category_discount_rules' => $category_discount_rules
+        ]);
+    }
+
+    public function updateCategoryWiseDiscount()
+    {
+        $categoryIds = $this->request->getPost('category_ids') ?? [];
+        $discount = (float)($this->request->getPost('discount') ?? 0);
+        $discountType = $this->request->getPost('discount_type') ?? 'flat';
+
+        $settingModel = new \App\Models\SettingModel();
+        $currentRules = json_decode($settingModel->getSetting('category_discount_rules', '{}'), true) ?: [];
+
+        if (!empty($categoryIds)) {
+            foreach ($categoryIds as $catId) {
+                $currentRules[$catId] = [
+                    'discount' => $discount,
+                    'discount_type' => $discountType,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+
+                // Apply discount to all products under this category
+                $this->db->table('products')
+                    ->where('category_id', $catId)
+                    ->update([
+                        'discount' => $discount,
+                        'discount_type' => $discountType
+                    ]);
+            }
+
+            $jsonVal = json_encode($currentRules);
+            $rulesExists = $this->db->table('business_settings')->where('type', 'category_discount_rules')->get()->getRow();
+            if ($rulesExists) {
+                $this->db->table('business_settings')->where('type', 'category_discount_rules')->update(['value' => $jsonVal]);
+            } else {
+                $this->db->table('business_settings')->insert(['type' => 'category_discount_rules', 'value' => $jsonVal]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Category-wise discount applied to all matching products successfully!');
+    }
+
+    public function categoryWiseRefund()
+    {
+        $settingModel = new \App\Models\SettingModel();
+        $builder = $this->db->table('categories c');
+        $builder->select('c.*, u.file_name as icon_img');
+        $builder->join('uploads u', 'c.icon = u.id', 'left');
+        $categories = $builder->get()->getResultArray();
+
+        $category_refund_days = (int)$settingModel->getSetting('category_refund_days', 7);
+        $category_refund_rules_json = $settingModel->getSetting('category_refund_rules', '{}');
+        $category_refund_rules = json_decode($category_refund_rules_json, true) ?: [];
+
+        return view('admin/category_wise_refund', [
+            'page_title' => 'Category-Wise Refund Setup',
+            'categories' => $categories,
+            'category_refund_days' => $category_refund_days,
+            'category_refund_rules' => $category_refund_rules
+        ]);
+    }
+
+    public function updateCategoryWiseRefund()
+    {
+        $categoryIds = $this->request->getPost('category_ids') ?? [];
+        $refundable = $this->request->getPost('refundable') ? 1 : 0;
+        $refundDays = (int)($this->request->getPost('refund_days') ?? 7);
+
+        // Update default refund days setting
+        $exists = $this->db->table('business_settings')->where('type', 'category_refund_days')->get()->getRow();
+        if ($exists) {
+            $this->db->table('business_settings')->where('type', 'category_refund_days')->update(['value' => $refundDays]);
+        } else {
+            $this->db->table('business_settings')->insert(['type' => 'category_refund_days', 'value' => $refundDays]);
+        }
+
+        // Save category-specific rules
+        $settingModel = new \App\Models\SettingModel();
+        $currentRules = json_decode($settingModel->getSetting('category_refund_rules', '{}'), true) ?: [];
+
+        if (!empty($categoryIds)) {
+            foreach ($categoryIds as $catId) {
+                $currentRules[$catId] = [
+                    'refundable' => $refundable,
+                    'refund_days' => $refundDays,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+            }
+            $jsonVal = json_encode($currentRules);
+            $rulesExists = $this->db->table('business_settings')->where('type', 'category_refund_rules')->get()->getRow();
+            if ($rulesExists) {
+                $this->db->table('business_settings')->where('type', 'category_refund_rules')->update(['value' => $jsonVal]);
+            } else {
+                $this->db->table('business_settings')->insert(['type' => 'category_refund_rules', 'value' => $jsonVal]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Category refund configuration updated successfully.');
+    }
     public function setupLanguages() { return view('admin/setup/languages'); }
     public function setupCurrencies() { return view('admin/setup/currencies'); }
-    public function setupPaymentMethods() { return view('admin/setup/payment_methods'); }
+    public function setupPaymentMethods() {
+        $settingModel = new \App\Models\SettingModel();
+        $payment_methods = [
+            'cash_on_delivery' => (int)$settingModel->getSetting('cash_on_delivery', 1),
+            'piprapay'          => (int)$settingModel->getSetting('piprapay', 1),
+            'piprapay_sandbox'  => (int)$settingModel->getSetting('piprapay_sandbox', 1),
+            'piprapay_base_url' => $settingModel->getSetting('piprapay_base_url', ''),
+            'piprapay_api_key'  => $settingModel->getSetting('piprapay_api_key', '')
+        ];
+        return view('admin/setup/payment_methods', ['payment_methods' => $payment_methods]);
+    }
+
+    public function updatePaymentMethods() {
+        $post = $this->request->getPost();
+        foreach ($post as $key => $val) {
+            if ($key === csrf_token()) continue;
+            $exists = $this->db->table('business_settings')->where('type', $key)->get()->getRow();
+            if ($exists) {
+                $this->db->table('business_settings')->where('type', $key)->update(['value' => $val]);
+            } else {
+                $this->db->table('business_settings')->insert(['type' => $key, 'value' => $val]);
+            }
+        }
+        return redirect()->back()->with('success', 'Payment method settings updated successfully.');
+    }
     public function setupVatTax() { return view('admin/setup/generic', ['page_title' => 'Vat & TAX Setup']); }
     public function setupPickupPoint() { return view('admin/setup/generic', ['page_title' => 'Pickup Point Setup']); }
     public function setupSmtp() { return view('admin/setup/generic', ['page_title' => 'SMTP Settings']); }

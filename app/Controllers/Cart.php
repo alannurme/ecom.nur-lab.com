@@ -75,12 +75,18 @@ class Cart extends BaseController
             ];
         }
 
-        $this->session->set('cart', $cart);
+        $totalItems = 0;
+        $totalPrice = 0.0;
+        foreach ($cart as $cItem) {
+            $totalItems += (int)($cItem['qty'] ?? 1);
+            $totalPrice += ((float)($cItem['price'] ?? 0)) * (int)($cItem['qty'] ?? 1);
+        }
 
         return $this->response->setJSON([
-            'status' => 'success', 
-            'message' => 'Product added to cart successfully!',
-            'cart_count' => count($cart)
+            'status'     => 'success', 
+            'message'    => 'Product added to cart successfully!',
+            'cart_count' => $totalItems,
+            'cart_total' => '৳' . number_format($totalPrice, 2)
         ]);
     }
 

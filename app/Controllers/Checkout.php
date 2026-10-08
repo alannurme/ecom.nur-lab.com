@@ -32,10 +32,12 @@ class Checkout extends BaseController
         }
 
         $data = [
-            'site_name' => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
-            'categories' => $categoryModel->getMainCategories(12),
-            'cart' => $cart,
-            'total' => $total
+            'site_name'       => $settingModel->getSetting('website_name', 'NUR-LAB ECOM'),
+            'categories'      => $categoryModel->getMainCategories(12),
+            'cart'            => $cart,
+            'total'           => $total,
+            'cod_active'      => (int)$settingModel->getSetting('cash_on_delivery', 1),
+            'piprapay_active' => (int)$settingModel->getSetting('piprapay', 1)
         ];
 
         return view('frontend/checkout', $data);

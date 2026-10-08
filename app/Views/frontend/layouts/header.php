@@ -276,13 +276,87 @@ $headerSiteFavicon = $settingModel->getSetting('site_favicon', 'assets/img/logo.
                     </div>
                 </div>
 
-                <!-- Right Side: Cart Box -->
-                <div class="cart-box-nav">
-                    <a href="<?= base_url('cart') ?>" class="text-white text-decoration-none d-flex align-items-center py-2 px-3 fw-700 fs-14" style="background-color: rgba(0, 0, 0, 0.15); border-radius: 4px;">
+                <!-- Right Side: Cart Box with Mini Cart Dropdown -->
+                <?php
+                $headerCart = session()->get('cart') ?? [];
+                $headerCartCount = 0;
+                $headerCartTotal = 0;
+                foreach ($headerCart as $hItem) {
+                    $hQty = (int)($hItem['qty'] ?? 1);
+                    $headerCartCount += $hQty;
+                    $headerCartTotal += ((float)($hItem['price'] ?? 0)) * $hQty;
+                }
+                ?>
+                <div class="cart-box-nav position-relative dropdown" id="cart-dropdown-box">
+                    <a href="javascript:void(0)" id="cart-dropdown-toggle" class="text-white text-decoration-none d-flex align-items-center py-2 px-3 fw-700 fs-14 dropdown-toggle no-arrow" data-toggle="dropdown" aria-expanded="false" style="background-color: rgba(0, 0, 0, 0.18); border-radius: 6px; cursor: pointer; transition: background-color 0.2s;">
                         <i class="las la-shopping-cart fs-22 mr-2"></i>
-                        <span class="mr-1">৳0.00</span>
-                        <span class="fs-12 text-white-50 font-weight-normal">(0 Items)</span>
+                        <span class="mr-1 cart-total">৳<?= number_format($headerCartTotal, 2) ?></span>
+                        <span class="fs-12 text-white-50 font-weight-normal">(<span class="cart-count"><?= $headerCartCount ?></span> Items)</span>
                     </a>
+
+                    <div class="dropdown-menu dropdown-menu-right p-0 border-0 shadow-lg" style="min-width: 380px; width: 400px; max-width: 95vw; border-radius: 14px; overflow: hidden; margin-top: 10px; border: 1px solid rgba(0,0,0,0.08) !important;">
+                        <!-- Header -->
+                        <div class="px-4 py-3 bg-white border-bottom d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="las la-shopping-cart text-primary fs-22 mr-2"></i>
+                                <h6 class="fw-800 fs-15 text-dark mb-0" style="color: #0f172a !important;">My Shopping Cart</h6>
+                            </div>
+                            <span class="badge badge-primary badge-pill fs-12 fw-700 px-3 py-1.5" style="background-color: #2d6aff; color: #fff;"><span class="cart-count"><?= $headerCartCount ?></span> Items</span>
+                        </div>
+
+                        <!-- Item List -->
+                        <div class="cart-items-list" style="max-height: 320px; overflow-y: auto; scrollbar-width: thin;">
+                            <?php if (!empty($headerCart)): ?>
+                                <ul class="list-group list-group-flush mb-0">
+                                    <?php foreach ($headerCart as $cKey => $cItem): ?>
+                                        <li class="list-group-item px-4 py-3 d-flex align-items-center justify-content-between border-bottom-light" style="transition: background-color 0.15s; background-color: #fff;">
+                                            <div class="d-flex align-items-center overflow-hidden mr-3" style="flex: 1;">
+                                                <img src="<?= !empty($cItem['thumbnail']) ? base_url($cItem['thumbnail']) : base_url('assets/img/placeholder.jpg') ?>" 
+                                                     alt="" width="52" height="52" class="rounded border mr-3 flex-shrink-0" style="object-fit: cover; border-color: #e2e8f0 !important;"
+                                                     onerror="this.src='<?= base_url('assets/img/placeholder.jpg') ?>'">
+                                                <div class="overflow-hidden">
+                                                    <h6 class="fs-14 fw-700 mb-1 text-dark text-truncate" style="color: #1e293b !important; line-height: 1.3;" title="<?= esc($cItem['name']) ?>"><?= esc($cItem['name']) ?></h6>
+                                                    <div class="d-flex align-items-center fs-13">
+                                                        <span class="badge bg-light text-dark font-weight-bold fs-11 border mr-2 px-2 py-0.5" style="color: #334155 !important;">Qty: <?= $cItem['qty'] ?></span>
+                                                        <span class="fw-700 text-primary fs-14">৳<?= number_format($cItem['price'], 2) ?></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <a href="<?= base_url('cart/remove/' . $cKey) ?>" class="text-danger p-2 rounded-circle hover-bg-light flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; text-decoration: none;" title="Remove from cart">
+                                                <i class="las la-trash-alt fs-18"></i>
+                                            </a>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php else: ?>
+                                <div class="text-center py-5 px-4">
+                                    <div class="mb-3 d-inline-block p-3 rounded-circle bg-light text-muted">
+                                        <i class="las la-shopping-basket fs-40" style="color: #94a3b8;"></i>
+                                    </div>
+                                    <h6 class="fs-15 fw-700 text-dark mb-1" style="color: #1e293b !important;">Your cart is empty</h6>
+                                    <p class="fs-13 text-muted mb-0">Add products to your cart to see them here.</p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Footer Subtotal & Action Buttons -->
+                        <?php if (!empty($headerCart)): ?>
+                            <div class="p-4 bg-light border-top" style="background-color: #f8fafc !important;">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="text-secondary fw-700 fs-14" style="color: #475569 !important;">Subtotal:</span>
+                                    <span class="fw-800 text-primary fs-18 cart-total" style="color: #e62e04 !important;">৳<?= number_format($headerCartTotal, 2) ?></span>
+                                </div>
+                                <div class="row gutters-10">
+                                    <div class="col-6">
+                                        <a href="<?= base_url('cart') ?>" class="btn btn-outline-primary btn-block fw-700 py-2.5 fs-13" style="border-radius: 8px; border-width: 2px;">View Cart</a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="<?= base_url('checkout') ?>" class="btn btn-primary btn-block fw-700 py-2.5 fs-13 shadow-sm" style="border-radius: 8px; background-color: #e62e04; border-color: #e62e04;">Checkout</a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>

@@ -100,15 +100,16 @@
                         </div>
                     </div>
                     <label class="aiz-switch aiz-switch-success mb-0" data-toggle="tooltip" title="Enable/Disable COD">
-                        <input type="checkbox" checked>
+                        <input type="checkbox" onchange="togglePaymentMethod('cash_on_delivery', this.checked)" <?= (!empty($payment_methods['cash_on_delivery']) && $payment_methods['cash_on_delivery'] == 1) ? 'checked' : '' ?>>
                         <span class="slider round"></span>
                     </label>
                 </div>
                 
                 <div class="mt-auto pt-3 border-top" style="border-color: rgba(0,0,0,0.05) !important;">
                     <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge status-badge bg-soft-success text-success">
-                            <i class="las la-check-circle mr-1"></i> Active
+                        <span class="badge status-badge <?= (!empty($payment_methods['cash_on_delivery']) && $payment_methods['cash_on_delivery'] == 1) ? 'bg-soft-success text-success' : 'bg-soft-secondary text-muted' ?>">
+                            <i class="las <?= (!empty($payment_methods['cash_on_delivery']) && $payment_methods['cash_on_delivery'] == 1) ? 'la-check-circle' : 'la-times-circle' ?> mr-1"></i> 
+                            <?= (!empty($payment_methods['cash_on_delivery']) && $payment_methods['cash_on_delivery'] == 1) ? 'Active' : 'Disabled' ?>
                         </span>
                         <span class="fs-11 text-muted"><i class="las la-info-circle"></i> No config needed</span>
                     </div>
@@ -125,12 +126,12 @@
                             <img src="/public/assets/img/cards/piprapay.png" alt="PipraPay" style="max-height: 24px; object-fit: contain;" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'las la-credit-card fs-24 text-primary\'></i>';">
                         </div>
                         <div>
-                            <h6 class="fw-700 fs-16 text-dark mb-1">PipraPay</h6>
+                            <h6 class="fw-700 fs-16 text-dark mb-1">PipraPay / Online Payment</h6>
                             <span class="fs-12 text-muted">Digital Payment Gateway</span>
                         </div>
                     </div>
                     <label class="aiz-switch aiz-switch-success mb-0" data-toggle="tooltip" title="Enable/Disable PipraPay">
-                        <input type="checkbox" checked>
+                        <input type="checkbox" onchange="togglePaymentMethod('piprapay', this.checked)" <?= (!empty($payment_methods['piprapay']) && $payment_methods['piprapay'] == 1) ? 'checked' : '' ?>>
                         <span class="slider round"></span>
                     </label>
                 </div>
@@ -138,7 +139,7 @@
                 <div class="d-flex justify-content-between align-items-center py-3">
                     <span class="fs-13 fw-600 text-dark"><i class="las la-bug text-warning mr-1"></i> Sandbox Mode</span>
                     <label class="aiz-switch aiz-switch-blue mb-0">
-                        <input type="checkbox">
+                        <input type="checkbox" onchange="togglePaymentMethod('piprapay_sandbox', this.checked)" <?= (!empty($payment_methods['piprapay_sandbox']) && $payment_methods['piprapay_sandbox'] == 1) ? 'checked' : '' ?>>
                         <span class="slider round"></span>
                     </label>
                 </div>
@@ -151,7 +152,7 @@
                             </button>
                         </div>
                         <div class="col-6">
-                            <button type="button" class="btn btn-block btn-outline-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 16px;" onclick="alert('Testing 10 BDT payment... (Backend endpoint required)');">
+                            <button type="button" class="btn btn-block btn-outline-primary" style="border-radius: 8px; font-weight: 600; padding: 8px 16px;" onclick="alert('PipraPay sandbox active.');">
                                 <i class="las la-vial mr-1"></i> Test (10 ৳)
                             </button>
                         </div>
@@ -176,14 +177,15 @@
                 </button>
             </div>
             <div class="modal-body p-4">
-                <form action="#" method="POST">
+                <form action="<?= base_url('admin/setup/payment-methods/update') ?>" method="POST">
+                    <?= csrf_field() ?>
                     <div class="form-group mb-4">
                         <label class="form-label fw-600 text-dark">Base URL</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-right-0"><i class="las la-link"></i></span>
                             </div>
-                            <input type="text" name="piprapay_base_url" class="form-control border-left-0 pl-0" placeholder="e.g. https://pay.nur-lab.com">
+                            <input type="text" name="piprapay_base_url" class="form-control border-left-0 pl-0" value="<?= esc($payment_methods['piprapay_base_url'] ?? '') ?>" placeholder="e.g. https://pay.nur-lab.com">
                         </div>
                         <small class="form-text text-muted mt-2"><i class="las la-info-circle"></i> Leave empty to use default URL</small>
                     </div>
@@ -193,12 +195,12 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-right-0"><i class="las la-shield-alt"></i></span>
                             </div>
-                            <input type="password" name="piprapay_api_key" class="form-control border-left-0 pl-0" placeholder="Enter your secret API Key">
+                            <input type="password" name="piprapay_api_key" class="form-control border-left-0 pl-0" value="<?= esc($payment_methods['piprapay_api_key'] ?? '') ?>" placeholder="Enter your secret API Key">
                         </div>
                     </div>
                     <div class="d-flex justify-content-end mt-5">
                         <button type="button" class="btn btn-light rounded-pill px-4 py-2 fw-600 mr-2" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-600 shadow-sm" onclick="alert('Settings saved successfully!'); $('#piprapayModal').modal('hide');">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-600 shadow-sm">
                             <i class="las la-save mr-1"></i> Save Changes
                         </button>
                     </div>
@@ -207,5 +209,29 @@
         </div>
     </div>
 </div>
+
+<script>
+function togglePaymentMethod(key, status) {
+    $.ajax({
+        url: '<?= base_url('admin/setup/features/update') ?>',
+        type: 'POST',
+        data: {
+            '<?= csrf_token() ?>': '<?= csrf_hash() ?>',
+            key: key,
+            status: status ? 1 : 0
+        },
+        success: function(response) {
+            if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
+                AIZ.plugins.notify(response.status ? 'success' : 'danger', response.message);
+            }
+        },
+        error: function() {
+            if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
+                AIZ.plugins.notify('danger', 'Error updating payment method status');
+            }
+        }
+    });
+}
+</script>
 
 <?= $this->include('admin/layouts/footer') ?>

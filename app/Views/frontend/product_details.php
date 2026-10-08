@@ -306,8 +306,8 @@
 
     .modern-product-card:hover {
         transform: translateY(-8px) scale(1.04);
-        box-shadow: 0 20px 35px -10px rgba(37, 99, 235, 0.22);
-        border-color: #3b82f6;
+        box-shadow: 0 20px 35px -10px rgba(239, 68, 68, 0.2);
+        border-color: #f87171;
         z-index: 10;
     }
 
@@ -357,7 +357,7 @@
     }
 
     .modern-product-card:hover .product-title-modern {
-        color: #2563eb;
+        color: #e62e04;
     }
 
     .product-footer-row {
@@ -377,21 +377,47 @@
     .price-current {
         font-size: 1.15rem;
         font-weight: 800;
-        color: #2563eb;
+        color: #e62e04;
         line-height: 1.2;
     }
 
     .btn-quick-cart {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        background: #eff6ff;
-        color: #2563eb;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-        transition: all 0.2s ease;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 12px !important;
+        background: #fee2e2 !important;
+        color: #dc2626 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.25rem !important;
+        border: 1px solid #fca5a5 !important;
+        transition: all 0.25s ease !important;
+        text-decoration: none !important;
+        flex-shrink: 0 !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+    }
+
+    .btn-quick-cart i,
+    .btn-quick-cart svg {
+        color: #dc2626 !important;
+        transition: color 0.25s ease !important;
+    }
+
+    .modern-product-card:hover .btn-quick-cart,
+    .btn-quick-cart:hover {
+        background: #dc2626 !important;
+        color: #ffffff !important;
+        border-color: #dc2626 !important;
+        box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4) !important;
+    }
+
+    .modern-product-card:hover .btn-quick-cart i,
+    .modern-product-card:hover .btn-quick-cart svg,
+    .btn-quick-cart:hover i,
+    .btn-quick-cart:hover svg {
+        color: #ffffff !important;
     }
 
     /* Tabs Section */
@@ -763,8 +789,9 @@ function handleAddToCart(productId, isBuyNow) {
                 } else {
                     alert(data.message);
                 }
-                if (document.querySelector('.cart-count')) {
-                    document.querySelector('.cart-count').innerText = data.cart_count;
+                document.querySelectorAll('.cart-count').forEach(el => el.innerText = data.cart_count);
+                if (data.cart_total) {
+                    document.querySelectorAll('.cart-total').forEach(el => el.innerText = data.cart_total);
                 }
             }
         } else {

@@ -47,7 +47,7 @@
                                                 <del class="fs-12 text-muted fw-400 ml-2">৳<?= number_format($unitPrice, 2) ?></del>
                                             <?php endif; ?>
                                         </div>
-                                        <button class="btn btn-soft-primary btn-sm btn-block mt-2 fw-700">
+                                        <button type="button" onclick="addToCartDirect(<?= $product['id'] ?>, event)" class="btn btn-soft-primary btn-sm btn-block mt-2 fw-700">
                                             <i class="las la-shopping-cart"></i> Add to Cart
                                         </button>
                                     </div>

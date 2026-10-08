@@ -136,10 +136,46 @@
     <script src="<?= base_url('assets/js/aiz-core.js') ?>"></script>
     <script>
         $(document).ready(function() {
-            if (typeof AIZ.plugins.slickCarousel === 'function') {
+            if (typeof AIZ !== 'undefined' && AIZ.plugins && typeof AIZ.plugins.slickCarousel === 'function') {
                 AIZ.plugins.slickCarousel();
             }
         });
+
+        function addToCartDirect(productId, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            $.ajax({
+                url: '<?= base_url('cart/add') ?>',
+                type: 'POST',
+                data: {
+                    '<?= csrf_token() ?>': '<?= csrf_hash() ?>',
+                    product_id: productId,
+                    quantity: 1
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
+                            AIZ.plugins.notify('success', response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                        if (response.cart_count !== undefined) {
+                            $('.cart-count').text(response.cart_count);
+                        }
+                        if (response.cart_total !== undefined) {
+                            $('.cart-total').text(response.cart_total);
+                        }
+                    } else {
+                        alert(response.message || 'Error adding product to cart.');
+                    }
+                },
+                error: function() {
+                    alert('Could not add product to cart. Please try again.');
+                }
+            });
+        }
     </script>
 </body>
 </html>
